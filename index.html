@@ -1,0 +1,2970 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MORPHOS v2 — Ithkuil IV Learning Architecture</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cinzel:wght@400;600;700&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&family=IBM+Plex+Mono:wght@400;500;600&family=Fraunces:ital,opsz,wght@0,9..144,300;1,9..144,300&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.development.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.development.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+<style>
+:root {
+  --bg: #08080e; --surface: #0f0f1a; --card: #161623; --border: #252538;
+  --text: #dde0f5; --muted: #6e7099; --bright: #f0f2ff;
+  --accent: #3730a3; --accent2: #4338ca;
+  --slot-cc:#4b5563; --slot-vv:#1d4ed8; --slot-cr:#b91c1c; --slot-vr:#c2410c;
+  --slot-cs:#92400e; --slot-vx:#4d7c0f; --slot-ca:#15803d; --slot-vn:#0f766e; --slot-vc:#6d28d9;
+  --p-cfg:#16a34a; --p-afl:#0d9488; --p-per:#7c3aed; --p-ext:#b45309;
+  --p-ess:#c2410c; --p-spc:#b91c1c; --p-fn:#6d28d9; --p-cas:#1d4ed8;
+  --p-moo:#0e7490; --p-val:#0f766e; --p-bia:#be185d; --p-asp:#7e22ce;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; background: var(--bg); }
+body { color: var(--text); font-family: 'IBM Plex Sans', sans-serif; font-size: 14px; line-height: 1.6; overflow-x: hidden; }
+#root { height: 100%; display: flex; flex-direction: column; }
+h1,h2,h3,h4 { font-family: 'Cinzel', serif; letter-spacing: 0.04em; }
+.fraunces { font-family: 'Fraunces', serif; font-style: italic; }
+.mono { font-family: 'IBM Plex Mono', monospace; }
+.ithkuil { font-family: 'IBM Plex Mono', monospace; font-weight: 600; letter-spacing: 0.08em; }
+
+/* SCROLLBARS */
+.sy::-webkit-scrollbar, .scroll-y::-webkit-scrollbar { width: 4px; }
+.sy::-webkit-scrollbar-thumb, .scroll-y::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+.sy { scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
+.scroll-y { overflow-y: auto; }
+
+/* LAYOUT */
+.app { display: flex; height: 100vh; overflow: hidden; }
+.sidebar { width: 180px; flex-shrink: 0; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
+.main { flex: 1; display: flex; flex-direction: column; min-width: 0; overflow: hidden; }
+.topbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 12px 24px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+.content { flex: 1; overflow-y: auto; padding: 24px; min-width: 0; }
+
+/* CARDS */
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+.card2 { background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 12px; }
+.glass { background: rgba(255,255,255,.02); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+
+/* BUTTONS */
+.btn { padding: 7px 16px; border-radius: 6px; border: none; cursor: pointer; font-family: 'IBM Plex Sans', sans-serif; font-size: 13px; font-weight: 500; transition: all 0.15s; display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
+.btn:disabled { opacity: .4; cursor: not-allowed; }
+.btn-primary { background: #3730a3; color: white; }
+.btn-primary:hover:not(:disabled) { background: #4338ca; }
+.btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+.btn-ghost:hover:not(:disabled) { border-color: #4338ca; color: var(--text); }
+.btn-sm { padding: 4px 10px; font-size: 12px; border-radius: 5px; }
+.btn-xs { padding: 2px 7px; font-size: 11px; border-radius: 4px; }
+.btn-icon { padding: 6px; border-radius: 6px; }
+
+/* NAV */
+.nav-btn { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 6px; border: none; cursor: pointer; background: transparent; color: var(--muted); font-family: 'IBM Plex Sans', sans-serif; font-size: 12px; font-weight: 400; width: 100%; text-align: left; transition: all 0.12s; }
+.nav-btn:hover { color: var(--text); background: rgba(255,255,255,0.04); }
+.nav-btn.active { color: var(--bright); background: rgba(67,56,202,0.25); font-weight: 600; }
+.nav-icon { width: 16px; text-align: center; font-size: 11px; flex-shrink: 0; opacity: 0.8; }
+.nav-section { font-size: 9px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); padding: 8px 10px 4px; }
+
+/* FORMS */
+select, input[type=text], textarea { background: var(--surface); border: 1px solid var(--border); color: var(--text); border-radius: 6px; padding: 7px 10px; font-family: 'IBM Plex Sans', sans-serif; font-size: 13px; width: 100%; outline: none; transition: border-color .15s; }
+select:focus, input[type=text]:focus, textarea:focus { border-color: #4338ca; }
+option { background: var(--surface); }
+label.rl { display: flex; align-items: flex-start; gap: 9px; cursor: pointer; padding: 8px 10px; border-radius: 6px; border: 1px solid var(--border); transition: all .12s; }
+label.rl:hover { border-color: #4338ca44; }
+label.rl.sel { border-color: currentColor; }
+input[type=radio] { accent-color: #4338ca; margin-top: 2px; flex-shrink: 0; }
+
+/* SLOT BLOCKS */
+.slot-block { display: inline-flex; flex-direction: column; align-items: center; border-radius: 6px; padding: 6px 10px; min-width: 60px; cursor: pointer; transition: opacity 0.15s; }
+.slot-block:hover { opacity: 0.85; }
+.slot-label, .slot-lbl { font-size: 9px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.75; margin-bottom: 2px; }
+.slot-value, .slot-val { font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 600; }
+.slot-name, .slot-sub { font-size: 9px; opacity: 0.6; margin-top: 2px; }
+.slot { display: inline-flex; flex-direction: column; align-items: center; border-radius: 6px; padding: 5px 9px; min-width: 52px; cursor: pointer; transition: transform .12s, box-shadow .12s; }
+.slot:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,.4); }
+
+/* PROGRESS */
+.progress-bar, .pbar { height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+.progress-fill, .pfill { height: 100%; border-radius: 2px; transition: width 0.4s ease; }
+.pbar5 { height: 5px; }
+
+/* BADGES & PILLS */
+.param-badge, .badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 500; }
+.phase-tag, .tag { font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; padding: 2px 8px; border-radius: 3px; }
+.pill { display: inline-block; padding: 1px 7px; border-radius: 10px; font-size: 10px; font-weight: 500; }
+
+/* ANIMATIONS */
+@keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .5; } }
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes glow { 0%,100% { box-shadow: 0 0 0 rgba(67,56,202,0); } 50% { box-shadow: 0 0 20px rgba(67,56,202,.35); } }
+.anim-fade, .fade-up { animation: fadeIn 0.2s ease; }
+/* smooth colour transitions when theme/brightness changes */
+body, .card, .card2, .glass, .sidebar, .topbar, .nav-btn, .btn, .tab, .slot, .slot-block, .syn-cell, select, input, textarea, label.rl { transition-property: background-color, border-color, color; transition-duration: .25s; transition-timing-function: ease; }
+.pulse { animation: pulse 1.5s infinite; }
+.glow-text { text-shadow: 0 0 20px rgba(99,102,241,0.5); }
+
+/* RESULT STATES */
+.dot-correct { color: #22c55e; } .dot-wrong { color: #ef4444; }
+.correct-bg { background: rgba(34,197,94,0.1); border-color: rgba(34,197,94,0.3) !important; }
+.wrong-bg { background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.3) !important; }
+
+/* SYNESTHETIC */
+.synth-overlay { position: fixed; inset: 0; pointer-events: none; z-index: 1000; mix-blend-mode: screen; }
+.syn-aura { transition: box-shadow .3s, border-color .3s; }
+.syn-active { animation: glow 2s infinite; }
+
+/* TABS */
+.tab { padding: 6px 14px; border-radius: 5px; cursor: pointer; font-size: 12px; font-weight: 500; transition: all 0.12s; white-space: nowrap; color: var(--muted); }
+.tab:hover { color: var(--text); background: rgba(255,255,255,0.04); }
+.tab.active { color: var(--bright); background: rgba(67,56,202,0.3); border-bottom: 2px solid #4338ca; }
+
+/* TOOLTIP */
+.tip-wrap { position: relative; display: inline-block; }
+.tip { position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%); background: #1a1a2e; border: 1px solid var(--border); border-radius: 6px; padding: 7px 10px; font-size: 11px; white-space: nowrap; z-index: 100; pointer-events: none; opacity: 0; transition: opacity .15s; }
+.tip-wrap:hover .tip { opacity: 1; }
+
+/* GRID UTILITIES */
+.g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.g3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+.g4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; }
+.flex { display: flex; align-items: center; }
+.flex-col { display: flex; flex-direction: column; }
+.gap4{gap:4px} .gap6{gap:6px} .gap8{gap:8px} .gap10{gap:10px} .gap12{gap:12px} .gap14{gap:14px}
+.mb4{margin-bottom:4px} .mb6{margin-bottom:6px} .mb8{margin-bottom:8px} .mb10{margin-bottom:10px} .mb12{margin-bottom:12px} .mb14{margin-bottom:14px} .mb16{margin-bottom:16px}
+
+/* PUZZLE CARDS */
+.puzzle-card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 16px; cursor: pointer; transition: all 0.15s; }
+.puzzle-card:hover { border-color: #4338ca44; transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,0,0,.5); }
+
+/* SYNESTHETIC CHART */
+.syn-row { display: flex; align-items: stretch; gap: 0; border-radius: 6px; overflow: hidden; margin-bottom: 3px; }
+.syn-cell { flex: 1; padding: 5px 4px; text-align: center; font-size: 9px; font-weight: 600; letter-spacing: .04em; transition: all .2s; cursor: pointer; }
+.syn-cell:hover { filter: brightness(1.4); }
+.syn-cell.active { outline: 2px solid white; z-index: 1; }
+
+/* SCENARIO CANVAS */
+.scenario-box { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 12px; min-height: 120px; display: flex; align-items: center; justify-content: center; }
+.stage { padding: 8px 12px; border-radius: 6px; border: 1px solid; font-size: 13px; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const{useState,useReducer,useEffect,useRef,useCallback,useMemo}=React;
+
+/* ══════════════════════════════════════════════════════════════════
+   LAYER 1 — SYNESTHETIC AUDIO ENGINE
+   Each parameter value maps to a specific musical frequency.
+   The learner hears the morphology as they select it.
+   ══════════════════════════════════════════════════════════════════ */
+let audioCtx=null;
+const getAudioCtx=()=>{
+  if(!audioCtx) audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+  return audioCtx;
+};
+// Each param dimension is a musical "register"; values are notes within it
+const TONE_MAP={
+  // Configuration: C major scale, grounding, structural (low register 200-400Hz)
+  UNI:261.6, DPX:293.7, DCT:329.6, AGG:349.2, SEG:392.0, CPN:440.0, COH:493.9, CST:523.3, MUL:587.3,
+  // Affiliation: Perfect 4ths (warm, relational, mid register)
+  CSL:330.0, ASO:440.0, VAR:550.0, COA:660.0,
+  // Perspective: Octave relationships (metaphysical, high register)
+  M:220.0, P:440.0, N:880.0, A:1760.0,
+  // Extension: Chromatic semitones (spatial gradation)
+  DEL:370.0, PRX:311.1, DST:415.3, PXD:466.2, ICP:277.2, TRM:391.0,
+  // Essence: Major vs minor (actuality contrast)
+  NRM:440.0, RPV:415.3,
+  // Specification: Chord tones
+  BSC:261.6, CTE:329.6, CSV:392.0, OBJ:523.3,
+  // Mood: Pentatonic (flowing, stance)
+  FAC:392.0, SUB:440.0, ASM:493.9, SPE:523.3, CNT:349.2, IPT:587.3,
+  // Validation: Lydian mode (epistemic light)
+  OBS:523.3, RCL:493.9, PUR:466.2, RPR:440.0, APR:415.3, IMG:392.0,
+  // Bias: Chromatic (emotional range)
+  EUP:587.3, EUH:554.4, COR:523.3, DUB:493.9, TEN:466.2, NEG:440.0, SKP:415.3, CYN:391.0, CTM:369.9, EXA:349.2,
+};
+function playTone(freq,dur=0.12,type='sine',vol=0.08){
+  if(!freq) return;
+  try{
+    const ctx=getAudioCtx();
+    const osc=ctx.createOscillator();
+    const gain=ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.type=type; osc.frequency.value=freq;
+    gain.gain.setValueAtTime(0,ctx.currentTime);
+    gain.gain.linearRampToValueAtTime(vol,ctx.currentTime+0.01);
+    gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+dur);
+    osc.start(ctx.currentTime); osc.stop(ctx.currentTime+dur+0.05);
+  }catch(e){}
+}
+function playChord(freqs,dur=0.25,type='sine'){
+  freqs.forEach(f=>playTone(f,dur,type,0.05));
+}
+function playCaChord(cfg,afl,per){
+  playChord([TONE_MAP[cfg],TONE_MAP[afl],TONE_MAP[per]].filter(Boolean),0.35,'sine');
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   LAYER 2 — LINGUISTIC DATA LAYER
+   Complete parameter definitions with synesthetic metadata.
+   Future: API-replace with /roots, /affixes, /cases endpoints.
+   ══════════════════════════════════════════════════════════════════ */
+const PARAMS={
+  configuration:{
+    label:"Configuration", slot:"Ca", cssVar:"--p-cfg", hex:"#16a34a",
+    synNote:"C-major scale. Green spectrum. Geometric shapes.",
+    spatialAxis:"horizontal arrangement",
+    values:[
+      {id:"UNI",label:"Uniplex",   icon:"●",  shape:"circle",      desc:"A single undivided instance",                              freq:261.6, hue:"#16a34a"},
+      {id:"DPX",label:"Duplex",    icon:"●●", shape:"two-circles",  desc:"Exactly two instances",                                  freq:293.7, hue:"#15803d"},
+      {id:"DCT",label:"Discrete",  icon:"∷",  shape:"scattered",    desc:"Multiple separate same-type instances",                  freq:329.6, hue:"#166534"},
+      {id:"AGG",label:"Aggregative",icon:"⬡", shape:"cluster",      desc:"Multiple joined same-type instances",                    freq:349.2, hue:"#14532d"},
+      {id:"SEG",label:"Segmentative",icon:"⬡⊘",shape:"split-cluster",desc:"Joined instances partially separated",                 freq:392.0, hue:"#1a6b3c"},
+      {id:"CPN",label:"Componential",icon:"⚙",shape:"gears",        desc:"Functionally differentiated parts of a whole",          freq:440.0, hue:"#0f9548"},
+      {id:"COH",label:"Coherent",  icon:"◈",  shape:"lattice",      desc:"Unified whole from heterogeneous parts",                 freq:493.9, hue:"#22c55e"},
+      {id:"CST",label:"Compositive",icon:"⊞", shape:"mosaic",       desc:"Mixture of different types joined",                     freq:523.3, hue:"#4ade80"},
+      {id:"MUL",label:"Multiform", icon:"⁂",  shape:"cloud",        desc:"Irregular mixture with no unifying logic",               freq:587.3, hue:"#86efac"},
+    ]
+  },
+  affiliation:{
+    label:"Affiliation", slot:"Ca", cssVar:"--p-afl", hex:"#0d9488",
+    synNote:"Perfect fourths. Teal spectrum. Texture patterns.",
+    spatialAxis:"internal relational logic",
+    values:[
+      {id:"CSL",label:"Consolidative",icon:"≡",desc:"Members identical in nature and function",freq:330,hue:"#0d9488"},
+      {id:"ASO",label:"Associative",  icon:"≈",desc:"Similar but functionally differentiated",freq:440,hue:"#0f766e"},
+      {id:"VAR",label:"Variative",    icon:"∼",desc:"Diverse members sharing a common purpose",freq:550,hue:"#14b8a6"},
+      {id:"COA",label:"Coalescent",   icon:"∪",desc:"Previously distinct groups now unified",  freq:660,hue:"#5eead4"},
+    ]
+  },
+  perspective:{
+    label:"Perspective", slot:"Ca", cssVar:"--p-per", hex:"#7c3aed",
+    synNote:"Octave series. Violet spectrum. Depth/distance.",
+    spatialAxis:"existential scope — depth into abstraction",
+    values:[
+      {id:"M",label:"Monadic",  icon:"◉",desc:"A specific bounded instance",                    freq:220,  hue:"#7c3aed"},
+      {id:"P",label:"Polyadic", icon:"◎",desc:"A set of instances",                              freq:440,  hue:"#6d28d9"},
+      {id:"N",label:"Noumenal", icon:"⊙",desc:"The category/type itself (Platonic)",            freq:880,  hue:"#8b5cf6"},
+      {id:"A",label:"Abstract", icon:"○",desc:"The pure abstract property or essence",          freq:1760, hue:"#a78bfa"},
+    ]
+  },
+  extension:{
+    label:"Extension", slot:"Ca", cssVar:"--p-ext", hex:"#b45309",
+    synNote:"Chromatic semitones. Amber spectrum. Spatial reach.",
+    spatialAxis:"spatial/temporal bounding",
+    values:[
+      {id:"DEL",label:"Delimitive",   icon:"⟷",desc:"The full extent of the referent",          freq:370,  hue:"#b45309"},
+      {id:"PRX",label:"Proximal",     icon:"◄",desc:"The near portion only",                    freq:311.1,hue:"#92400e"},
+      {id:"DST",label:"Distal",       icon:"►",desc:"The far portion only",                     freq:415.3,hue:"#d97706"},
+      {id:"PXD",label:"Proxi-Distal", icon:"◄►",desc:"Near and far portions simultaneously",   freq:466.2,hue:"#f59e0b"},
+      {id:"ICP",label:"Inceptive",    icon:"⊢",desc:"Just the beginning portion",               freq:277.2,hue:"#fbbf24"},
+      {id:"TRM",label:"Terminative",  icon:"⊣",desc:"Just the ending portion",                  freq:391,  hue:"#fcd34d"},
+    ]
+  },
+  essence:{
+    label:"Essence", slot:"Ca", cssVar:"--p-ess", hex:"#c2410c",
+    synNote:"Major/minor contrast. Orange spectrum. Solidity.",
+    spatialAxis:"actuality vs normativity",
+    values:[
+      {id:"NRM",label:"Normal",       icon:"■",desc:"The actual thing as it concretely exists",  freq:440,  hue:"#c2410c"},
+      {id:"RPV",label:"Representative",icon:"□",desc:"Normative/representative instance",         freq:415.3,hue:"#ea580c"},
+    ]
+  },
+  specification:{
+    label:"Specification", slot:"Vr", cssVar:"--p-spc", hex:"#b91c1c",
+    synNote:"Chord tones. Red spectrum. Facet/angle.",
+    spatialAxis:"which conceptual facet is foregrounded",
+    values:[
+      {id:"BSC",label:"Basic",       icon:"◆",desc:"Fundamental default concept",               freq:261.6,hue:"#b91c1c"},
+      {id:"CTE",label:"Contential",  icon:"◇",desc:"Content, material, or substance of",       freq:329.6,hue:"#dc2626"},
+      {id:"CSV",label:"Constitutive",icon:"◈",desc:"Structure, form, or composition of",       freq:392.0,hue:"#ef4444"},
+      {id:"OBJ",label:"Objective",   icon:"◉",desc:"Purposive or goal-directed function of",   freq:523.3,hue:"#f87171"},
+    ]
+  },
+  function:{
+    label:"Function", slot:"Vr", cssVar:"--p-fn", hex:"#6d28d9",
+    synNote:"Static vs motion. Purple spectrum.",
+    spatialAxis:"stative vs dynamic",
+    values:[
+      {id:"STA",label:"Stative",  icon:"—",desc:"State, property, or condition",                freq:220,  hue:"#6d28d9"},
+      {id:"DYN",label:"Dynamic",  icon:"→",desc:"Action, process, or event",                    freq:440,  hue:"#8b5cf6"},
+    ]
+  },
+  mood:{
+    label:"Mood", slot:"Vn", cssVar:"--p-moo", hex:"#0e7490",
+    synNote:"Pentatonic. Cyan spectrum. Epistemic stance.",
+    spatialAxis:"speaker's deontic/epistemic relationship to proposition",
+    values:[
+      {id:"FAC",label:"Factual",       icon:"⊨",desc:"Asserted as fact",                        freq:392,  hue:"#0e7490"},
+      {id:"SUB",label:"Subjunctive",   icon:"⊃",desc:"Contingent or hypothetical",              freq:440,  hue:"#0891b2"},
+      {id:"ASM",label:"Assumptive",    icon:"≅",desc:"Assumed to be the case",                  freq:493.9,hue:"#06b6d4"},
+      {id:"SPE",label:"Speculative",   icon:"∿",desc:"Speculative or conjectural",              freq:523.3,hue:"#22d3ee"},
+      {id:"CNT",label:"Counterfactual",icon:"⊭",desc:"Known to be contrary to fact",            freq:349.2,hue:"#67e8f9"},
+      {id:"IPT",label:"Imperative",    icon:"⊢",desc:"Directive or command",                    freq:587.3,hue:"#a5f3fc"},
+    ]
+  },
+  validation:{
+    label:"Validation", slot:"Vn", cssVar:"--p-val", hex:"#0f766e",
+    synNote:"Lydian mode. Teal-dark. Evidential light.",
+    spatialAxis:"source of speaker's epistemic access",
+    values:[
+      {id:"OBS",label:"Observational", icon:"👁",desc:"Directly witnessed by speaker",           freq:523.3,hue:"#0f766e"},
+      {id:"RCL",label:"Recollective",  icon:"◎",desc:"Remembered by speaker",                  freq:493.9,hue:"#0d9488"},
+      {id:"PUR",label:"Purportive",    icon:"~",desc:"Based on hearsay or report",              freq:466.2,hue:"#14b8a6"},
+      {id:"RPR",label:"Reportive",     icon:"»",desc:"Claimed by a named/known source",         freq:440,  hue:"#2dd4bf"},
+      {id:"APR",label:"Apprehensive",  icon:"≈",desc:"Inferred from indirect evidence",         freq:415.3,hue:"#5eead4"},
+      {id:"IMG",label:"Imaginative",   icon:"∞",desc:"Imagined or speculative",                  freq:392,  hue:"#99f6e4"},
+    ]
+  },
+  bias:{
+    label:"Bias", slot:"Cb", cssVar:"--p-bia", hex:"#be185d",
+    synNote:"Chromatic emotional range. Rose-to-crimson spectrum.",
+    spatialAxis:"speaker's attitudinal stance toward proposition",
+    values:[
+      {id:"EUP",label:"Euphoric",      icon:"⤴",desc:"Expressing delight or elation",           freq:587.3,hue:"#f472b6"},
+      {id:"EUH",label:"Euphemistic",   icon:"~",desc:"Softening or hedging the expression",    freq:554.4,hue:"#ec4899"},
+      {id:"COR",label:"Corrective",    icon:"↺",desc:"Correcting a prior statement",            freq:523.3,hue:"#db2777"},
+      {id:"DUB",label:"Dubitative",    icon:"?",desc:"Expressing doubt about the content",      freq:493.9,hue:"#be185d"},
+      {id:"TEN",label:"Tentative",     icon:"…",desc:"Expressing hesitation",                   freq:466.2,hue:"#9d174d"},
+      {id:"NEG",label:"Neglective",    icon:"∅",desc:"Dismissing or minimizing",                freq:440,  hue:"#831843"},
+      {id:"SKP",label:"Skeptical",     icon:"⊘",desc:"Expressing skepticism",                   freq:415.3,hue:"#701a36"},
+      {id:"CYN",label:"Cynical",       icon:"⊗",desc:"Expressing cynicism or irony",            freq:391,  hue:"#9f1239"},
+      {id:"CTM",label:"Contemptuous",  icon:"↓",desc:"Expressing contempt",                     freq:369.9,hue:"#881337"},
+      {id:"EXA",label:"Exasperative",  icon:"!",desc:"Expressing frustration or exasperation",  freq:349.2,hue:"#be123c"},
+    ]
+  },
+  aspect:{
+    label:"Aspect", slot:"Vn", cssVar:"--p-asp", hex:"#7e22ce",
+    synNote:"Temporal shapes. Plum spectrum. Duration contours.",
+    spatialAxis:"temporal/spatial shape of the action or state",
+    values:[
+      {id:"RTR",label:"Retrospective", icon:"←",desc:"Looking back at a completed event",       freq:330,  hue:"#7e22ce"},
+      {id:"PRS",label:"Prospective",   icon:"→",desc:"Looking forward to an event",             freq:392,  hue:"#9333ea"},
+      {id:"HAB",label:"Habitual",      icon:"↻",desc:"Ongoing pattern or habit",                freq:440,  hue:"#a855f7"},
+      {id:"PRG",label:"Progressive",   icon:"▶",desc:"Ongoing process at speech time",          freq:493.9,hue:"#c084fc"},
+      {id:"IMM",label:"Imminent",      icon:"▷",desc:"About to begin",                          freq:523.3,hue:"#d8b4fe"},
+      {id:"INC",label:"Inceptive",     icon:"⊢",desc:"Just beginning",                         freq:349.2,hue:"#e9d5ff"},
+      {id:"TRM2",label:"Terminative",  icon:"⊣",desc:"Just ending",                            freq:293.7,hue:"#f3e8ff"},
+    ]
+  },
+};
+
+const ROOTS=[
+  {id:"LK",  domain:"I",  name:"Body",       color:"#991b1b",
+   stem1:"physical body as whole", stem2:"limb / appendage", stem3:"torso / trunk",
+   desc:"The physical body and its primary structural components",
+   crosslinks:["ŢR","NŢ"]},
+  {id:"ŢR",  domain:"I",  name:"Sensation",  color:"#b91c1c",
+   stem1:"physical sensation", stem2:"pain / discomfort", stem3:"pleasure / comfort",
+   desc:"Sensory and proprioceptive experience",crosslinks:["LK","KŢ"]},
+  {id:"KŢ",  domain:"II", name:"Cognition",  color:"#c2410c",
+   stem1:"act of thinking / reasoning", stem2:"concept / idea as object", stem3:"mental faculty as whole",
+   desc:"Cognitive operations and mental content", crosslinks:["MŘ","ŇV","ŽB"]},
+  {id:"MŘ",  domain:"II", name:"Knowledge",  color:"#9a3412",
+   stem1:"knowing a fact", stem2:"understanding a system", stem3:"wisdom / applied knowledge",
+   desc:"States and degrees of epistemic access", crosslinks:["KŢ","ŇV","RM"]},
+  {id:"ŇV",  domain:"II", name:"Belief",     color:"#7c2d12",
+   stem1:"holding a belief", stem2:"conviction / certainty", stem3:"doubt / uncertainty",
+   desc:"Doxastic states and their degrees", crosslinks:["MŘ","KŢ"]},
+  {id:"ŽB",  domain:"III",name:"Speech",     color:"#78350f",
+   stem1:"act of speaking", stem2:"spoken content / utterance", stem3:"communicative intent",
+   desc:"Verbal communication events",crosslinks:["RŇ","KŢ"]},
+  {id:"RŇ",  domain:"III",name:"Meaning",    color:"#92400e",
+   stem1:"semantic content", stem2:"referent of an expression", stem3:"interpretation / reading",
+   desc:"Semantic and interpretive phenomena",crosslinks:["ŽB","KŢ","ŇM"]},
+  {id:"VŽ",  domain:"IV", name:"Social Bond",color:"#365314",
+   stem1:"relationship / connection", stem2:"member of a group", stem3:"role within a structure",
+   desc:"Interpersonal and social relationships",crosslinks:["KF","ŢV"]},
+  {id:"KF",  domain:"IV", name:"Conflict",   color:"#14532d",
+   stem1:"opposition / conflict", stem2:"combatant / opponent", stem3:"contested matter",
+   desc:"States of opposition and contestation",crosslinks:["VŽ","RM"]},
+  {id:"ŢM",  domain:"V",  name:"Matter",     color:"#134e4a",
+   stem1:"physical substance", stem2:"specific material type", stem3:"physical property",
+   desc:"Physical matter and its properties",crosslinks:["XL","ŘK"]},
+  {id:"XL",  domain:"V",  name:"Motion",     color:"#0f766e",
+   stem1:"movement as event", stem2:"trajectory / path", stem3:"manner of motion",
+   desc:"Spatial movement and displacement",crosslinks:["ŢM","ŘK","ŽL"]},
+  {id:"ŘK",  domain:"V",  name:"Causation",  color:"#0d9488",
+   stem1:"cause-effect event", stem2:"cause / causal agent", stem3:"effect / result",
+   desc:"Causal relationships and processes",crosslinks:["XL","ŢM","RM"]},
+  {id:"PŘ",  domain:"VI", name:"Growth",     color:"#1d4ed8",
+   stem1:"growth process", stem2:"growing entity", stem3:"growth product / outcome",
+   desc:"Biological growth and development",crosslinks:["NŢ","ŢM"]},
+  {id:"NŢ",  domain:"VI", name:"Life",       color:"#1e40af",
+   stem1:"being alive / life process", stem2:"living organism", stem3:"life-sustaining element",
+   desc:"The phenomenon of biological life",crosslinks:["PŘ","LK"]},
+  {id:"KV",  domain:"VII",name:"Tool",       color:"#4c1d95",
+   stem1:"tool as functional object", stem2:"act of using a tool", stem3:"effect produced by tool",
+   desc:"Artifacts made for specific purposes",crosslinks:["ŽL","ŘK"]},
+  {id:"ŽL",  domain:"VII",name:"Structure",  color:"#5b21b6",
+   stem1:"constructed structure", stem2:"structural element", stem3:"interior architectural space",
+   desc:"Built environments and their components",crosslinks:["KV","XL"]},
+  {id:"RM",  domain:"VIII",name:"Value",     color:"#7e22ce",
+   stem1:"evaluative judgment", stem2:"entity judged good or bad", stem3:"criterion of evaluation",
+   desc:"Value judgments and ethical/aesthetic assessment",crosslinks:["ŢV","MŘ","ŘK"]},
+  {id:"ŢV",  domain:"VIII",name:"Obligation",color:"#6b21a8",
+   stem1:"normative obligation", stem2:"obligated agent", stem3:"obligatory act or omission",
+   desc:"Deontic relations and normative force",crosslinks:["RM","VŽ"]},
+  {id:"FL",  domain:"IX", name:"Quantity",   color:"#0369a1",
+   stem1:"quantity / amount", stem2:"measured entity", stem3:"unit of measure",
+   desc:"Quantitative relations and measurement",crosslinks:["ŇM","ŢM"]},
+  {id:"ŇM",  domain:"IX", name:"Relation",   color:"#075985",
+   stem1:"abstract relation", stem2:"first relatum", stem3:"second relatum",
+   desc:"Formal and logical relations between entities",crosslinks:["FL","RŇ"]},
+];
+
+const CASES=[
+  {id:"THM",family:"Transrelative",color:"#b91c1c",label:"Thematic",   desc:"Primary participant in state / patient of action"},
+  {id:"INS",family:"Transrelative",color:"#b91c1c",label:"Instrumental",desc:"Tool or means enabling an action"},
+  {id:"ABS",family:"Transrelative",color:"#b91c1c",label:"Absolutive",  desc:"Entity whose existence/presence is asserted"},
+  {id:"ERG",family:"Transrelative",color:"#991b1b",label:"Ergative",    desc:"Volitional agent causing state-change in another"},
+  {id:"DAT",family:"Transrelative",color:"#991b1b",label:"Dative",      desc:"Recipient or beneficiary of an action"},
+  {id:"AFF",family:"Transrelative",color:"#991b1b",label:"Affective",   desc:"Experiencer of a stimulus-induced state"},
+  {id:"GEN",family:"Appositive",  color:"#c2410c",label:"Genitive",     desc:"General possessive/associative relationship"},
+  {id:"ATR",family:"Appositive",  color:"#c2410c",label:"Attributive",  desc:"Entity whose property is described"},
+  {id:"PRP",family:"Appositive",  color:"#c2410c",label:"Proprietive",  desc:"Owner or proprietor of something"},
+  {id:"PRT",family:"Appositive",  color:"#9a3412",label:"Partitive",    desc:"The whole of which something is a part"},
+  {id:"ORI",family:"Appositive",  color:"#9a3412",label:"Originative",  desc:"Source from which something derives"},
+  {id:"APP",family:"Associative", color:"#0f766e",label:"Applicative",  desc:"Entity on behalf of which action occurs"},
+  {id:"PUR",family:"Associative", color:"#0f766e",label:"Purposive",    desc:"Purpose or goal motivating the action"},
+  {id:"CNS",family:"Associative", color:"#0d9488",label:"Considerative",desc:"Criterion by which judgment is made"},
+  {id:"CMP",family:"Associative", color:"#0d9488",label:"Comparative",  desc:"Standard against which comparison is made"},
+  {id:"FNC",family:"Adverbial",   color:"#b45309",label:"Functive",     desc:"How an entity functions / what role it plays"},
+  {id:"TFM",family:"Adverbial",   color:"#b45309",label:"Transformative",desc:"What something becomes or is transformed into"},
+  {id:"RSL",family:"Adverbial",   color:"#92400e",label:"Resultative",  desc:"The result or outcome of an action"},
+  {id:"CSN",family:"Adverbial",   color:"#92400e",label:"Consumptive",  desc:"Entity consumed or expended in action"},
+  {id:"TMP",family:"Temporal",    color:"#1d4ed8",label:"Temporal",     desc:"When an event takes place"},
+  {id:"EVT",family:"Temporal",    color:"#1d4ed8",label:"Eventual",     desc:"Upon the occurrence of an event"},
+  {id:"PCV",family:"Temporal",    color:"#1e40af",label:"Postcursive",  desc:"Subsequent to an event"},
+  {id:"PCR",family:"Temporal",    color:"#1e40af",label:"Precursive",   desc:"Prior to an event"},
+  {id:"ALL",family:"Spatio-temporal",color:"#4c1d95",label:"Allative",  desc:"Destination of movement"},
+  {id:"ABL",family:"Spatio-temporal",color:"#4c1d95",label:"Ablative",  desc:"Origin point of movement"},
+  {id:"LOC",family:"Spatio-temporal",color:"#5b21b6",label:"Locative",  desc:"Location where something exists"},
+  {id:"ORT",family:"Spatio-temporal",color:"#5b21b6",label:"Orientative",desc:"Direction faced/oriented toward without reaching"},
+  {id:"INT",family:"Spatio-temporal",color:"#6d28d9",label:"Intrative", desc:"Within / throughout a bounded space"},
+  {id:"NAV",family:"Spatio-temporal",color:"#6d28d9",label:"Navigative",desc:"Along a path with purpose"},
+];
+
+const DOMAIN_META={
+  I:{label:"Body & Embodiment",color:"#991b1b"},II:{label:"Mind & Cognition",color:"#c2410c"},
+  III:{label:"Language & Comm.",color:"#92400e"},IV:{label:"Social Structure",color:"#365314"},
+  V:{label:"Physical Reality",color:"#0f766e"},VI:{label:"Living Systems",color:"#1d4ed8"},
+  VII:{label:"Artifact & Craft",color:"#5b21b6"},VIII:{label:"Value & Ethics",color:"#7e22ce"},
+  IX:{label:"Abstract Structure",color:"#0369a1"},
+};
+
+const MODULES=[
+  {id:1,phase:1,name:"Semantic Event Model",desc:"Learn to perceive reality as structured conceptual events",color:"#1d4ed8"},
+  {id:2,phase:1,name:"Dimensional Framework",desc:"Map all major grammatical axes as abstract dimensions",color:"#1d4ed8"},
+  {id:3,phase:1,name:"Root Ecology",desc:"Acquire roots through semantic clustering",color:"#1d4ed8"},
+  {id:4,phase:2,name:"Slot Architecture",desc:"Master the 9-slot formative structure",color:"#7c3aed"},
+  {id:5,phase:2,name:"Vr and Cr Complexes",desc:"Root/stem/pattern phonological encoding",color:"#7c3aed"},
+  {id:6,phase:2,name:"Case Grammar",desc:"All 68+ cases organized by semantic family",color:"#7c3aed"},
+  {id:7,phase:2,name:"Verbal & Register Axis",desc:"Mood, Validation, Illocution, Bias",color:"#7c3aed"},
+  {id:8,phase:3,name:"Morphological Assembly",desc:"Construct complete Ithkuil word forms",color:"#15803d"},
+  {id:9,phase:3,name:"Deconstruction Engine",desc:"Parse Ithkuil forms to parameter specs",color:"#15803d"},
+  {id:10,phase:3,name:"Semantic Compression",desc:"Compress complex English into minimal forms",color:"#15803d"},
+  {id:11,phase:4,name:"Conceptual Fluency",desc:"Pre-linguistic Ithkuil thinking exercises",color:"#b45309"},
+  {id:12,phase:4,name:"Philosophical Expression",desc:"Abstract and technical precision expression",color:"#b45309"},
+];
+
+/* ══════════════════════════════════════════════════════════════════
+   LAYER 3 — LEARNER MODEL & STATE
+   ══════════════════════════════════════════════════════════════════ */
+const initLM=()=>({
+  // Per-value mastery (0-1 probability of correct application)
+  ...Object.fromEntries(Object.entries(PARAMS).map(([k,p])=>
+    [k,Object.fromEntries(p.values.map(v=>[v.id,0.05]))])),
+  roots:Object.fromEntries(ROOTS.map(r=>[r.id,{s1:0.05,s2:0.05,s3:0.05}])),
+  moduleProgress:Object.fromEntries(Array.from({length:12},(_,i)=>[i+1,0])),
+  // Adaptive: error log for targeted remediation
+  errorLog:[],// [{param,val,errorType,timestamp}]
+  // SRS queue: items due for review
+  srsQueue:[],// [{type,key,val,dueAt,interval}]
+  // Stats
+  xp:0, streak:0, totalAttempts:0, totalCorrect:0,
+  competenceStage:1,// 1-4 (unconscious incompetent → unconscious competent)
+  synestheticMode:true,
+  puzzleScores:{},// {puzzleId: highScore}
+});
+
+const defaultP=()=>({
+  root:"KŢ", stem:"S1", pattern:"P1",
+  configuration:"UNI", affiliation:"CSL", perspective:"M",
+  extension:"DEL", essence:"NRM", specification:"BSC", function:"STA",
+  mood:"FAC", validation:"OBS", case:"THM", bias:"EUP", aspect:"PRG",
+});
+
+/* Simplified Ithkuil form generator — structural placeholder for DB integration */
+function buildForm(p){
+  const rMap={KŢ:"kţ",MŘ:"mř",ŇV:"ňv",ŽB:"žb",RŇ:"rň",VŽ:"vž",KF:"kf",
+    ŢM:"ţm",XL:"xl",ŘK:"řk",PŘ:"př",NŢ:"nţ",KV:"kv",ŽL:"žl",RM:"rm",
+    ŢV:"ţv",FL:"fl",ŇM:"ňm",LK:"lk",ŢR:"ţr"};
+  const vr={S1P1:"a",S1P2:"e",S1P3:"i",S2P1:"u",S2P2:"o",S2P3:"ö",S3P1:"â",S3P2:"ê",S3P3:"î"};
+  const specMap={BSC:"",CTE:"a",CSV:"e",OBJ:"i"};
+  const caMap={
+    UNI_CSL:"l",DPX_CSL:"r",DCT_CSL:"v",AGG_CSL:"tļ",SEG_CSL:"lm",CPN_CSL:"vr",COH_CSL:"zm",CST_CSL:"nļ",MUL_CSL:"ňv",
+    UNI_ASO:"lf",UNI_VAR:"ls",UNI_COA:"lç",AGG_ASO:"tļf",AGG_VAR:"tļs",COH_ASO:"zmf",CPN_COA:"vrç",
+  };
+  const perMap={M:"",P:"r",N:"ř",A:"š"};
+  const extMap={DEL:"",PRX:"t",DST:"k",PXD:"tk",ICP:"f",TRM:"p"};
+  const vcMap={THM:"a",INS:"â",ABS:"e",ERG:"ê",DAT:"i",GEN:"î",ATR:"u",PRP:"û",PUR:"o",LOC:"ô",ALL:"ö",ABL:"ae",TMP:"ea",FNC:"oa",APP:"ao"};
+  const r=rMap[p.root]||"kt";
+  const v=(vr[`${p.stem||"S1"}${p.pattern||"P1"}`]||"a")+(specMap[p.specification||"BSC"]||"");
+  const caKey=`${p.configuration||"UNI"}_${p.affiliation||"CSL"}`;
+  const ca=(caMap[caKey]||"l")+(perMap[p.perspective||"M"]||"")+(extMap[p.extension||"DEL"]||"");
+  const vc=vcMap[p.case||"THM"]||"a";
+  return r+v+ca+vc;
+}
+
+/* Competence stage calc */
+const calcStage=lm=>{
+  const allVals=Object.entries(lm).filter(([k])=>PARAMS[k]).flatMap(([,v])=>Object.values(v));
+  const avg=allVals.length?allVals.reduce((a,b)=>a+b,0)/allVals.length:0;
+  if(avg<0.25) return 1;
+  if(avg<0.55) return 2;
+  if(avg<0.80) return 3;
+  return 4;
+};
+
+/* ══════════════════════════════════════════════════════════════════
+   LAYER 4 — SYNESTHETIC UI PRIMITIVES
+   ══════════════════════════════════════════════════════════════════ */
+function SynCell({paramKey,valId,label,icon,color,freq,selected,onClick,synOn}){
+  return(
+    <div onClick={()=>{onClick&&onClick();if(synOn&&freq)playTone(freq,0.15,'sine');}}
+      className="syn-cell" style={{background:selected?color+'44':color+'18',color:selected?color:'#6e709944',
+        border:`1px solid ${selected?color:color+'22'}`,borderRadius:4,padding:'5px 2px',cursor:'pointer',fontSize:9,
+        fontWeight:600,letterSpacing:'0.04em',textAlign:'center',transition:'all .15s',minWidth:44}}>
+      <div style={{fontSize:14,lineHeight:1}}>{icon}</div>
+      <div style={{marginTop:2,fontSize:8,color:selected?'var(--bright)':'var(--text)'}}>{label}</div>
+    </div>
+  );
+}
+
+function ParamStrip({paramKey,selectedId,onChange,synOn,compact,showLabel=true}){
+  const p=PARAMS[paramKey];
+  if(!p) return null;
+  return(
+    <div>
+      {!compact&&showLabel&&<div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:5}}>
+        <span style={{fontSize:9,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:p.hex}}>{p.label}</span>
+        <span style={{fontSize:9,color:'var(--muted)'}}>{p.synNote?.split('.')[0]}</span>
+      </div>}
+      <div style={{display:'flex',gap:3,flexWrap:'wrap'}}>
+        {p.values.map(v=>(
+          <SynCell key={v.id} paramKey={paramKey} valId={v.id} label={v.label}
+            icon={v.icon} color={v.hue||p.hex} freq={v.freq}
+            selected={selectedId===v.id}
+            onClick={()=>onChange&&onChange(v.id)}
+            synOn={synOn}/>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function SlotBlock({slot,val,desc,color,onClick,active}){
+  return(
+    <div className="slot syn-aura" onClick={onClick}
+      style={{background:color+'22',border:`1px solid ${active?color:color+'55'}`,
+        boxShadow:active?`0 0 12px ${color}44`:'none'}}>
+      <span className="slot-lbl" style={{color}}>{slot}</span>
+      <span className="slot-val" style={{color}}>{val}</span>
+      {desc&&<span className="slot-sub">{desc}</span>}
+    </div>
+  );
+}
+
+function Meter({value,color,height=3}){
+  return(
+    <div className="pbar" style={{height}}>
+      <div className="pfill" style={{width:`${Math.max(2,value*100)}%`,background:color||'var(--accent)'}}/>
+    </div>
+  );
+}
+function Badge({color,children}){
+  return <span style={{background:color+'22',color,border:`1px solid ${color}44`,display:'inline-block',padding:'2px 8px',borderRadius:12,fontSize:11,fontWeight:500}}>{children}</span>;
+}
+function ProgressMeter({value,color="#4338ca"}){
+  return <div className="pbar"><div className="pfill" style={{width:`${Math.max(0,value)*100}%`,background:color}}/></div>;
+}
+function SectionHeader({title,sub,right}){
+  return <div style={{display:'flex',alignItems:'flex-end',justifyContent:'space-between',marginBottom:16}}>
+    <div><h2 style={{fontSize:18,color:'var(--bright)',marginBottom:2,fontFamily:'Cinzel,serif',letterSpacing:'0.04em'}}>{title}</h2>
+    {sub&&<p style={{fontSize:12,color:'var(--muted)'}}>{sub}</p>}</div>
+    {right&&<div>{right}</div>}
+  </div>;
+}
+function InfoPill({label,value,color}){
+  return <div style={{background:'var(--surface)',border:'1px solid var(--border)',borderRadius:6,padding:'4px 10px',display:'inline-flex',flexDirection:'column',alignItems:'center',minWidth:70}}>
+    <span style={{fontSize:9,color:'var(--muted)',textTransform:'uppercase',letterSpacing:'0.08em'}}>{label}</span>
+    <span style={{fontSize:13,fontWeight:600,color:color||'var(--text)'}}>{value}</span>
+  </div>;
+}
+
+/* ── GLOSSARY & Term tooltip component ───────────────────────────────────────
+   Difficult words in descriptions are wrapped in <Term>. On hover, shows a
+   compact definition inline. Click swaps to extended explanation.
+   ──────────────────────────────────────────────────────────────────────────── */
+const GLOSSARY={
+  ontology:     {short:"study of what exists",         long:"The branch of philosophy concerned with the fundamental categories of being — what kinds of things exist and how they relate."},
+  morphology:   {short:"word-form structure",           long:"The study of how words are formed from smaller meaningful units (morphemes). In Ithkuil, a single word can encode 12+ simultaneous dimensions."},
+  morpheme:     {short:"smallest meaning unit",         long:"The smallest unit of a language that carries meaning. In Ithkuil, each slot in the word structure (Cr, Ca, Vr…) is a morpheme."},
+  deictic:      {short:"pointing/indexical",            long:"A word or feature that depends on context to convey meaning — 'this', 'here', 'now'. Deictic words point to things relative to the speaker's position."},
+  noumenal:     {short:"category/type itself",          long:"In Ithkuil, the Noumenal perspective encodes the Platonic type or category of a thing — not any particular instance, but the kind of thing it is."},
+  monadic:      {short:"single bounded instance",       long:"The Monadic perspective refers to one specific, individuated, bounded instance of something — this particular dog, not dogs in general."},
+  polyadic:     {short:"a set of instances",            long:"The Polyadic perspective refers to a plurality of instances treated as a set — these dogs, not dogness or the category 'dog'."},
+  deontic:      {short:"relating to obligation/norms",  long:"Deontic logic deals with permission, obligation, and prohibition. In Ithkuil, the Mood parameter encodes the speaker's deontic relationship to a proposition."},
+  epistemic:    {short:"relating to knowledge/belief",  long:"Epistemology is the study of knowledge and justified belief. Epistemic stance encodes how the speaker knows or believes what they're asserting."},
+  stative:      {short:"describes a state",             long:"A stative predicate describes a condition, property, or state of affairs — 'is red', 'believes', 'knows'. Contrasts with Dynamic (active processes)."},
+  evidential:   {short:"source of knowledge marker",   long:"An evidential marks how the speaker came to know what they're asserting — by direct observation, hearsay, inference, memory, etc."},
+  holophrase:   {short:"single-word sentence",          long:"A single utterance that expresses a complete proposition. Ithkuil is famous for encoding entire paragraphs of English into a single morphological form."},
+  phonotactics: {short:"rules for sound sequences",    long:"The constraints on which sequences of sounds are permissible in a language. Ithkuil has complex phonotactic rules that determine valid consonant clusters."},
+  formative:    {short:"core word structure",           long:"In Ithkuil, a formative is the primary word type — it encodes a full predication including root, configuration, case, mood, and all other parameters."},
+  configurative:{short:"how instances are arranged",   long:"Configuration in Ithkuil encodes how many instances there are and how they're spatially/logically arranged — uniplex, duplex, discrete, aggregative, etc."},
+};
+
+function Term({word,children}){
+  const[expanded,setExpanded]=useState(false);
+  const[visible,setVisible]=useState(false);
+  const ref=useRef(null);
+  const entry=GLOSSARY[word?.toLowerCase()]||GLOSSARY[(children?.toString()||'').toLowerCase()];
+  if(!entry) return <span>{children||word}</span>;
+  return(
+    <span ref={ref} style={{position:'relative',display:'inline'}}
+      onMouseEnter={()=>setVisible(true)}
+      onMouseLeave={()=>{setVisible(false);setExpanded(false);}}>
+      <span style={{borderBottom:'1px dotted var(--accent2)',cursor:'help',color:'var(--bright)'}}
+        onClick={e=>{e.stopPropagation();setExpanded(v=>!v);}}>
+        {children||word}
+      </span>
+      {visible&&(
+        <span style={{position:'absolute',bottom:'calc(100% + 5px)',left:'50%',transform:'translateX(-50%)',
+          background:'#13132a',border:'1px solid var(--border2)',borderRadius:6,padding:'7px 10px',
+          fontSize:10,lineHeight:1.5,zIndex:200,whiteSpace:'nowrap',maxWidth:280,whiteSpace:'normal',
+          boxShadow:'0 8px 24px rgba(0,0,0,.6)',pointerEvents:'none',display:'block'}}>
+          <span style={{color:'var(--muted)',display:'block'}}>{expanded?entry.long:entry.short}</span>
+          <span style={{color:'var(--muted)',fontSize:9,marginTop:3,display:'block'}}>{expanded?'↑ less':'click for more'}</span>
+        </span>
+      )}
+    </span>
+  );
+}
+/* ══════════════════════════════════════════════════════════════════
+   LAYER 5 — ANIMATED SCENARIO ENGINE (SVG)
+   Procedurally generates visual scenarios for each Configuration.
+   ══════════════════════════════════════════════════════════════════ */
+function ConfigScenario({configId,size=100}){
+  const frames={
+    UNI:()=><circle cx={50} cy={50} r={14} fill="#16a34a88" stroke="#16a34a" strokeWidth={1.5}/>,
+    DPX:()=><g><circle cx={38} cy={50} r={11} fill="#15803d88" stroke="#15803d" strokeWidth={1.5}/><circle cx={62} cy={50} r={11} fill="#15803d88" stroke="#15803d" strokeWidth={1.5}/></g>,
+    DCT:()=><g>{[[22,30],[50,22],[78,30],[22,70],[50,78],[78,70]].map(([x,y],i)=><circle key={i} cx={x} cy={y} r={7} fill="#16653488" stroke="#166534" strokeWidth={1}/>)}</g>,
+    AGG:()=><g>{[[50,50],[38,42],[62,42],[38,58],[62,58],[50,36],[50,64]].map(([x,y],i)=><circle key={i} cx={x} cy={y} r={7} fill="#14532d88" stroke="#14532d" strokeWidth={1}/>)}</g>,
+    SEG:()=><g>
+      {[[26,42],[36,42],[32,54]].map(([x,y],i)=><circle key={`a${i}`} cx={x} cy={y} r={7} fill="#1a6b3c88" stroke="#1a6b3c" strokeWidth={1}/>)}
+      <line x1={46} y1={50} x2={54} y2={50} stroke="#1a6b3c44" strokeWidth={1} strokeDasharray="3,2"/>
+      {[[64,42],[74,42],[70,54]].map(([x,y],i)=><circle key={`b${i}`} cx={x} cy={y} r={7} fill="#1a6b3c88" stroke="#1a6b3c" strokeWidth={1}/>)}
+    </g>,
+    CPN:()=><g>
+      <rect x={22} y={36} width={18} height={18} rx={2} fill="#0f954888" stroke="#0f9548" strokeWidth={1}/>
+      <circle cx={50} cy={50} r={9} fill="#0f954888" stroke="#0f9548" strokeWidth={1}/>
+      <polygon points="60,36 78,36 78,54 60,54" fill="#0f954888" stroke="#0f9548" strokeWidth={1}/>
+    </g>,
+    COH:()=><g>
+      <circle cx={50} cy={50} r={28} fill="none" stroke="#22c55e66" strokeWidth={1} strokeDasharray="4,2"/>
+      {[[50,28],[30,60],[70,60],[38,38],[62,38],[38,62],[62,62]].map(([x,y],i)=><circle key={i} cx={x} cy={y} r={5} fill="#22c55e88" stroke="#22c55e" strokeWidth={1}/>)}
+    </g>,
+    CST:()=><g>
+      {[[26,38],[50,26],[74,38],[26,62],[50,74],[74,62]].map(([x,y],i)=><polygon key={i} points={`${x},${y-8} ${x+7},${y+5} ${x-7},${y+5}`} fill={i%2===0?"#4ade8088":"#86efac88"} stroke={i%2===0?"#4ade80":"#86efac"} strokeWidth={1}/>)}
+    </g>,
+    MUL:()=><g>
+      {[["●",24,32,10],["■",56,26,9],["▲",76,50,9],["◆",60,72,8],["●",32,68,10],["■",18,58,8],["▲",44,84,8],["◆",88,36,9]].map(([s,x,y,f],i)=><text key={i} x={x} y={y} fontSize={f} fill={["#4ade80","#86efac","#22c55e","#16a34a"][i%4]} textAnchor="middle" dominantBaseline="middle">{s}</text>)}
+    </g>,
+  };
+  const render=frames[configId]||frames.UNI;
+  return(
+    <svg width={size} height={size} viewBox="0 0 100 100">
+      <rect width={100} height={100} fill="var(--surface)" rx={6}/>
+      {render()}
+    </svg>
+  );
+}
+
+function ExtensionScenario({extId,size=80}){
+  const renders={
+    DEL:()=><g><rect x={10} y={40} width={80} height={8} rx={3} fill="#b4530988" stroke="#b45309" strokeWidth={1}/><text x={50} y={35} textAnchor="middle" fontSize={8} fill="#b45309">full extent</text></g>,
+    PRX:()=><g><rect x={10} y={40} width={30} height={8} rx={3} fill="#92400e88" stroke="#92400e" strokeWidth={1}/><rect x={40} y={40} width={50} height={8} rx={3} fill="#92400e22" stroke="#92400e44" strokeWidth={1} strokeDasharray="3,2"/><text x={25} y={35} textAnchor="middle" fontSize={8} fill="#92400e">near</text></g>,
+    DST:()=><g><rect x={10} y={40} width={50} height={8} rx={3} fill="#d9770622" stroke="#d9770644" strokeWidth={1} strokeDasharray="3,2"/><rect x={60} y={40} width={30} height={8} rx={3} fill="#d97706bb" stroke="#d97706" strokeWidth={1}/><text x={75} y={35} textAnchor="middle" fontSize={8} fill="#d97706">far</text></g>,
+    PXD:()=><g><rect x={10} y={40} width={25} height={8} rx={3} fill="#f59e0bbb" stroke="#f59e0b" strokeWidth={1}/><rect x={35} y={40} width={30} height={8} rx={3} fill="#f59e0b22" stroke="#f59e0b44" strokeWidth={1} strokeDasharray="3,2"/><rect x={65} y={40} width={25} height={8} rx={3} fill="#f59e0bbb" stroke="#f59e0b" strokeWidth={1}/></g>,
+    ICP:()=><g><rect x={10} y={40} width={20} height={8} rx={3} fill="#fbbf24bb" stroke="#fbbf24" strokeWidth={1.5}/><rect x={30} y={40} width={60} height={8} rx={3} fill="#fbbf2422" stroke="#fbbf2444" strokeWidth={1} strokeDasharray="3,2"/><text x={20} y={35} textAnchor="middle" fontSize={8} fill="#fbbf24">start</text></g>,
+    TRM:()=><g><rect x={10} y={40} width={60} height={8} rx={3} fill="#fcd34d22" stroke="#fcd34d44" strokeWidth={1} strokeDasharray="3,2"/><rect x={70} y={40} width={20} height={8} rx={3} fill="#fcd34dbb" stroke="#fcd34d" strokeWidth={1.5}/><text x={80} y={35} textAnchor="middle" fontSize={8} fill="#fcd34d">end</text></g>,
+  };
+  return(
+    <svg width={size} height={60} viewBox={`0 0 100 60`}>
+      <rect width={100} height={60} fill="var(--surface)" rx={4}/>
+      {(renders[extId]||renders.DEL)()}
+    </svg>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   LAYER 6 — MORPHEME ARCHITECTURE VISUALIZER (MAV)
+   ══════════════════════════════════════════════════════════════════ */
+function MAV({params,synOn}){
+  const[hov,setHov]=useState(null);
+  const form=buildForm(params);
+  const root=ROOTS.find(r=>r.id===params.root)||ROOTS[0];
+  const slotDefs=[
+    {s:"Cc",v:"—",  desc:"No concatenation",c:"#374151"},
+    {s:"Vv",v:"a",  desc:"Process version",c:"#1e3a8a"},
+    {s:"Cr",v:root.id, desc:`Root: ${root.name}`,c:"#991b1b"},
+    {s:"Vr",v:`${(params.stem||"S1").replace("S","")}·${(params.pattern||"P1").replace("P","")}`,
+     desc:`${params.stem||"S1"} · ${params.pattern||"P1"} · ${params.specification||"BSC"}`,c:"#9a3412"},
+    {s:"Cs",v:"—",  desc:"No incorporated root",c:"#78350f"},
+    {s:"Vx",v:"—",  desc:"No affixes",c:"#365314"},
+    {s:"Ca",v:`${(params.configuration||"UNI").slice(0,3)}`,
+     desc:`${params.configuration} · ${params.affiliation} · ${params.perspective} · ${params.extension} · ${params.essence}`,c:"#14532d"},
+    {s:"Vn",v:params.mood==="FAC"?"—":(params.mood||"FAC").slice(0,3),
+     desc:`Mood:${params.mood||"FAC"} · Valid:${params.validation||"OBS"}`,c:"#134e4a"},
+    {s:"Vc",v:params.case||"THM", desc:`Case: ${CASES.find(c=>c.id===params.case)?.label||"Thematic"}`,c:"#4c1d95"},
+  ];
+  return(
+    <div style={{background:'var(--card)',border:'1px solid var(--border)',borderRadius:8,padding:14,position:'relative'}}>
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:10}}>
+        <span style={{fontSize:9,fontWeight:700,letterSpacing:'.12em',textTransform:'uppercase',color:'var(--muted)'}}>Morpheme Architecture</span>
+        <div className="flex gap8">
+          {synOn&&<span style={{fontSize:9,color:PARAMS.configuration.hex}}>◈ synesthetic</span>}
+          <span className="ithkuil" style={{fontSize:22,color:'var(--bright)',letterSpacing:'.12em'}}>{form}</span>
+        </div>
+      </div>
+      <div style={{display:'flex',gap:4,flexWrap:'wrap'}}>
+        {slotDefs.map(sl=>(
+          <div key={sl.s} className="slot" style={{background:sl.c+'22',border:`1px solid ${hov?.s===sl.s?sl.c:sl.c+'55'}`,
+            boxShadow:hov?.s===sl.s?`0 0 10px ${sl.c}44`:'none'}}
+            onMouseEnter={()=>{setHov(sl);if(synOn)playTone(TONE_MAP[sl.v]||330,0.1);}}
+            onMouseLeave={()=>setHov(null)}>
+            <span className="slot-lbl" style={{color:sl.c}}>{sl.s}</span>
+            <span className="slot-val" style={{color:sl.c}}>{sl.v}</span>
+          </div>
+        ))}
+      </div>
+      {hov&&(
+        <div className="fade-up" style={{marginTop:8,padding:'7px 10px',borderRadius:6,
+          background:hov.c+'18',border:`1px solid ${hov.c}44`,fontSize:11}}>
+          <span style={{color:hov.c,fontWeight:600}}>{hov.s}: </span>
+          <span style={{color:'var(--muted)'}}>{hov.desc}</span>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   LAYER 7 — PARAMETER SELECTION PANEL
+   ══════════════════════════════════════════════════════════════════ */
+function PSP({params,onChange,synOn}){
+  const[openGroup,setOpenGroup]=useState("ca");
+  const groups=[
+    {id:"ca",  title:"Ca Complex",note:"The morphological heart — 5 simultaneous dimensions",
+     keys:["configuration","affiliation","perspective","extension","essence"],hex:"#14532d"},
+    {id:"vr",  title:"Vr Complex",note:"Root · Stem · Pattern · Specification · Function",
+     keys:["specification","function"],hex:"#9a3412"},
+    {id:"reg", title:"Register",note:"Mood · Validation · Bias · Aspect",
+     keys:["mood","validation","bias","aspect"],hex:"#134e4a"},
+  ];
+  return(
+    <div className="flex-col gap8">
+      {groups.map(g=>(
+        <div key={g.id} style={{background:'var(--card)',border:`1px solid ${g.hex+'44'}`,borderRadius:8,padding:14}}>
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',cursor:'pointer',marginBottom:openGroup===g.id?10:0}}
+            onClick={()=>setOpenGroup(openGroup===g.id?null:g.id)}>
+            <div>
+              <div style={{fontSize:10,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:g.hex}}>{g.title}</div>
+              {openGroup!==g.id&&<div style={{fontSize:9,color:'var(--muted)'}}>{g.note}</div>}
+            </div>
+            <span style={{color:g.hex,fontSize:12}}>{openGroup===g.id?"▾":"▸"}</span>
+          </div>
+          {openGroup===g.id&&(
+            <div className="flex-col gap10">
+              {g.keys.map(k=>(
+                <div key={k}>
+                  <div style={{display:'flex',justifyContent:'space-between',marginBottom:4}}>
+                    <span style={{fontSize:9,fontWeight:700,letterSpacing:'.09em',textTransform:'uppercase',color:PARAMS[k]?.hex}}>{PARAMS[k]?.label}</span>
+                    <span style={{fontSize:9,color:'var(--muted)',fontStyle:'italic'}}>{PARAMS[k]?.spatialAxis}</span>
+                  </div>
+                  <ParamStrip paramKey={k} selectedId={params[k]} onChange={v=>{
+                    if(synOn&&TONE_MAP[v])playTone(TONE_MAP[v],0.18,'sine');
+                    if(k==="configuration"||k==="affiliation"||k==="perspective")
+                      playCaChord(
+                        k==="configuration"?v:params.configuration,
+                        k==="affiliation"?v:params.affiliation,
+                        k==="perspective"?v:params.perspective
+                      );
+                    onChange({...params,[k]:v});
+                  }} synOn={synOn} showLabel={false}/>
+                  {params[k]&&<div style={{marginTop:4,fontSize:10,color:'var(--muted)',lineHeight:1.4}}>
+                    {PARAMS[k]?.values.find(v=>v.id===params[k])?.desc}
+                  </div>}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      ))}
+      {/* Root + Stem + Case */}
+      <div style={{background:'var(--card)',border:'1px solid #991b1b44',borderRadius:8,padding:14}}>
+        <div style={{fontSize:10,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:'#991b1b',marginBottom:8}}>Root · Stem · Case</div>
+        <div className="g2 gap8 mb8">
+          <div>
+            <label style={{fontSize:9,color:'var(--muted)',display:'block',marginBottom:3}}>Root</label>
+            <select value={params.root||"KŢ"} onChange={e=>onChange({...params,root:e.target.value})}>
+              {ROOTS.map(r=><option key={r.id} value={r.id}>{r.id} — {r.name}</option>)}
+            </select>
+          </div>
+          <div>
+            <label style={{fontSize:9,color:'var(--muted)',display:'block',marginBottom:3}}>Stem · Pattern</label>
+            <div style={{display:'flex',gap:4}}>
+              <select value={params.stem||"S1"} onChange={e=>onChange({...params,stem:e.target.value})} style={{flex:1}}>
+                {[1,2,3].map(s=><option key={s} value={`S${s}`}>Stem {s}</option>)}
+              </select>
+              <select value={params.pattern||"P1"} onChange={e=>onChange({...params,pattern:e.target.value})} style={{flex:1}}>
+                {[1,2,3].map(p=><option key={p} value={`P${p}`}>Pat {p}</option>)}
+              </select>
+            </div>
+          </div>
+        </div>
+        <div>
+          <label style={{fontSize:9,color:'var(--muted)',display:'block',marginBottom:3}}>Case</label>
+          <select value={params.case||"THM"} onChange={e=>onChange({...params,case:e.target.value})}>
+            {CASES.map(c=><option key={c.id} value={c.id}>[{c.family}] {c.label} — {c.desc.slice(0,36)}</option>)}
+          </select>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   LAYER 8 — PUZZLE HALL (10 puzzle types)
+   ══════════════════════════════════════════════════════════════════ */
+
+/* --- 8.1 SITUATION → PARAMS ---------------------------------------- */
+const SIT_EXERCISES=[
+  {id:"s1",title:"The Migrating Flock",difficulty:1,
+   scenario:"A single unified flock of identical starlings performing a coordinated murmuration before splitting into three spatially distinct sub-groups that continue to fly independently.",
+   target:{configuration:"SEG",affiliation:"CSL",perspective:"M",extension:"DEL"},
+   expl:"Segmentative: was unified, now partially separated. Consolidative: birds identical in kind. Monadic: this specific observable group. Delimitive: full extent discussed."},
+  {id:"s2",title:"Urban Transport System",difficulty:2,
+   scenario:"The city's entire public transport network considered as a unified system — buses, trains, ferries each performing a distinct function contributing to a coherent whole.",
+   target:{configuration:"CPN",affiliation:"ASO",perspective:"N",specification:"OBJ"},
+   expl:"Componential: distinct functional parts. Associative: similar purpose, different function. Noumenal: the category 'transport network', not a specific city's. Objective: foregrounding its purposive function."},
+  {id:"s3",title:"Justice as Property",difficulty:3,
+   scenario:"A philosopher considers justice not as any particular just act, nor as the abstract category, but as the pure formal property that all just things instantiate — untethered from any instance.",
+   target:{perspective:"A",specification:"CSV",function:"STA",essence:"RPV"},
+   expl:"Abstract perspective: pure property, not instance or category. Constitutive: the structural form of justice. Stative: a property, not an action. Representative: the normative ideal."},
+  {id:"s4",title:"The Knife's Identity",difficulty:2,
+   scenario:"You are discussing the knife as a normative tool-type — emphasizing its purposive, functional nature — not any particular knife and not the material knife-category.",
+   target:{essence:"RPV",specification:"OBJ",perspective:"N",configuration:"UNI"},
+   expl:"Representative essence: normative knife. Objective specification: purposive function foregrounded. Noumenal perspective: the type, not an instance. Uniplex: one knife-concept."},
+  {id:"s5",title:"River Delta — Full System",difficulty:2,
+   scenario:"The totality of a river delta — previously unified flow split into numerous identical smaller channels, covering the entire geographic extent.",
+   target:{configuration:"SEG",affiliation:"CSL",extension:"DEL",essence:"NRM"},
+   expl:"Segmentative: unified flow now partially separated. Consolidative: channels identical in kind. Delimitive: the full geographic extent. Normal: actual physical phenomenon."},
+  {id:"s6",title:"Coalition Government",difficulty:3,
+   scenario:"A government formed when previously separate, politically distinct parties merged their operations into a single governing body, each retaining their distinct ideological character.",
+   target:{configuration:"COH",affiliation:"COA",perspective:"M",essence:"NRM"},
+   expl:"Coherent: a unified whole from heterogeneous parts. Coalescent: previously distinct entities now merged. Monadic: this specific government. Normal: actual."},
+  {id:"s7",title:"Mathematical Abstraction",difficulty:4,
+   scenario:"You want to discuss the abstract relational structure underlying all instances of 'betweenness' — not a specific case, not the category of cases, but the pure formal property itself.",
+   target:{perspective:"A",root:"ŇM",stem:"S1",specification:"CSV"},
+   expl:"Root ŇM: Relation. Stem 1: abstract relation as such. Abstract perspective: pure property. Constitutive: the structural form of the relation."},
+  {id:"s8",title:"The Start of Rain",difficulty:2,
+   scenario:"You observe the very first moments of rainfall beginning — the inceptive phase, before rain has fully established, just the onset.",
+   target:{extension:"ICP",function:"DYN",aspect:"INC"},
+   expl:"Inceptive extension: only the beginning portion. Dynamic function: an ongoing process. Inceptive aspect: just starting."},
+];
+
+/* --- 8.2 PARAMETER CLASH (minimal pair discrimination) -------------- */
+const CLASH_PAIRS=[
+  {id:"c1",title:"Aggregative vs Coherent",difficulty:2,
+   A:{scenario:"A colony of genetically identical ants moving as a unified swarm.",target:{configuration:"AGG",affiliation:"CSL"}},
+   B:{scenario:"An ant colony understood as a superorganism — a single unified entity whose parts (workers, queen, larvae) have fundamentally different functions.",target:{configuration:"COH",affiliation:"ASO"}},
+   diffParam:"configuration",
+   expl:"AGG: multiple joined identical units. COH: unified whole from heterogeneous, functionally differentiated parts. The swarm is AGG; the superorganism is COH."},
+  {id:"c2",title:"Proximal vs Inceptive Extension",difficulty:3,
+   A:{scenario:"You are discussing only the near end of a very long bridge — the section closest to where you stand.",target:{extension:"PRX"}},
+   B:{scenario:"You are discussing the first section of the bridge to have been constructed historically — its beginning in terms of sequence, not spatial proximity.",target:{extension:"ICP"}},
+   diffParam:"extension",
+   expl:"PRX: spatially near portion. ICP: temporally/sequentially initial portion. Spatial nearness ≠ temporal inception."},
+  {id:"c3",title:"Monadic vs Polyadic Perspective",difficulty:2,
+   A:{scenario:"This specific dog in front of you — one individual, individuated and bounded.",target:{perspective:"M"}},
+   B:{scenario:"The dogs that roam this neighborhood — a set of instances, treated as a plurality.",target:{perspective:"P"}},
+   diffParam:"perspective",
+   expl:"Monadic: this one. Polyadic: a set of instances. Ithkuil marks this distinction grammatically — English rarely does explicitly."},
+  {id:"c4",title:"Noumenal vs Abstract Perspective",difficulty:4,
+   A:{scenario:"The category 'dog' — the species Canis lupus familiaris as a type of thing that exists in the world.",target:{perspective:"N"}},
+   B:{scenario:"Dogness — the abstract property or essence that makes something a dog, considered independently of any instance or category.",target:{perspective:"A"}},
+   diffParam:"perspective",
+   expl:"Noumenal: the Platonic category/type (still ontologically grounded). Abstract: the pure extracted property or essence (fully detached from instantiation)."},
+  {id:"c5",title:"Instrumental vs Ergative Case",difficulty:3,
+   A:{scenario:"The hammer in: 'the carpenter drove the nail using the hammer' — the non-volitional tool enabling the action.",target:{case:"INS"}},
+   B:{scenario:"The carpenter in: 'the carpenter drove the nail' — the volitional agent who causes state-change in another.",target:{case:"ERG"}},
+   diffParam:"case",
+   expl:"INS: non-volitional means/instrument. ERG: volitional causal agent. Volitionality is the key distinction."},
+  {id:"c6",title:"Observational vs Recollective Validation",difficulty:3,
+   A:{scenario:"You report what you are directly witnessing right now with your own eyes.",target:{validation:"OBS"}},
+   B:{scenario:"You report what you clearly remember having witnessed in the past.",target:{validation:"RCL"}},
+   diffParam:"validation",
+   expl:"OBS: current direct perception. RCL: past perception accessed through memory. Both are first-person, but one is present and one is recalled."},
+];
+
+/* --- 8.3 ABSTRACTION LADDER ----------------------------------------- */
+const ABST_LADDERS=[
+  {id:"al1",root:"KŢ",rootName:"Cognition",
+   rungs:[
+     {perspective:"M",  desc:"This specific instance of thinking happening right now in this person's mind.",      scenario:"Ahmad is currently working through a logic puzzle."},
+     {perspective:"P",  desc:"These instances of thinking — the various cognitive processes occurring in this study group.",scenario:"The study group is thinking through the problem."},
+     {perspective:"N",  desc:"The category 'thinking' — the type of mental activity, as a kind of thing that minds do.",   scenario:"Thinking is what distinguishes conscious beings."},
+     {perspective:"A",  desc:"Cogitation as pure abstract property — the essence of what it means to think, untethered from any thinker.",scenario:"Pure cognition, as a formal structure."},
+   ]},
+  {id:"al2",root:"VŽ",rootName:"Social Bond",
+   rungs:[
+     {perspective:"M",  desc:"This specific friendship between these two people.",scenario:"Maya and Jin's friendship."},
+     {perspective:"P",  desc:"These friendships in this social network.",scenario:"The friendships in this community."},
+     {perspective:"N",  desc:"Friendship as a category of social bond.",scenario:"Friendship is a form of social attachment."},
+     {perspective:"A",  desc:"The pure property of inter-personal connectedness.",scenario:"Social bonding as abstract relational structure."},
+   ]},
+];
+
+/* --- 8.4 BIAS ENCODER ----------------------------------------------- */
+const BIAS_EXERCISES=[
+  {id:"b1",title:"Unexpected Success",scenario:"Your rival has just won an award you were sure they didn't deserve, and you can barely contain your surprise and mild annoyance.",
+   target:"EUP",alt:["DUB","CYN","SKP"],expl:"Euphoric: delight/elation (sarcastic here). But CYN (cynical) or DUB (dubitative) also fit. The key: euphoric encodes the surprise-mixed-with-ironic-positivity best here."},
+  {id:"b2",title:"Questionable Report",scenario:"Someone tells you that the meeting was cancelled, but you have serious doubts about whether that's true.",
+   target:"DUB",alt:["SKP","TEN","APR"],expl:"Dubitative: expressing active doubt about the specific content of this claim."},
+  {id:"b3",title:"Frustrated Repetition",scenario:"You are explaining something for the fourth time to someone who keeps not understanding, and your exasperation is palpable.",
+   target:"EXA",alt:["CTM","NEG","CYN"],expl:"Exasperative: frustrated/irritated iteration. CTM (contempt) would imply disdain for the person; EXA is directed at the situation."},
+  {id:"b4",title:"Softened Criticism",scenario:"You need to point out someone's error but want to do so in a way that softens the impact.",
+   target:"EUH",alt:["COR","TEN","DUB"],expl:"Euphemistic: intentionally softening/hedging the expression to cushion its impact. COR (corrective) is blunter; EUH adds the softening layer."},
+];
+
+/* --- 8.5 CASE CHAIN (narrative NP assignment) ----------------------- */
+const CASE_CHAINS=[
+  {id:"cc1",title:"The Sculptor's Process",
+   sentence:"The sculptor (___) shaped the clay (___) with her hands (___) into a vessel (___) for the temple (___).",
+   nps:[
+     {label:"the sculptor",target:"ERG",hint:"Volitional agent causing state-change"},
+     {label:"the clay",   target:"THM",hint:"The primary participant undergoing change"},
+     {label:"her hands",  target:"INS",hint:"Non-volitional means / instrument"},
+     {label:"a vessel",   target:"TFM",hint:"What the clay is transformed into"},
+     {label:"the temple", target:"PUR",hint:"The purpose / goal motivating the action"},
+   ]},
+  {id:"cc2",title:"The Librarian's Memory",
+   sentence:"The researcher (___) recalled the argument (___) from her reading (___) about mathematics (___) long after the lecture (___).",
+   nps:[
+     {label:"the researcher", target:"AFF",hint:"Experiencer of the recollection (non-volitional)"},
+     {label:"the argument",   target:"THM",hint:"The thing recalled / primary referent"},
+     {label:"her reading",    target:"ORI",hint:"What the argument came from / was about"},
+     {label:"mathematics",    target:"ATR",hint:"The subject being attributed"},
+     {label:"the lecture",    target:"PCR",hint:"Prior temporal reference point"},
+   ]},
+];
+
+/* --- 8.6 ROOT FAMILY TREE ------------------------------------------- */
+function RootFamilyTree({lm}){
+  const[selectedRoot,setSR]=useState("KŢ");
+  const[revealed,setRevealed]=useState({});
+  const root=ROOTS.find(r=>r.id===selectedRoot);
+  const key=id=>`${selectedRoot}-${id}`;
+  const reveal=id=>setRevealed(p=>({...p,[key(id)]:true}));
+  const specVals=PARAMS.specification.values;
+  const fnVals=PARAMS.function.values;
+  return(
+    <div>
+      <div style={{marginBottom:10}}>
+        <label style={{fontSize:9,color:'var(--muted)',display:'block',marginBottom:3}}>Select Root</label>
+        <select value={selectedRoot} onChange={e=>{setSR(e.target.value);setRevealed({});}}>
+          {ROOTS.map(r=><option key={r.id} value={r.id}>{r.id} — {r.name}</option>)}
+        </select>
+      </div>
+      <div style={{display:'flex',flexDirection:'column',gap:6}}>
+        {[1,2,3].map(s=>(
+          <div key={s} className="card2">
+            <div style={{fontWeight:600,fontSize:11,color:root.color,marginBottom:4}}>Stem {s}: {root[`stem${s}`]}</div>
+            <div style={{display:'flex',flexWrap:'wrap',gap:4}}>
+              {[1,2,3].map(p=>{
+                const kid=`S${s}P${p}`;
+                const isRev=revealed[key(kid)];
+                return(
+                  <div key={p} onClick={()=>reveal(kid)} style={{padding:'5px 10px',borderRadius:5,
+                    background:isRev?root.color+'22':'var(--surface)',border:`1px solid ${isRev?root.color+'66':'var(--border)'}`,
+                    cursor:isRev?'default':'pointer',minWidth:90,transition:'all .2s'}}>
+                    <div style={{fontSize:9,color:'var(--muted)',marginBottom:2}}>Pat {p}</div>
+                    {isRev?(
+                      <div style={{fontSize:10,color:root.color}}>
+                        {root[`stem${s}`]} · Pattern {p}
+                        <div style={{marginTop:3,display:'flex',gap:3,flexWrap:'wrap'}}>
+                          {specVals.map(sv=><span key={sv.id} style={{fontSize:8,padding:'1px 4px',borderRadius:3,background:sv.hue+'22',color:sv.hue}}>{sv.icon}</span>)}
+                        </div>
+                      </div>
+                    ):(
+                      <div style={{fontSize:10,color:'#3a3a5a'}}>[ click to reveal ]</div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
+      <div style={{marginTop:8,fontSize:10,color:'var(--muted)'}}>
+        Each root has 27 primary nodes (3 stems × 3 patterns × 3 function values) × 4 specifications = 108 distinct semantic positions.
+      </div>
+    </div>
+  );
+}
+
+/* --- 8.7 COMPRESSION SPRINT ----------------------------------------- */
+function CompressionSprint({synOn}){
+  const targets=[
+    {id:"cs1",text:"Multiple specialists with different skills who had previously been working independently but are now coordinating their efforts toward a shared goal.",
+     hint:"COH or CPN config? COA affiliation? OBJ specification?",
+     model:{configuration:"CPN",affiliation:"COA",perspective:"M",specification:"OBJ"},charCount:45},
+    {id:"cs2",text:"The way in which a child gradually and unexpectedly comes to understand something that had previously been opaque to them.",
+     hint:"Aspect: INC or HAB? Validation: OBS? Bias: EUP?",
+     model:{aspect:"INC",root:"MŘ",stem:"S2",function:"DYN",bias:"EUP"},charCount:38},
+    {id:"cs3",text:"Every instance of the abstract property of connectedness that could ever be instantiated, considered as a pure formal structure.",
+     hint:"Perspective: A? Root ŇM? Extension DEL? Essence RPV?",
+     model:{perspective:"A",root:"ŇM",extension:"DEL",essence:"RPV"},charCount:32},
+  ];
+  const[idx,setIdx]=useState(0);
+  const[timer,setTimer]=useState(60);
+  const[running,setRunning]=useState(false);
+  const[params,setParams]=useState(defaultP());
+  const[score,setScore]=useState(null);
+  const timerRef=useRef(null);
+  const t=targets[idx];
+  useEffect(()=>{
+    if(running&&timer>0) timerRef.current=setTimeout(()=>setTimer(v=>v-1),1000);
+    else if(timer===0) {setRunning(false);calcScore();}
+    return()=>clearTimeout(timerRef.current);
+  },[running,timer]);
+  const start=()=>{setTimer(60);setRunning(true);setScore(null);setParams(defaultP());};
+  const calcScore=()=>{
+    let pts=0;
+    Object.entries(t.model).forEach(([k,v])=>{if(params[k]===v)pts+=20;});
+    const form=buildForm(params);
+    setScore({pts,form,timeLeft:timer});
+  };
+  const submit=()=>{setRunning(false);calcScore();};
+  return(
+    <div className="flex-col gap10">
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+        <div style={{display:'flex',gap:8,alignItems:'center'}}>
+          {targets.map((t2,i)=><button key={i} className={`btn btn-sm ${idx===i?'btn-primary':'btn-ghost'}`}
+            onClick={()=>{setIdx(i);setScore(null);setRunning(false);setTimer(60);setParams(defaultP());}}>Sprint {i+1}</button>)}
+        </div>
+        <div style={{display:'flex',alignItems:'center',gap:8}}>
+          <span style={{fontFamily:'IBM Plex Mono',fontSize:16,color:timer<15?'#ef4444':'var(--text)'}}>{timer}s</span>
+          {!running&&<button className="btn btn-primary btn-sm" onClick={start}>Start</button>}
+          {running&&<button className="btn btn-ghost btn-sm" onClick={submit}>Submit</button>}
+        </div>
+      </div>
+      <div className="card" style={{borderColor:'#c2410c44'}}>
+        <div style={{fontSize:9,color:'#c2410c',fontWeight:700,textTransform:'uppercase',letterSpacing:'.1em',marginBottom:6}}>Compress This</div>
+        <p style={{fontSize:13,lineHeight:1.7,color:'var(--bright)'}}>{t.text}</p>
+        <p style={{fontSize:10,color:'var(--muted)',marginTop:6,fontStyle:'italic'}}>Hint: {t.hint}</p>
+      </div>
+      {running&&(
+        <div className="fade-up">
+          <div style={{marginBottom:8,fontWeight:600,fontSize:11,color:'var(--muted)'}}>Set your parameters:</div>
+          <ParamStrip paramKey="configuration" selectedId={params.configuration} onChange={v=>setParams(p=>({...p,configuration:v}))} synOn={synOn}/>
+          <div style={{marginTop:6}}><ParamStrip paramKey="affiliation" selectedId={params.affiliation} onChange={v=>setParams(p=>({...p,affiliation:v}))} synOn={synOn}/></div>
+          <div style={{marginTop:6}}><ParamStrip paramKey="perspective" selectedId={params.perspective} onChange={v=>setParams(p=>({...p,perspective:v}))} synOn={synOn}/></div>
+          <div style={{marginTop:6}}><ParamStrip paramKey="specification" selectedId={params.specification} onChange={v=>setParams(p=>({...p,specification:v}))} synOn={synOn}/></div>
+          <div style={{marginTop:6}}><ParamStrip paramKey="essence" selectedId={params.essence} onChange={v=>setParams(p=>({...p,essence:v}))} synOn={synOn}/></div>
+          <div style={{marginTop:8}}><MAV params={params} synOn={synOn}/></div>
+        </div>
+      )}
+      {score&&(
+        <div className="card fade-up" style={{borderColor:'#4338ca44'}}>
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:8}}>
+            <span style={{fontWeight:700,color:'var(--bright)',fontSize:14}}>Score: {score.pts}/100</span>
+            <span className="ithkuil" style={{fontSize:20,color:'#a5b4fc'}}>{score.form}</span>
+          </div>
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:6}}>
+            {Object.entries(t.model).map(([k,v])=>(
+              <div key={k} style={{fontSize:11,padding:'4px 8px',borderRadius:4,
+                background:params[k]===v?'rgba(34,197,94,.1)':'rgba(239,68,68,.1)',
+                color:params[k]===v?'#22c55e':'#ef4444'}}>
+                {PARAMS[k]?.label}: {params[k]===v?`✓ ${v}`:` ✗ ${params[k]||'—'} (want ${v})`}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* --- 8.8 MORPHOLOGICAL SUDOKU --------------------------------------- */
+function MorphSudoku(){
+  // A 3×3 grid where each row must have all 3 Configuration values from a family,
+  // each column must have all 3 Affiliation values, and each cell must be unique.
+  const configRows=[["UNI","DPX","DCT"],["AGG","SEG","CPN"],["COH","CST","MUL"]];
+  const aflCols=[["CSL","ASO","VAR"],["ASO","VAR","COA"],["CSL","VAR","COA"]];
+  // Puzzle: 3x3 grid, some cells pre-filled, learner fills rest
+  const puzzle=[
+    [{cfg:"UNI",afl:"CSL",fixed:true},{cfg:"DPX",afl:"ASO",fixed:false},{cfg:"DCT",afl:"VAR",fixed:true}],
+    [{cfg:"AGG",afl:"COA",fixed:true},{cfg:"SEG",afl:"CSL",fixed:false},{cfg:"CPN",afl:"ASO",fixed:false}],
+    [{cfg:"COH",afl:"ASO",fixed:false},{cfg:"CST",afl:"VAR",fixed:true},{cfg:"MUL",afl:"COA",fixed:true}],
+  ];
+  const[grid,setGrid]=useState(puzzle.map(row=>row.map(cell=>({...cell,userCfg:cell.fixed?cell.cfg:"",userAfl:cell.fixed?cell.afl:""}))));
+  const[checked,setChecked]=useState(false);
+  const check=()=>setChecked(true);
+  const isCorrect=(r,c)=>grid[r][c].userCfg===puzzle[r][c].cfg&&grid[r][c].userAfl===puzzle[r][c].afl;
+  const cfgOptions=["UNI","DPX","DCT","AGG","SEG","CPN","COH","CST","MUL"];
+  const aflOptions=["CSL","ASO","VAR","COA"];
+  return(
+    <div>
+      <div style={{marginBottom:10,fontSize:12,color:'var(--muted)',lineHeight:1.6}}>
+        Fill in the empty cells. Each row must contain three different Configuration values. Each column must contain three different Affiliation values. No cell may repeat in its row or column.
+      </div>
+      <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:6,marginBottom:10}}>
+        {grid.map((row,r)=>row.map((cell,c)=>(
+          <div key={`${r}${c}`} className="card2" style={{
+            borderColor:checked?(isCorrect(r,c)?'#22c55e66':'#ef444466'):'var(--border)',
+            background:cell.fixed?'var(--surface)':checked?(isCorrect(r,c)?'rgba(34,197,94,.05)':'rgba(239,68,68,.05)'):'var(--card2)'}}>
+            <div style={{fontSize:8,color:'var(--muted)',marginBottom:4,textTransform:'uppercase',letterSpacing:'.08em'}}>R{r+1}·C{c+1}{cell.fixed?'·fixed':''}</div>
+            {cell.fixed?(
+              <div>
+                <div style={{fontSize:10,color:PARAMS.configuration.hex,fontWeight:600}}>{cell.cfg}</div>
+                <div style={{fontSize:10,color:PARAMS.affiliation.hex,fontWeight:600}}>{cell.afl}</div>
+              </div>
+            ):(
+              <div className="flex-col gap4">
+                <select value={cell.userCfg} onChange={e=>{const ng=[...grid.map(row=>[...row])];ng[r][c]={...ng[r][c],userCfg:e.target.value};setGrid(ng);setChecked(false);}}>
+                  <option value="">CFG</option>
+                  {cfgOptions.map(o=><option key={o} value={o}>{o}</option>)}
+                </select>
+                <select value={cell.userAfl} onChange={e=>{const ng=[...grid.map(row=>[...row])];ng[r][c]={...ng[r][c],userAfl:e.target.value};setGrid(ng);setChecked(false);}}>
+                  <option value="">AFL</option>
+                  {aflOptions.map(o=><option key={o} value={o}>{o}</option>)}
+                </select>
+              </div>
+            )}
+          </div>
+        )))}
+      </div>
+      <div style={{display:'flex',gap:8}}>
+        <button className="btn btn-primary" onClick={check}>Check Grid</button>
+        <button className="btn btn-ghost" onClick={()=>{setGrid(puzzle.map(row=>row.map(cell=>({...cell,userCfg:cell.fixed?cell.cfg:"",userAfl:cell.fixed?cell.afl:""}))));setChecked(false);}}>Reset</button>
+      </div>
+      {checked&&<div style={{marginTop:8,fontSize:11,color:grid.every((row,r)=>row.every((_,c)=>isCorrect(r,c)))?'#22c55e':'#f59e0b'}}>
+        {grid.every((row,r)=>row.every((_,c)=>isCorrect(r,c)))?'✓ Perfect! All cells correct.':'Some cells incorrect. Review row/column constraints.'}
+      </div>}
+    </div>
+  );
+}
+
+/* --- 8.9 CASE DETECTIVE (narrative) --------------------------------- */
+function CaseDetective(){
+  const[chainIdx,setChainIdx]=useState(0);
+  const[answers,setAnswers]=useState({});
+  const[submitted,setSubmitted]=useState(false);
+  const chain=CASE_CHAINS[chainIdx];
+  const check=()=>setSubmitted(true);
+  const reset=()=>{setSubmitted(false);setAnswers({});};
+  return(
+    <div>
+      <div style={{display:'flex',gap:6,marginBottom:12}}>
+        {CASE_CHAINS.map((c,i)=><button key={i} className={`btn btn-sm ${chainIdx===i?'btn-primary':'btn-ghost'}`}
+          onClick={()=>{setChainIdx(i);reset();}}>{c.title}</button>)}
+      </div>
+      <div className="card" style={{marginBottom:12,borderColor:'#1d4ed844'}}>
+        <div style={{fontWeight:600,color:'var(--bright)',marginBottom:10}}>{chain.title}</div>
+        <p style={{fontSize:13,color:'var(--text)',lineHeight:2,marginBottom:8}}>{chain.sentence}</p>
+        <div style={{fontSize:10,color:'var(--muted)',fontStyle:'italic'}}>Assign a case to each NP. Consider: is this the agent? the patient? a tool? a purpose? a location?</div>
+      </div>
+      <div className="flex-col gap8">
+        {chain.nps.map((np,i)=>{
+          const correct=submitted&&answers[i]===np.target;
+          const wrong=submitted&&answers[i]&&answers[i]!==np.target;
+          return(
+            <div key={i} className="card2" style={{borderColor:correct?'#22c55e44':wrong?'#ef444444':'var(--border)'}}>
+              <div style={{display:'flex',gap:10,alignItems:'center'}}>
+                <span style={{fontWeight:600,color:'var(--bright)',minWidth:140,fontSize:12}}>"{np.label}"</span>
+                <select value={answers[i]||""} onChange={e=>!submitted&&setAnswers(p=>({...p,[i]:e.target.value}))}
+                  style={{flex:1,borderColor:correct?'#22c55e44':wrong?'#ef444444':'var(--border)'}}>
+                  <option value="">— select case —</option>
+                  {CASES.map(c=><option key={c.id} value={c.id}>{c.label} ({c.family})</option>)}
+                </select>
+                {submitted&&<span style={{color:correct?'#22c55e':'#ef4444',fontSize:12,minWidth:40}}>{correct?"✓":"✗ "+np.target}</span>}
+              </div>
+              {submitted&&!correct&&<div style={{fontSize:10,color:'var(--muted)',marginTop:4,paddingLeft:150}}>Hint: {np.hint}</div>}
+            </div>
+          );
+        })}
+      </div>
+      <div style={{display:'flex',gap:8,marginTop:10}}>
+        {!submitted&&<button className="btn btn-primary" onClick={check} disabled={Object.keys(answers).length<chain.nps.length}>Check Assignments</button>}
+        {submitted&&<button className="btn btn-ghost" onClick={reset}>Retry</button>}
+        {submitted&&<button className="btn btn-primary" onClick={()=>{setChainIdx(i=>(i+1)%CASE_CHAINS.length);reset();}}>Next Chain →</button>}
+      </div>
+    </div>
+  );
+}
+
+/* --- 8.11 PERSPECTIVE SORTER --------------------------------------- */
+const SORT_SCENARIOS=[
+  {text:"This specific oak tree in the courtyard, right in front of you.",target:"M"},
+  {text:"The oak trees lining this particular avenue.",target:"P"},
+  {text:"Oak trees as a species — the kind of thing an oak is.",target:"N"},
+  {text:"Oakness — the abstract property that makes something an oak.",target:"A"},
+  {text:"Your childhood dog, Max, the individual animal you knew.",target:"M"},
+  {text:"Dogs in this neighbourhood — the ones you see on walks.",target:"P"},
+  {text:"Canis lupus familiaris as a category of living thing.",target:"N"},
+  {text:"Canine loyalty as a pure abstract relational property.",target:"A"},
+];
+const PER_COLORS={M:"#7c3aed",P:"#6d28d9",N:"#8b5cf6",A:"#a78bfa"};
+function PerspectiveSorter({synOn}){
+  const[assignments,setAssignments]=useState({});
+  const[submitted,setSubmitted]=useState(false);
+  const[shuffled]=useState(()=>[...SORT_SCENARIOS].sort(()=>Math.random()-.5));
+  const assign=(idx,val)=>{if(!submitted){setAssignments(p=>({...p,[idx]:val}));if(synOn)playTone(PARAMS.perspective.values.find(v=>v.id===val)?.freq||440,0.15,'sine');}};
+  const submit=()=>setSubmitted(true);
+  const score=submitted?shuffled.filter((_,i)=>assignments[i]===shuffled[i].target).length:0;
+  return(
+    <div className="flex-col gap10">
+      <div className="card" style={{borderColor:'#7c3aed44',marginBottom:4}}>
+        <p style={{fontSize:11,color:'var(--muted)',lineHeight:1.7}}>
+          Each scenario below encodes a different <Term word="perspective">Perspective</Term>. Assign M (Monadic), P (Polyadic), N (<Term word="noumenal">Noumenal</Term>), or A (Abstract) to each.
+          <span style={{marginLeft:8,fontSize:10,color:'var(--muted)'}}>Monadic = one specific instance · Polyadic = a set · Noumenal = the type · Abstract = the pure property</span>
+        </p>
+      </div>
+      {shuffled.map((sc,i)=>(
+        <div key={i} className="card2" style={{borderColor:submitted?(assignments[i]===sc.target?'#22c55e44':'#ef444444'):'var(--border)'}}>
+          <p style={{fontSize:12,lineHeight:1.7,marginBottom:8,color:'var(--text)'}}>{sc.text}</p>
+          <div style={{display:'flex',gap:4,flexWrap:'wrap'}}>
+            {['M','P','N','A'].map(opt=>{
+              const correct=submitted&&opt===sc.target;
+              const wrong=submitted&&assignments[i]===opt&&opt!==sc.target;
+              return<button key={opt} onClick={()=>assign(i,opt)}
+                style={{padding:'5px 12px',borderRadius:5,border:`1px solid ${
+                  correct?'#22c55e':wrong?'#ef4444':assignments[i]===opt?PER_COLORS[opt]:'var(--border)'}`,
+                  background:correct?'rgba(34,197,94,.12)':wrong?'rgba(239,68,68,.1)':assignments[i]===opt?PER_COLORS[opt]+'22':'transparent',
+                  color:correct?'#22c55e':wrong?'#ef4444':assignments[i]===opt?PER_COLORS[opt]:'var(--muted)',
+                  fontSize:11,fontWeight:600,cursor:'pointer'}}>
+                {opt} <span style={{fontSize:9,opacity:.7}}>·{PARAMS.perspective.values.find(v=>v.id===opt)?.label.slice(0,4)}</span>
+                {correct&&' ✓'}{wrong&&` ✗→${sc.target}`}
+              </button>;
+            })}
+          </div>
+        </div>
+      ))}
+      <div style={{display:'flex',gap:8,alignItems:'center'}}>
+        {!submitted&&<button className="btn btn-primary" onClick={submit} disabled={Object.keys(assignments).length<shuffled.length}>Check All</button>}
+        {submitted&&<span style={{fontSize:13,fontWeight:600,color:score===8?'#22c55e':'#f59e0b'}}>{score}/8 correct</span>}
+        {submitted&&<button className="btn btn-ghost btn-sm" onClick={()=>{setAssignments({});setSubmitted(false);}}>Retry</button>}
+      </div>
+    </div>
+  );
+}
+
+/* --- 8.12 VALIDATION CHAIN ------------------------------------------ */
+const VAL_SCENARIOS=[
+  {stance:"You watched the fire start with your own eyes two minutes ago.",target:"OBS",hint:"Present direct perception"},
+  {stance:"You clearly remember seeing the accident last Tuesday.",target:"RCL",hint:"Past personal perception accessed through memory"},
+  {stance:"Someone who was there told you about the meeting.",target:"PUR",hint:"Hearsay — indirect, unnamed source"},
+  {stance:"The newspaper reported that the bill was passed.",target:"RPR",hint:"Named/known external source"},
+  {stance:"The wet streets strongly suggest it rained last night.",target:"APR",hint:"Inference from indirect evidence"},
+  {stance:"You are imagining how the conversation might have gone.",target:"IMG",hint:"Speculative or imagined content"},
+];
+function ValidationChain({synOn}){
+  const[idx,setIdx]=useState(0);
+  const[answer,setAnswer]=useState(null);
+  const[submitted,setSubmitted]=useState(false);
+  const sc=VAL_SCENARIOS[idx];
+  const select=v=>{if(!submitted){setAnswer(v);if(synOn)playTone(PARAMS.validation.values.find(x=>x.id===v)?.freq||440,0.2,'sine');}};
+  const submit=()=>setSubmitted(true);
+  const next=()=>{setIdx(i=>(i+1)%VAL_SCENARIOS.length);setAnswer(null);setSubmitted(false);};
+  const correct=answer===sc.target;
+  return(
+    <div className="flex-col gap10">
+      <div style={{display:'flex',gap:4,marginBottom:8}}>
+        {VAL_SCENARIOS.map((_,i)=><div key={i} style={{flex:1,height:3,borderRadius:2,background:i<idx?'#0f766e':i===idx?'#14b8a6':'var(--border)'}}/>)}
+      </div>
+      <div className="card" style={{borderColor:'#0f766e44'}}>
+        <div style={{fontSize:9,color:'#0f766e',fontWeight:700,textTransform:'uppercase',letterSpacing:'.1em',marginBottom:6}}>Validation · {idx+1}/{VAL_SCENARIOS.length}</div>
+        <p style={{fontSize:13,lineHeight:1.8,fontFamily:'Fraunces',fontStyle:'italic',color:'var(--bright)'}}>{sc.stance}</p>
+      </div>
+      <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
+        {PARAMS.validation.values.map(v=>{
+          const isSel=answer===v.id;
+          const isCorrect=submitted&&v.id===sc.target;
+          const isWrong=submitted&&isSel&&v.id!==sc.target;
+          return<button key={v.id} onClick={()=>select(v.id)}
+            style={{padding:'8px 14px',borderRadius:6,border:`1px solid ${isCorrect?'#22c55e':isWrong?'#ef4444':isSel?v.hue:'var(--border)'}`,
+              background:isCorrect?'rgba(34,197,94,.12)':isWrong?'rgba(239,68,68,.08)':isSel?v.hue+'22':'transparent',
+              color:isCorrect?'#22c55e':isWrong?'#ef4444':isSel?v.hue:'var(--muted)',
+              fontSize:11,fontWeight:500,cursor:'pointer',transition:'all .15s'}}>
+            {v.icon} {v.label}
+            {isCorrect&&' ✓'}{isWrong&&` ✗`}
+          </button>;
+        })}
+      </div>
+      {answer&&!submitted&&<button className="btn btn-primary btn-sm" onClick={submit}>Check</button>}
+      {submitted&&(
+        <div className="card fade-up" style={{borderColor:correct?'#22c55e44':'#ef444444'}}>
+          <div style={{fontWeight:600,color:correct?'#22c55e':'#ef4444',marginBottom:4}}>
+            {correct?'✓ Correct':'✗ That was '+PARAMS.validation.values.find(v=>v.id===sc.target)?.label}
+          </div>
+          <p style={{fontSize:11,color:'var(--muted)',lineHeight:1.6}}>Hint: {sc.hint}</p>
+          <button className="btn btn-primary btn-sm" style={{marginTop:8}} onClick={next}>Next →</button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* --- 8.13 FORM DISSECTION ------------------------------------------- */
+const DISSECT_FORMS=[
+  {
+    form:"kŧalmö",label:"Cognition: Segmentative Consolidative Polyadic",
+    question:"This form encodes 'a set of thinking processes that were unified but are now partially separated.' Identify: which slot encodes multiplicity-arrangement? Which encodes set-vs-instance?",
+    slots:[
+      {s:"Cr",v:"kŧ",label:"Root",detail:"KŢ · Cognition domain",color:"#991b1b"},
+      {s:"Vr",v:"al",label:"Stem/Pattern",detail:"Stem 1, Pattern I — basic act of thinking",color:"#9a3412"},
+      {s:"Ca",v:"m",label:"Ca complex",detail:"SEG·CSL·P·DEL·NRM — Segmentative, Consolidative, Polyadic, Delimitive, Normal",color:"#14532d"},
+      {s:"Vc",v:"ö",label:"Case",detail:"Purposive — this set exists for the purpose of…",color:"#4c1d95"},
+    ],
+    key:"Ca is the heart: Segmentative (SEG) = arrangement was unified, now separated. Polyadic (P) = set of instances not a single one. These are different dimensions encoding different aspects simultaneously."
+  },
+  {
+    form:"žblvra",label:"Speech: Coherent Associative Monadic Thematic",
+    question:"Identify which dimension of the Ca slot distinguishes this from a mere collection of identical speech acts.",
+    slots:[
+      {s:"Cr",v:"žb",label:"Root",detail:"ŽB · Speech / Communication",color:"#991b1b"},
+      {s:"Vr",v:"a",label:"Stem/Pattern",detail:"Stem 1, Pattern I — act of speaking",color:"#9a3412"},
+      {s:"Ca",v:"lvr",label:"Ca complex",detail:"COH·ASO·M·DEL·NRM — Coherent, Associative, Monadic, Delimitive, Normal",color:"#14532d"},
+      {s:"Vc",v:"a",label:"Case",detail:"Thematic — primary participant",color:"#4c1d95"},
+    ],
+    key:"COH (Coherent) = unified whole from heterogeneous parts — this is a communication system not a sum of speeches. ASO (Associative) = parts are similar in kind but functionally differentiated."
+  },
+  {
+    form:"rmulça",label:"Value: Uniplex Coalescent Monadic Thematic",
+    question:"Two learners disagree: one says this is a single value-judgment; another says it describes a merged value-system. Who is right and which dimension settles it?",
+    slots:[
+      {s:"Cr",v:"rm",label:"Root",detail:"RM · Value & Judgment",color:"#991b1b"},
+      {s:"Vr",v:"u",label:"Stem/Pattern",detail:"Stem 2, Pattern I — entity judged good or bad",color:"#9a3412"},
+      {s:"Ca",v:"lç",label:"Ca complex",detail:"UNI·COA·M·DEL·NRM — Uniplex, Coalescent, Monadic, Delimitive, Normal",color:"#14532d"},
+      {s:"Vc",v:"a",label:"Case",detail:"Thematic — primary participant",color:"#4c1d95"},
+    ],
+    key:"UNI (Uniplex) = one instance, but COA (Coalescent) = previously distinct entities now merged into it. So: one merged value-system, formed from previously separate values. Configuration × Affiliation encode both simultaneously."
+  },
+];
+function FormDissection({synOn}){
+  const[idx,setIdx]=useState(0);
+  const[revealed,setRevealed]=useState([]);
+  const[showKey,setShowKey]=useState(false);
+  const f=DISSECT_FORMS[idx];
+  const reset=()=>{setRevealed([]);setShowKey(false);};
+  return(
+    <div className="flex-col gap12">
+      <div style={{display:'flex',gap:6,marginBottom:4}}>
+        {DISSECT_FORMS.map((_,i)=><button key={i} className={`btn btn-sm ${idx===i?'btn-primary':'btn-ghost'}`}
+          onClick={()=>{setIdx(i);reset();}}>Form {i+1}</button>)}
+      </div>
+      <div className="card" style={{textAlign:'center',borderColor:'#7e22ce44'}}>
+        <div style={{fontSize:9,color:'var(--muted)',textTransform:'uppercase',letterSpacing:'.1em',marginBottom:6}}>{f.label}</div>
+        <span className="ithkuil" style={{fontSize:34,color:'var(--bright)',letterSpacing:'.15em'}}>{f.form}</span>
+      </div>
+      <div className="card" style={{borderColor:'#7e22ce22'}}>
+        <div style={{fontSize:9,color:'#7e22ce',fontWeight:700,textTransform:'uppercase',letterSpacing:'.1em',marginBottom:6}}>Analysis Question</div>
+        <p style={{fontSize:12,lineHeight:1.7,color:'var(--text)'}}>{f.question}</p>
+      </div>
+      <div>
+        <div style={{fontSize:10,color:'var(--muted)',marginBottom:6}}>Click each slot to reveal its analysis:</div>
+        <div style={{display:'flex',gap:5,flexWrap:'wrap'}}>
+          {f.slots.map((sl,i)=>(
+            <div key={i} onClick={()=>{setRevealed(p=>p.includes(i)?p:[...p,i]);if(synOn)playTone(280+i*60,0.15,'sine');}}
+              className="slot" style={{background:sl.color+'22',border:`1px solid ${revealed.includes(i)?sl.color:sl.color+'44'}`,
+                boxShadow:revealed.includes(i)?`0 0 10px ${sl.color}33`:'none',cursor:'pointer',transition:'all .2s',
+                transform:revealed.includes(i)?'translateY(-2px)':'none'}}>
+              <span className="slot-lbl" style={{color:sl.color}}>{sl.s}</span>
+              <span className="slot-val" style={{color:sl.color}}>{sl.v}</span>
+            </div>
+          ))}
+        </div>
+        {revealed.length>0&&(
+          <div className="flex-col gap4" style={{marginTop:8}}>
+            {revealed.map(i=>(
+              <div key={i} className="fade-up" style={{padding:'6px 10px',borderRadius:5,
+                background:f.slots[i].color+'15',border:`1px solid ${f.slots[i].color}33`,fontSize:11}}>
+                <span style={{color:f.slots[i].color,fontWeight:600}}>{f.slots[i].label}: </span>
+                <span style={{color:'var(--muted)'}}>{f.slots[i].detail}</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+      {!showKey&&<button className="btn btn-primary btn-sm" onClick={()=>setShowKey(true)}>Reveal Analysis Key</button>}
+      {showKey&&(
+        <div className="card fade-up" style={{borderColor:'#7e22ce44',borderLeftWidth:3}}>
+          <div style={{fontSize:9,color:'#7e22ce',fontWeight:700,textTransform:'uppercase',letterSpacing:'.1em',marginBottom:6}}>Key Insight</div>
+          <p style={{fontSize:12,lineHeight:1.7,color:'var(--text)'}}>{f.key}</p>
+          <button className="btn btn-ghost btn-sm" style={{marginTop:8}} onClick={()=>{setIdx(i=>(i+1)%DISSECT_FORMS.length);reset();}}>Next Form →</button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* --- 8.10 MAIN PUZZLE HALL ------------------------------------------ */
+function PuzzleHall({synOn,lm,onXP}){
+  const[active,setActive]=useState(null);
+  const[sitIdx,setSitIdx]=useState(0);
+  const[sitAnswers,setSitAnswers]=useState({});
+  const[sitSubmitted,setSitSubmitted]=useState(false);
+  const[clashIdx,setClashIdx]=useState(0);
+  const[clashSide,setClashSide]=useState(null);
+  const[clashSubmitted,setClashSubmitted]=useState(false);
+  const[abIdx,setAbIdx]=useState(0);
+  const[abRung,setAbRung]=useState(0);
+  const[biasIdx,setBiasIdx]=useState(0);
+  const[biasAnswer,setBiasAnswer]=useState(null);
+  const[biasSubmitted,setBiasSubmitted]=useState(false);
+  const[score,setScore]=useState({correct:0,total:0});
+
+  // Per-puzzle metadata (type label, color, module, phase) matching v1 ExerciseEngine style
+  const PUZZLE_META={
+    situations:{typeLabel:"Situation→Params",typeColor:"#1d4ed8",module:1,phase:1,total:SIT_EXERCISES.length},
+    clash:     {typeLabel:"Minimal Pair",    typeColor:"#15803d",module:5,phase:2,total:CLASH_PAIRS.length},
+    ladder:    {typeLabel:"Abstraction Ladder",typeColor:"#7c3aed",module:2,phase:1,total:ABST_LADDERS.length},
+    bias:      {typeLabel:"Bias Encoder",    typeColor:"#be185d",module:7,phase:2,total:BIAS_EXERCISES.length},
+    case:      {typeLabel:"Case Detective",  typeColor:"#6d28d9",module:6,phase:2,total:CASE_CHAINS.length},
+    tree:      {typeLabel:"Root Ecology",    typeColor:"#b45309",module:3,phase:1,total:ROOTS.length},
+    sprint:    {typeLabel:"Compression",     typeColor:"#c2410c",module:10,phase:3,total:3},
+    sudoku:    {typeLabel:"Full Pipeline",   typeColor:"#92400e",module:8,phase:3,total:1},
+    sorter:    {typeLabel:"Situation→Params",typeColor:"#0891b2",module:2,phase:1,total:8},
+    valchain:  {typeLabel:"Validation",      typeColor:"#0f766e",module:7,phase:2,total:6},
+    formparse: {typeLabel:"Form→Params",     typeColor:"#7e22ce",module:9,phase:3,total:3},
+  };
+
+  // Standardised v1-style exercise header
+  const ExerciseHeader=({puzzleId,idx,onBack,extraReset})=>{
+    const m=PUZZLE_META[puzzleId]||{};
+    return(
+      <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:12}}>
+        <div style={{display:'flex',gap:8,alignItems:'center'}}>
+          <button className="btn btn-ghost btn-sm" onClick={()=>{setActive(null);setScore({correct:0,total:0});onBack&&onBack();}}>← Hall</button>
+          <span className="phase-tag" style={{background:m.typeColor+'22',color:m.typeColor}}>{m.typeLabel}</span>
+          <span style={{fontSize:11,color:'var(--muted)'}}>Module {m.module} · Phase {m.phase}</span>
+        </div>
+        <div style={{display:'flex',gap:8,alignItems:'center'}}>
+          <InfoPill label="Correct" value={`${score.correct}/${score.total}`} color="#22c55e"/>
+          <InfoPill label="Exercise" value={`${(idx||0)+1}/${m.total||'?'}`}/>
+        </div>
+      </div>
+    );
+  };
+
+  const puzzles=[
+    {id:"situations",icon:"◈",color:"#16a34a",label:"Situation → Params",count:SIT_EXERCISES.length,desc:"Encode real-world scenarios into morphological parameter sets"},
+    {id:"clash",     icon:"⇄",color:"#0d9488",label:"Parameter Clash",  count:CLASH_PAIRS.length,  desc:"Minimal pair discrimination — two situations differing by one parameter"},
+    {id:"ladder",    icon:"▲",color:"#7c3aed",label:"Abstraction Ladder",count:ABST_LADDERS.length, desc:"Climb from Monadic to Abstract perspective along a root's semantic axis"},
+    {id:"bias",      icon:"~",color:"#be185d",label:"Bias Encoder",     count:BIAS_EXERCISES.length,desc:"Select the correct attitudinal bias for nuanced speaker stance"},
+    {id:"case",      icon:"▷",color:"#1d4ed8",label:"Case Detective",   count:CASE_CHAINS.length,  desc:"Assign semantic cases to all NPs in a complex narrative sentence"},
+    {id:"tree",      icon:"⊙",color:"#c2410c",label:"Root Family Tree", count:ROOTS.length,         desc:"Excavate the 27-node semantic tree of any Ithkuil root"},
+    {id:"sprint",    icon:"⚡",color:"#b45309",label:"Compression Sprint",count:3,                  desc:"Compress complex English into minimal Ithkuil under time pressure"},
+    {id:"sudoku",    icon:"⊞",color:"#6d28d9",label:"Morphological Sudoku",count:1,                desc:"Satisfy Configuration×Affiliation grid constraints — logic puzzle"},
+    {id:"sorter",    icon:"⊿",color:"#0891b2",label:"Perspective Sorter",count:8,                  desc:"Drag-assign eight scenarios to their correct M/P/N/A perspective bucket"},
+    {id:"valchain",  icon:"◎",color:"#0f766e",label:"Validation Chain",  count:6,                  desc:"Match six speaker stances to their correct Validation evidential category"},
+    {id:"formparse", icon:"◇",color:"#7e22ce",label:"Form Dissection",   count:3,                  desc:"Given a complete Ithkuil form, identify each slot and explain its value"},
+  ];
+
+  if(!active) return(
+    <div>
+      <div style={{marginBottom:16}}>
+        <h3 style={{fontSize:15,color:'var(--bright)',marginBottom:4}}>Puzzle Hall</h3>
+        <p style={{fontSize:12,color:'var(--muted)'}}>Eleven puzzle types, each training a different cognitive operation. Start from Situations; advance to Form Dissection.</p>
+      </div>
+      <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(220px,1fr))',gap:10}}>
+        {puzzles.map(p=>(
+          <div key={p.id} className="puzzle-card" onClick={()=>setActive(p.id)}
+            style={{borderColor:p.color+'44',borderLeftWidth:3}}>
+            <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:8}}>
+              <span style={{fontSize:20,color:p.color}}>{p.icon}</span>
+              <span className="tag" style={{background:p.color+'22',color:p.color}}>{p.count} rounds</span>
+            </div>
+            <div style={{fontWeight:600,color:'var(--bright)',marginBottom:4,fontSize:13}}>{p.label}</div>
+            <div style={{fontSize:11,color:'var(--muted)',lineHeight:1.6}}>{p.desc}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  /* ---- Situation → Params ---- */
+  if(active==="situations"){
+    const ex=SIT_EXERCISES[sitIdx];
+    const targetKeys=Object.keys(ex.target).filter(k=>!["root","stem","pattern"].includes(k));
+    return(
+      <div>
+        <ExerciseHeader puzzleId="situations" idx={sitIdx} onBack={()=>{setSitSubmitted(false);setSitAnswers({});}}/>
+        <div style={{display:'flex',gap:4,marginBottom:12}}>{SIT_EXERCISES.map((_,i)=><div key={i} style={{flex:1,height:4,borderRadius:2,background:i<sitIdx?'#4338ca':i===sitIdx?'#818cf8':'var(--border)'}}/>)}</div>
+        <div className="card fade-up" key={ex.id}>
+          <div style={{marginBottom:10}}>
+            <h3 style={{fontSize:14,color:'var(--bright)',marginBottom:6}}>{ex.title}</h3>
+            <p style={{fontSize:13,lineHeight:1.8,color:'var(--text)'}}>{ex.scenario}</p>
+          </div>
+          {/* Configuration visual if applicable */}
+          {ex.target.configuration&&(
+            <div style={{display:'flex',gap:8,marginBottom:10,flexWrap:'wrap'}}>
+              {PARAMS.configuration.values.slice(0,5).map(v=>(
+                <div key={v.id} style={{cursor:'pointer',opacity:sitAnswers.configuration===v.id?1:0.4,transition:'opacity .15s'}}
+                  onClick={()=>setSitAnswers(p=>({...p,configuration:v.id}))}>
+                  <ConfigScenario configId={v.id} size={60}/>
+                  <div style={{fontSize:8,textAlign:'center',color:PARAMS.configuration.hex,marginTop:2}}>{v.label}</div>
+                </div>
+              ))}
+            </div>
+          )}
+          <div className="flex-col gap8" style={{marginBottom:10}}>
+            {targetKeys.map(k=>{
+              if(k==="configuration") return null;// handled above
+              const p2=PARAMS[k]; if(!p2) return null;
+              return(
+                <div key={k}>
+                  <div style={{fontSize:9,fontWeight:700,color:p2.hex,textTransform:'uppercase',letterSpacing:'.08em',marginBottom:4}}>{p2.label}</div>
+                  <ParamStrip paramKey={k} selectedId={sitAnswers[k]} onChange={v=>{
+                    if(synOn&&TONE_MAP[v])playTone(TONE_MAP[v],0.15);
+                    setSitAnswers(p=>({...p,[k]:v}));
+                    setSitSubmitted(false);
+                  }} synOn={synOn} showLabel={false}/>
+                </div>
+              );
+            })}
+          </div>
+          {!sitSubmitted&&(
+            <button className="btn btn-primary" onClick={()=>{
+              const allCorrect=Object.entries(ex.target).every(([k,v])=>sitAnswers[k]===v);
+              setScore(s=>({correct:s.correct+(allCorrect?1:0),total:s.total+1}));
+              setSitSubmitted(true);
+            }} disabled={targetKeys.filter(k=>k!=="configuration"||ex.target.configuration).every(k=>!sitAnswers[k])&&!sitAnswers.configuration}>
+              Submit Answer
+            </button>
+          )}
+          {sitSubmitted&&(
+            <div className="card fade-up" style={{borderColor:'#4338ca44',marginTop:8}}>
+              <div style={{display:'flex',flexWrap:'wrap',gap:6,marginBottom:8}}>
+                {Object.entries(ex.target).map(([k,v])=>{
+                  const correct=sitAnswers[k]===v;
+                  return<span key={k} style={{fontSize:11,padding:'2px 8px',borderRadius:4,
+                    background:correct?'rgba(34,197,94,.15)':'rgba(239,68,68,.15)',
+                    color:correct?'#22c55e':'#ef4444'}}>
+                    {PARAMS[k]?.label||k}: {correct?`✓ ${v}`:` ✗ ${sitAnswers[k]||'?'} → ${v}`}
+                  </span>;
+                })}
+              </div>
+              <p style={{fontSize:12,lineHeight:1.7,color:'var(--muted)'}}>{ex.expl}</p>
+              <button className="btn btn-primary btn-sm" style={{marginTop:10}} onClick={()=>{
+                setSitIdx(i=>(i+1)%SIT_EXERCISES.length);setSitAnswers({});setSitSubmitted(false);
+              }}>Next →</button>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  /* ---- Parameter Clash ---- */
+  if(active==="clash"){
+    const pair=CLASH_PAIRS[clashIdx];
+    return(
+      <div>
+        <ExerciseHeader puzzleId="clash" idx={clashIdx} onBack={()=>{setClashSubmitted(false);setClashSide(null);}}/>
+        <div className="card fade-up" key={pair.id} style={{marginBottom:10,borderColor:'#0d948844'}}>
+          <h3 style={{fontSize:14,color:'var(--bright)',marginBottom:4}}>{pair.title}</h3>
+          <p style={{fontSize:11,color:'var(--muted)',marginBottom:10}}>These two situations differ by exactly one parameter: <strong style={{color:'#0d9488'}}>{PARAMS[pair.diffParam]?.label||pair.diffParam}</strong>. Identify which is Situation A and which is Situation B, then assign the correct value.</p>
+          <div className="g2">
+            {[pair.A,pair.B].map((side,si)=>{
+              const label=["A","B"][si];
+              const selected=clashSide===label;
+              return(
+                <div key={label} className="card2" style={{cursor:'pointer',borderColor:selected?'#0d9488':'var(--border)',background:selected?'rgba(13,148,136,.08)':'var(--card2)'}}
+                  onClick={()=>{setClashSide(label);setClashSubmitted(false);}}>
+                  <div style={{fontWeight:700,color:'#0d9488',marginBottom:6}}>Situation {label}</div>
+                  <p style={{fontSize:12,lineHeight:1.7}}>{side.scenario}</p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+        {clashSide&&!clashSubmitted&&(
+          <div className="fade-up">
+            <div style={{fontSize:11,color:'var(--muted)',marginBottom:8}}>What value of <strong style={{color:PARAMS[pair.diffParam]?.hex}}>{PARAMS[pair.diffParam]?.label}</strong> applies to Situation {clashSide}?</div>
+            <ParamStrip paramKey={pair.diffParam} selectedId={null}
+              onChange={v=>{
+                const correct=v===(clashSide==="A"?pair.A.target[pair.diffParam]:pair.B.target[pair.diffParam]);
+                setClashSubmitted({chosen:v,correct});
+                setScore(s=>({correct:s.correct+(correct?1:0),total:s.total+1}));
+                if(synOn)playTone(correct?660:220,0.2,correct?'sine':'sawtooth');
+              }} synOn={synOn}/>
+          </div>
+        )}
+        {clashSubmitted&&(
+          <div className="card fade-up" style={{borderColor:clashSubmitted.correct?'#22c55e44':'#ef444444'}}>
+            <div style={{fontWeight:600,color:clashSubmitted.correct?'#22c55e':'#ef4444',marginBottom:6}}>
+              {clashSubmitted.correct?"✓ Correct":"✗ Incorrect"}
+            </div>
+            <p style={{fontSize:12,lineHeight:1.7,color:'var(--muted)'}}>{pair.expl}</p>
+            <button className="btn btn-primary btn-sm" style={{marginTop:8}} onClick={()=>{
+              setClashIdx(i=>(i+1)%CLASH_PAIRS.length);setClashSide(null);setClashSubmitted(false);
+            }}>Next Pair →</button>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  /* ---- Abstraction Ladder ---- */
+  if(active==="ladder"){
+    const ladder=ABST_LADDERS[abIdx];
+    const rung=ladder.rungs[abRung];
+    const perColors={"M":"#7c3aed","P":"#6d28d9","N":"#8b5cf6","A":"#a78bfa"};
+    return(
+      <div>
+        <ExerciseHeader puzzleId="ladder" idx={abIdx} onBack={()=>{}}/>
+        <div style={{display:'flex',gap:6,marginBottom:12,flexWrap:'wrap'}}>
+          {ABST_LADDERS.map((l,i)=><button key={i} className={`btn btn-sm ${abIdx===i?'btn-primary':'btn-ghost'}`}
+            onClick={()=>{setAbIdx(i);setAbRung(0);}}>{l.rootName}</button>)}
+        </div>
+        <div style={{display:'flex',gap:3,marginBottom:16}}>
+          {ladder.rungs.map((r,i)=>(
+            <div key={i} onClick={()=>setAbRung(i)} style={{flex:1,cursor:'pointer',display:'flex',flexDirection:'column',alignItems:'center',gap:4}}>
+              <div style={{width:'100%',height:4,borderRadius:2,background:i<=abRung?'#4338ca':'var(--border)',transition:'background .3s'}}/>
+              <div style={{fontSize:8,color:i===abRung?perColors[r.perspective]:'var(--muted)',fontWeight:i===abRung?700:400}}>{PARAMS.perspective.values.find(v=>v.id===r.perspective)?.label}</div>
+            </div>
+          ))}
+        </div>
+        <div className="card fade-up" key={`${abIdx}-${abRung}`} style={{borderColor:`${perColors[rung.perspective]}44`}}>
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:10}}>
+            <div>
+              <div style={{fontSize:9,color:perColors[rung.perspective],fontWeight:700,textTransform:'uppercase',letterSpacing:'.1em',marginBottom:4}}>
+                {PARAMS.perspective.values.find(v=>v.id===rung.perspective)?.label} Perspective
+              </div>
+              <p style={{fontSize:13,fontFamily:'Fraunces',fontStyle:'italic',color:'var(--bright)',lineHeight:1.6}}>{rung.scenario}</p>
+            </div>
+            <div style={{width:50,height:50,borderRadius:'50%',background:perColors[rung.perspective]+'22',border:`2px solid ${perColors[rung.perspective]}`,
+              display:'flex',alignItems:'center',justifyContent:'center',fontSize:18,color:perColors[rung.perspective],flexShrink:0}}>
+              {PARAMS.perspective.values.find(v=>v.id===rung.perspective)?.icon}
+            </div>
+          </div>
+          <p style={{fontSize:12,lineHeight:1.7,color:'var(--muted)'}}>{rung.desc}</p>
+          <div style={{marginTop:10,padding:'8px 12px',borderRadius:6,background:'var(--surface)',fontSize:11,fontFamily:'IBM Plex Mono',color:perColors[rung.perspective]}}>
+            Root: {ladder.root} · Perspective: {rung.perspective} → {buildForm({...defaultP(),root:ladder.root,perspective:rung.perspective})}
+          </div>
+        </div>
+        <div style={{display:'flex',justifyContent:'space-between',marginTop:10}}>
+          <button className="btn btn-ghost" onClick={()=>setAbRung(r=>Math.max(0,r-1))} disabled={abRung===0}>← More Concrete</button>
+          <button className="btn btn-primary" onClick={()=>{
+            if(abRung<ladder.rungs.length-1){setAbRung(r=>r+1);if(synOn)playTone(PARAMS.perspective.values[abRung+1]?.freq,0.2,'sine');}
+          }} disabled={abRung===ladder.rungs.length-1}>More Abstract →</button>
+        </div>
+      </div>
+    );
+  }
+
+  /* ---- Bias Encoder ---- */
+  if(active==="bias"){
+    const ex=BIAS_EXERCISES[biasIdx];
+    return(
+      <div>
+        <ExerciseHeader puzzleId="bias" idx={biasIdx} onBack={()=>{setBiasSubmitted(false);setBiasAnswer(null);}}/>
+        <div className="card fade-up" key={ex.id} style={{marginBottom:10,borderColor:'#be185d44'}}>
+          <h3 style={{fontSize:14,color:'var(--bright)',marginBottom:6}}>{ex.title}</h3>
+          <p style={{fontSize:13,lineHeight:1.8,fontFamily:'Fraunces',fontStyle:'italic'}}>{ex.scenario}</p>
+        </div>
+        <ParamStrip paramKey="bias" selectedId={biasAnswer} onChange={v=>{
+          setBiasAnswer(v);setBiasSubmitted(false);
+          if(synOn&&TONE_MAP[v])playTone(TONE_MAP[v],0.2,'sine');
+        }} synOn={synOn}/>
+        {biasAnswer&&!biasSubmitted&&(
+          <button className="btn btn-primary btn-sm" style={{marginTop:10}} onClick={()=>{
+            setScore(s=>({correct:s.correct+(biasAnswer===ex.target?1:0),total:s.total+1}));
+            setBiasSubmitted(true);
+          }}>Submit Answer</button>
+        )}
+        {biasSubmitted&&(
+          <div className="card fade-up" style={{marginTop:10,borderColor:biasAnswer===ex.target?'#22c55e44':'#ef444444'}}>
+            <div style={{fontWeight:600,color:biasAnswer===ex.target?'#22c55e':'#ef4444',marginBottom:6}}>
+              {biasAnswer===ex.target?"✓ Correct":` ✗ Target: ${ex.target}`}
+            </div>
+            <p style={{fontSize:12,lineHeight:1.7,color:'var(--muted)'}}>{ex.expl}</p>
+            <p style={{fontSize:11,color:'var(--muted)',marginTop:6}}>Alternatives that could also apply: {ex.alt.join(', ')}</p>
+            <button className="btn btn-primary btn-sm" style={{marginTop:8}} onClick={()=>{
+              setBiasIdx(i=>(i+1)%BIAS_EXERCISES.length);setBiasAnswer(null);setBiasSubmitted(false);
+            }}>Next →</button>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  if(active==="case")  return <div><ExerciseHeader puzzleId="case" idx={0} onBack={()=>{}}/><CaseDetective/></div>;
+  if(active==="tree")  return <div><ExerciseHeader puzzleId="tree" idx={0} onBack={()=>{}}/><RootFamilyTree lm={lm}/></div>;
+  if(active==="sprint") return <div><ExerciseHeader puzzleId="sprint" idx={0} onBack={()=>{}}/><CompressionSprint synOn={synOn}/></div>;
+  if(active==="sudoku") return <div><ExerciseHeader puzzleId="sudoku" idx={0} onBack={()=>{}}/><MorphSudoku/></div>;
+  if(active==="sorter") return <div><ExerciseHeader puzzleId="sorter" idx={0} onBack={()=>{}}/><PerspectiveSorter synOn={synOn}/></div>;
+  if(active==="valchain") return <div><ExerciseHeader puzzleId="valchain" idx={0} onBack={()=>{}}/><ValidationChain synOn={synOn}/></div>;
+  if(active==="formparse") return <div><ExerciseHeader puzzleId="formparse" idx={0} onBack={()=>{}}/><FormDissection synOn={synOn}/></div>;
+  return null;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   LAYER 9 — SYNESTHETIC TRAINING MODE
+   The primary brain-training interface: color+sound+spatial
+   ══════════════════════════════════════════════════════════════════ */
+function SynestheticTrainer({synOn,setSynOn}){
+  const[activeParam,setAP]=useState("configuration");
+  const[mode,setMode]=useState("color");// color | spatial | chord | quiz
+  const[quizQ,setQuizQ]=useState(null);
+  const[quizAns,setQuizAns]=useState(null);
+  const[quizScore,setQuizScore]=useState({c:0,t:0});
+  const p=PARAMS[activeParam];
+
+  const genQuizQ=()=>{
+    const keys=Object.keys(PARAMS);
+    const pk=keys[Math.floor(Math.random()*keys.length)];
+    const pdata=PARAMS[pk];
+    const correct=pdata.values[Math.floor(Math.random()*pdata.values.length)];
+    const wrongs=pdata.values.filter(v=>v.id!==correct.id).slice(0,3).map(v=>({...v,correct:false}));
+    const all=[{...correct,correct:true},...wrongs].sort(()=>Math.random()-.5);
+    setQuizQ({paramKey:pk,correct,options:all});
+    setQuizAns(null);
+    // Play the tone — learner must identify the parameter value
+    if(synOn) setTimeout(()=>playTone(correct.freq,0.4,'sine',0.12),200);
+  };
+
+  return(
+    <div className="flex-col gap14">
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+        <div>
+          <h3 style={{fontSize:14,color:'var(--bright)',marginBottom:2}}>Synesthetic Training Mode</h3>
+          <p style={{fontSize:11,color:'var(--muted)'}}>Build colour-sound-spatial-conceptual mappings into procedural memory.</p>
+        </div>
+        <label style={{display:'flex',alignItems:'center',gap:8,cursor:'pointer'}}>
+          <span style={{fontSize:11,color:'var(--muted)'}}>Audio</span>
+          <div onClick={()=>setSynOn(!synOn)} style={{width:36,height:20,borderRadius:10,background:synOn?'var(--accent)':'var(--border)',position:'relative',cursor:'pointer',transition:'background .2s'}}>
+            <div style={{width:14,height:14,borderRadius:'50%',background:'white',position:'absolute',top:3,left:synOn?19:3,transition:'left .2s'}}/>
+          </div>
+        </label>
+      </div>
+
+      {/* Mode tabs */}
+      <div style={{display:'flex',gap:6,borderBottom:'1px solid var(--border)',paddingBottom:10}}>
+        {["color","spatial","chord","quiz"].map(m=>(
+          <button key={m} className={`btn btn-sm ${mode===m?'btn-primary':'btn-ghost'}`} onClick={()=>setMode(m)}>
+            {m==="color"?"Color Matrix":m==="spatial"?"Spatial Map":m==="chord"?"Chord Builder":"Ear Training Quiz"}
+          </button>
+        ))}
+      </div>
+
+      {/* COLOR MATRIX MODE */}
+      {mode==="color"&&(
+        <div>
+          <p style={{fontSize:11,color:'var(--muted)',marginBottom:12,lineHeight:1.7}}>
+            Every parameter dimension has a dedicated hue family. Every value within that dimension occupies a distinct shade.
+            Hover/click to play the associated tone. Your goal: develop instant colour-to-concept recognition.
+          </p>
+          {Object.entries(PARAMS).map(([k,pdata])=>(
+            <div key={k} style={{marginBottom:8}}>
+              <div style={{fontSize:9,fontWeight:700,color:pdata.hex,textTransform:'uppercase',letterSpacing:'.1em',marginBottom:4,display:'flex',justifyContent:'space-between'}}>
+                <span>{pdata.label}</span><span style={{color:'#3a3a5a',fontStyle:'italic'}}>{pdata.synNote}</span>
+              </div>
+              <div style={{display:'flex',gap:3,flexWrap:'wrap'}}>
+                {pdata.values.map(v=>(
+                  <div key={v.id} onClick={()=>{if(synOn)playTone(v.freq,0.25,'sine');}}
+                    className="tip-wrap" style={{display:'flex',flexDirection:'column',alignItems:'center',gap:2,cursor:'pointer',padding:'6px 8px',borderRadius:6,background:v.hue+'22',border:`1px solid ${v.hue}55`,transition:'all .15s',minWidth:60}}
+                    onMouseEnter={()=>{if(synOn)playTone(v.freq,0.1,'sine',0.05);}}>
+                    <div style={{width:24,height:24,borderRadius:4,background:v.hue}}/>
+                    <div style={{fontSize:9,color:v.hue,fontWeight:600}}>{v.icon}</div>
+                    <div style={{fontSize:8,color:'var(--muted)',textAlign:'center'}}>{v.label}</div>
+                    <div style={{fontSize:8,color:'#3a3a5a'}}>{Math.round(v.freq)}Hz</div>
+                    <div className="tip">{v.desc}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* SPATIAL MAP MODE */}
+      {mode==="spatial"&&(
+        <div>
+          <p style={{fontSize:11,color:'var(--muted)',marginBottom:12,lineHeight:1.7}}>
+            Each parameter occupies a distinct region in conceptual space. Configuration is horizontal arrangement (X axis).
+            Perspective is depth into abstraction (Z axis). Extension is boundary width. Case is directional orientation.
+            Train yourself to associate spatial position with grammatical function.
+          </p>
+          <svg width="100%" viewBox="0 0 600 340" style={{background:'var(--surface)',borderRadius:8,border:'1px solid var(--border)'}}>
+            {/* Axes */}
+            <line x1={50} y1={290} x2={550} y2={290} stroke="#1e1e35" strokeWidth={1}/>
+            <line x1={50} y1={290} x2={50} y2={30} stroke="#1e1e35" strokeWidth={1}/>
+            <text x={300} y={318} textAnchor="middle" fill="#3a3a5a" fontSize={9} fontFamily="IBM Plex Sans">← CONFIGURATION (horizontal arrangement) →</text>
+            <text x={22} y={180} textAnchor="middle" fill="#3a3a5a" fontSize={9} fontFamily="IBM Plex Sans" transform="rotate(-90,22,180)">← CONCRETE · ABSTRACT →</text>
+            {/* Configuration row */}
+            {PARAMS.configuration.values.map((v,i)=>{
+              const x=70+i*54, y=260;
+              return<g key={v.id} onClick={()=>{if(synOn)playTone(v.freq,0.2,'sine');}}>
+                <rect x={x-20} y={y-14} width={40} height={24} rx={4} fill={v.hue+'33'} stroke={v.hue+'66'}/>
+                <text x={x} y={y+2} textAnchor="middle" fill={v.hue} fontSize={10} fontFamily="IBM Plex Mono" fontWeight="600">{v.icon}</text>
+                <text x={x} y={y+18} textAnchor="middle" fill={v.hue} fontSize={7} fontFamily="IBM Plex Sans">{v.label.slice(0,6)}</text>
+              </g>;
+            })}
+            {/* Perspective column */}
+            {PARAMS.perspective.values.map((v,i)=>{
+              const x=580, y=260-i*60;
+              return<g key={v.id} onClick={()=>{if(synOn)playTone(v.freq,0.2,'sine');}}>
+                <rect x={x-38} y={y-14} width={50} height={22} rx={4} fill={v.hue+'33'} stroke={v.hue+'66'}/>
+                <text x={x-13} y={y+2} textAnchor="middle" fill={v.hue} fontSize={10} fontFamily="IBM Plex Mono">{v.icon}</text>
+                <text x={x-13} y={y+15} textAnchor="middle" fill={v.hue} fontSize={7}>{v.label}</text>
+              </g>;
+            })}
+            {/* Extension - middle horizontal band */}
+            {PARAMS.extension.values.map((v,i)=>{
+              const x=80+i*77, y=170;
+              return<g key={v.id} onClick={()=>{if(synOn)playTone(v.freq,0.2,'sine');}}>
+                <ellipse cx={x} cy={y} rx={28} ry={12} fill={v.hue+'22'} stroke={v.hue+'55'}/>
+                <text x={x} y={y+3} textAnchor="middle" fill={v.hue} fontSize={9} fontFamily="IBM Plex Mono">{v.icon}</text>
+                <text x={x} y={y+22} textAnchor="middle" fill={v.hue} fontSize={7}>{v.label.slice(0,5)}</text>
+              </g>;
+            })}
+            {/* Labels */}
+            <text x={300} y={148} textAnchor="middle" fill="#2a2a4a" fontSize={8}>EXTENSION ←──────→</text>
+            <text x={590} y={24} textAnchor="middle" fill="#2a2a4a" fontSize={8}>PERSPECTIVE</text>
+          </svg>
+        </div>
+      )}
+
+      {/* CHORD BUILDER MODE */}
+      {mode==="chord"&&(
+        <div>
+          <p style={{fontSize:11,color:'var(--muted)',marginBottom:12,lineHeight:1.7}}>
+            The Ca complex is a chord: Configuration + Affiliation + Perspective played simultaneously.
+            Build Ca combinations and hear them as musical chords. Train your ear to recognize Ca gestalts.
+          </p>
+          <div className="g3 mb12">
+            {["configuration","affiliation","perspective"].map(k=>(
+              <div key={k}>
+                <div style={{fontSize:9,fontWeight:700,color:PARAMS[k].hex,textTransform:'uppercase',marginBottom:6}}>{PARAMS[k].label}</div>
+                <div className="flex-col gap3">
+                  {PARAMS[k].values.map(v=>(
+                    <button key={v.id} className="btn btn-xs" onClick={()=>{
+                      if(synOn) playTone(v.freq,0.3,'sine');
+                    }} style={{justifyContent:'flex-start',background:v.hue+'18',color:v.hue,border:`1px solid ${v.hue}33`}}>
+                      {v.icon} {v.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="card2" style={{marginBottom:10}}>
+            <div style={{fontSize:10,color:'var(--muted)',marginBottom:8}}>Play a full Ca chord (select one from each row, then hit Play Chord):</div>
+            <div className="flex-col gap8">
+              {["configuration","affiliation","perspective"].map(k=>(
+                <ParamStrip key={k} paramKey={k} selectedId={null} onChange={()=>{}} synOn={false}/>
+              ))}
+            </div>
+          </div>
+          <div style={{fontSize:10,color:'#3a3a5a',lineHeight:1.7}}>
+            In Ithkuil, a single Ca morpheme encodes five dimensions simultaneously. Training your ear to hear
+            the individual tones within a chord builds the ability to decompose a Ca form into its five component parameters.
+            This is the musical analogy of morphological parsing.
+          </div>
+        </div>
+      )}
+
+      {/* EAR TRAINING QUIZ */}
+      {mode==="quiz"&&(
+        <div>
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:10}}>
+            <p style={{fontSize:11,color:'var(--muted)'}}>A tone plays. Identify which parameter value it encodes.</p>
+            <div style={{fontSize:12,color:'#22c55e',fontFamily:'IBM Plex Mono'}}>{quizScore.c}/{quizScore.t}</div>
+          </div>
+          {!quizQ&&<button className="btn btn-primary" onClick={genQuizQ}>▶ Play Tone &amp; Identify</button>}
+          {quizQ&&(
+            <div className="fade-up">
+              <div style={{marginBottom:10}}>
+                <div style={{fontSize:11,color:'var(--muted)',marginBottom:6}}>
+                  Parameter: <strong style={{color:PARAMS[quizQ.paramKey].hex}}>{PARAMS[quizQ.paramKey].label}</strong>
+                </div>
+                <button className="btn btn-ghost btn-sm" onClick={()=>synOn&&playTone(quizQ.correct.freq,0.5,'sine',0.12)}>
+                  ▶ Replay Tone ({Math.round(quizQ.correct.freq)}Hz)
+                </button>
+              </div>
+              <div style={{display:'flex',flexWrap:'wrap',gap:6}}>
+                {quizQ.options.map(opt=>(
+                  <button key={opt.id} onClick={()=>{
+                    if(quizAns) return;
+                    setQuizAns(opt.id);
+                    setQuizScore(s=>({c:s.c+(opt.correct?1:0),t:s.t+1}));
+                    if(synOn) playTone(opt.correct?880:165,0.3,opt.correct?'sine':'sawtooth',0.1);
+                  }} style={{padding:'8px 14px',borderRadius:6,border:`1px solid ${
+                    !quizAns?opt.hue+'55':opt.correct?'#22c55e':quizAns===opt.id?'#ef4444':opt.hue+'33'}`,
+                    background:!quizAns?opt.hue+'18':opt.correct?'rgba(34,197,94,.15)':quizAns===opt.id?'rgba(239,68,68,.1)':opt.hue+'08',
+                    color:!quizAns?opt.hue:opt.correct?'#22c55e':quizAns===opt.id?'#ef4444':opt.hue+'88',
+                    cursor:quizAns?'default':'pointer',fontSize:12,fontWeight:500}}>
+                    {opt.icon} {opt.label}
+                  </button>
+                ))}
+              </div>
+              {quizAns&&(
+                <div style={{marginTop:10}}>
+                  <p style={{fontSize:11,color:'var(--muted)',marginBottom:8}}>
+                    {quizQ.options.find(o=>o.id===quizAns)?.correct?"✓ Correct!":"✗ That was "+quizQ.correct.label+". "}
+                    {quizQ.correct.desc}
+                  </p>
+                  <button className="btn btn-primary btn-sm" onClick={genQuizQ}>Next Tone →</button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   LAYER 10 — PHILOSOPHICAL FRAMEWORK PANEL
+   ══════════════════════════════════════════════════════════════════ */
+function PhiloFramework(){
+  const[stage,setStage]=useState(0);
+  const stages=[
+    {id:0,label:"1. Epistemological Problem",color:"#b91c1c",
+     title:"The Epistemological Problem",
+     body:`Conventional language learning assumes a new language maps onto an existing cognitive structure — that "chien" substitutes for "dog," and grammar adjusts the container without altering the cargo. Ithkuil IV invalidates this assumption entirely.\n\nIthkuil does not translate meaning. It engineers it from ontological primitives. The learner who approaches Ithkuil as a code for English will fail at the level of their first morphological assembly. Every word form requires resolving at least twelve conceptual dimensions that natural languages leave systematically ambiguous.`,
+     key:"Before expressing anything in Ithkuil, you must have done the conceptual work first. Language production is the final step, not the starting point."},
+    {id:1,label:"2. Semantic Engineer Paradigm",color:"#c2410c",
+     title:"The Semantic Engineer Paradigm",
+     body:`The ideal Ithkuil learner is not a language student but a semantic engineer — a person who:\n\n• Perceives reality as a field of structured conceptual events\n• Decomposes events into their fundamental ontological parameters\n• Selects morphological tools to encode each parameter precisely\n• Assembles those tools into a compressed expression\n• Verifies the form faithfully reconstructs the intended structure for a listener\n\nThis is not translation. It is conceptual architecture. The question shifts from "what is the word for X?" to "what are the twelve parameters of X, and which morphological tools encode each one?"`,
+     key:"Semantic engineering precedes linguistic expression. The form is the last thing you produce, not the first."},
+    {id:2,label:"3. Cognitive Ontology",color:"#0f766e",
+     title:"What Ithkuil Treats as Primary",
+     body:`Every Ithkuil IV word form encodes simultaneously:\n\n• Root — a conceptual domain (not a meaning)\n• Stem/Pattern — ontological sub-specification\n• Configuration — arrangement of instances\n• Affiliation — internal relational logic\n• Perspective — existential scope (M/P/N/A)\n• Extension — spatial/temporal bounding\n• Essence — actual vs. normative\n• Function — stative vs. dynamic\n• Specification — which conceptual facet\n• Case — semantic-syntactic role\n• Mood/Validation — epistemic stance\n• Bias — attitudinal stance\n\nNatural languages routinely under-specify all twelve. Ithkuil makes every decision explicit.`,
+     key:"Ithkuil forces you to resolve distinctions that your native language lets you leave ambiguous. This is its difficulty and its power."},
+    {id:3,label:"4. Neurological Model",color:"#7c3aed",
+     title:"From Declarative to Procedural",
+     body:`Ithkuil mastery requires a transition from declarative to procedural morphological knowledge.\n\nPhase 1 — Orientation: The dimensions of the system are not yet visible; the first task is simply to become aware of what needs to be encoded.\nPhase 2 — Pattern-building: The system's architecture is visible but not yet fluid; each encoding requires deliberate step-by-step effort.\nPhase 3 — Integration: Parameters are applied correctly with conscious effort; encoding becomes faster and more automatic.\nPhase 4 — Procedural fluency: Morphological construction becomes perceptual — forms are assembled before conscious thought. The learner no longer translates from English; they perceive conceptual structure directly.\n\nAt Phase 4, the learner does not translate from English. They perceive the conceptual structure of a situation directly and assemble its Ithkuil form as a single cognitive act. This is the MORPHOS training target.`,
+     key:"The goal is not to know Ithkuil rules but to not need to think about them."},
+    {id:4,label:"5. Dual Coding & Embodiment",color:"#1d4ed8",
+     title:"Dual Coding and Semantic Embodiment",
+     body:`MORPHOS exploits dual-coding theory systematically. Every morphological category is simultaneously:\n\n• Symbolically represented (formal notation: Ca complex, Stem 2)\n• Visually represented (color-coded slot in architecture diagram)\n• Auditorily represented (a specific frequency / chord)\n• Spatially grounded (a position in the conceptual space map)\n• Conceptually grounded (a concrete scenario that illustrates the distinction)\n\nThe synesthetic training system builds redundant neural encodings of every parameter. The goal is a learner whose Ithkuil intuition is not verbal/symbolic but spatially, auditorily, and experientially embodied — so that Configuration: Segmentative is not recalled from a list but felt as a perceptual gestalt.`,
+     key:"The more sensory channels encode a morphological distinction, the more robust and automatic its recall becomes."},
+  ];
+  const s=stages[stage];
+  return(
+    <div>
+      <div style={{marginBottom:14}}>
+        <h2 style={{fontSize:16,color:'var(--bright)',marginBottom:4}}>Philosophical Framework</h2>
+        <p style={{fontSize:11,color:'var(--muted)'}}>The cognitive philosophy underlying MORPHOS. Read this before beginning — it determines how you approach every exercise.</p>
+      </div>
+      <div style={{display:'flex',gap:4,marginBottom:14,flexWrap:'wrap'}}>
+        {stages.map((st,i)=>(
+          <button key={i} onClick={()=>setStage(i)} className="btn btn-sm"
+            style={{background:stage===i?st.color+'33':'transparent',color:stage===i?st.color:'var(--muted)',
+              border:`1px solid ${stage===i?st.color:'var(--border)'}`,fontSize:10}}>
+            {st.label}
+          </button>
+        ))}
+      </div>
+      <div className="card fade-up" key={stage} style={{borderColor:s.color+'44',borderLeftWidth:3}}>
+        <h3 style={{fontSize:14,color:s.color,marginBottom:12}}>{s.title}</h3>
+        <div style={{fontSize:12,lineHeight:1.9,whiteSpace:'pre-wrap',color:'var(--text)',marginBottom:14}}>{s.body}</div>
+        <div style={{padding:'10px 14px',borderRadius:6,background:s.color+'15',border:`1px solid ${s.color}33`,fontSize:12,color:s.color,fontFamily:'Fraunces',fontStyle:'italic',lineHeight:1.7}}>
+          ⊘ Core Principle: {s.key}
+        </div>
+        <div style={{display:'flex',justifyContent:'space-between',marginTop:12}}>
+          <button className="btn btn-ghost btn-sm" onClick={()=>setStage(i=>Math.max(0,i-1))} disabled={stage===0}>← Previous</button>
+          <button className="btn btn-primary btn-sm" onClick={()=>setStage(i=>Math.min(stages.length-1,i+1))} disabled={stage===stages.length-1}>Next →</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   LAYER 11 — CDW (Concept Decomposition Workspace)
+   ══════════════════════════════════════════════════════════════════ */
+function CDW({params,setParams,synOn}){
+  const[step,setStep]=useState(0);
+  const[text,setText]=useState({situation:"",event:"",referent:""});
+  const stepDefs=[
+    {key:"situation",  label:"Situation",    sub:"Describe the idea or situation in your native language. Be as detailed as needed — you are thinking, not yet expressing.",       type:"textarea"},
+    {key:"event",      label:"Core Event",   sub:"What is the fundamental event, state, or property at the center of this expression?",                                          type:"text"},
+    {key:"referent",   label:"Referent",     sub:"What entity, process, or abstract property are you primarily encoding?",                                                        type:"text"},
+    {key:"root",       label:"Root Domain",  sub:"Which conceptual domain does the referent belong to?",                                                                          type:"root"},
+    {key:"configuration",label:"Configuration",sub:"How many instances? How are they arranged? (This is the most structurally important parameter — begin here.)",               type:"param"},
+    {key:"affiliation",label:"Affiliation",  sub:"What is the internal relational logic among the members of this configuration?",                                                type:"param"},
+    {key:"perspective",label:"Perspective",  sub:"Are you discussing a specific instance, a set, the type/category, or the pure abstract property?",                             type:"param"},
+    {key:"extension",  label:"Extension",    sub:"Which portion of the referent are you discussing? Its full extent? Its beginning? Its near end?",                               type:"param"},
+    {key:"essence",    label:"Essence",      sub:"Is this the actual thing as it concretely exists, or a normative/representative instance of the type?",                         type:"param"},
+    {key:"specification",label:"Specification",sub:"Which of the four conceptual facets of the root is being foregrounded?",                                                      type:"param"},
+    {key:"case",       label:"Case",         sub:"What semantic-syntactic role does this NP play? (Subject-like, object-like, tool, purpose, location...)",                       type:"case"},
+    {key:"mood",       label:"Mood",         sub:"What is the speaker's epistemic/deontic relationship to this proposition?",                                                     type:"param"},
+  ];
+  const s=stepDefs[step];
+  const renderField=()=>{
+    if(s.type==="textarea") return<textarea rows={3} value={text[s.key]||""} onChange={e=>setText(p=>({...p,[s.key]:e.target.value}))} placeholder={s.sub}/>;
+    if(s.type==="text") return<input type="text" value={text[s.key]||""} onChange={e=>setText(p=>({...p,[s.key]:e.target.value}))} placeholder={s.sub}/>;
+    if(s.type==="root") return(
+      <div>
+        <select value={params.root||"KŢ"} onChange={e=>setParams(p=>({...p,root:e.target.value}))} style={{marginBottom:8}}>
+          {Object.entries(DOMAIN_META).map(([d,meta])=>(
+            <optgroup key={d} label={`Domain ${d}: ${meta.label}`}>
+              {ROOTS.filter(r=>r.domain===d).map(r=><option key={r.id} value={r.id}>{r.id} — {r.desc.slice(0,50)}</option>)}
+            </optgroup>
+          ))}
+        </select>
+        {params.root&&<div style={{fontSize:11,color:'var(--muted)',lineHeight:1.6}}>
+          <strong style={{color:ROOTS.find(r=>r.id===params.root)?.color}}>{ROOTS.find(r=>r.id===params.root)?.name}</strong>: {ROOTS.find(r=>r.id===params.root)?.desc}
+        </div>}
+      </div>
+    );
+    if(s.type==="param") return(
+      <div>
+        <ParamStrip paramKey={s.key} selectedId={params[s.key]} onChange={v=>{
+          setParams(p=>({...p,[s.key]:v}));
+          if(synOn&&TONE_MAP[v])playTone(TONE_MAP[v],0.2,'sine');
+        }} synOn={synOn} showLabel={false}/>
+        {params[s.key]&&<div style={{marginTop:8,padding:'7px 10px',borderRadius:6,background:PARAMS[s.key]?.hex+'15',border:`1px solid ${PARAMS[s.key]?.hex}33`,fontSize:11,color:PARAMS[s.key]?.hex}}>
+          {PARAMS[s.key]?.values.find(v=>v.id===params[s.key])?.desc}
+        </div>}
+        {s.key==="configuration"&&params.configuration&&(
+          <div style={{marginTop:8,display:'flex',gap:4,flexWrap:'wrap'}}>
+            {PARAMS.configuration.values.slice(0,5).map(v=>(
+              <div key={v.id} style={{opacity:params.configuration===v.id?1:0.3,transition:'opacity .2s',cursor:'pointer'}}
+                onClick={()=>{setParams(p=>({...p,configuration:v.id}));if(synOn)playTone(v.freq,0.2,'sine');}}>
+                <ConfigScenario configId={v.id} size={50}/>
+                <div style={{fontSize:7,textAlign:'center',color:v.hue,marginTop:2}}>{v.label}</div>
+              </div>
+            ))}
+          </div>
+        )}
+        {s.key==="extension"&&params.extension&&(
+          <div style={{marginTop:8,display:'flex',gap:4,flexWrap:'wrap'}}>
+            {PARAMS.extension.values.map(v=>(
+              <div key={v.id} style={{opacity:params.extension===v.id?1:0.3,transition:'opacity .2s',cursor:'pointer'}}
+                onClick={()=>{setParams(p=>({...p,extension:v.id}));if(synOn)playTone(v.freq,0.2,'sine');}}>
+                <ExtensionScenario extId={v.id} size={60}/>
+                <div style={{fontSize:7,textAlign:'center',color:v.hue,marginTop:2}}>{v.label}</div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+    if(s.type==="case") return(
+      <div className="flex-col gap8">
+        {["Transrelative","Appositive","Associative","Adverbial","Temporal","Spatio-temporal"].map(fam=>{
+          const fc=CASES.find(c=>c.family===fam)?.color||'#4338ca';
+          return(
+            <div key={fam}>
+              <div style={{fontSize:9,color:fc,fontWeight:700,textTransform:'uppercase',letterSpacing:'.08em',marginBottom:4}}>{fam}</div>
+              <div style={{display:'flex',flexWrap:'wrap',gap:4}}>
+                {CASES.filter(c=>c.family===fam).map(c=>(
+                  <button key={c.id} className="btn btn-xs" onClick={()=>setParams(p=>({...p,case:c.id}))}
+                    style={{background:params.case===c.id?c.color+'33':'var(--surface)',color:params.case===c.id?c.color:'var(--muted)',border:`1px solid ${params.case===c.id?c.color:'var(--border)'}`,fontSize:10}}
+                    title={c.desc}>{c.label}</button>
+                ))}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
+  return(
+    <div className="flex-col gap10">
+      <div style={{display:'flex',gap:2}}>
+        {stepDefs.map((_,i)=><div key={i} style={{flex:1,height:3,borderRadius:2,cursor:'pointer',
+          background:i<step?'var(--accent)':i===step?'#818cf8':'var(--border)',transition:'background .3s'}}
+          onClick={()=>setStep(i)}/>)}
+      </div>
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+        <span style={{fontSize:9,color:'var(--muted)',textTransform:'uppercase',letterSpacing:'.1em'}}>Step {step+1} of {stepDefs.length}: {s.label}</span>
+        <span style={{fontSize:9,color:'#3a3a5a'}}>{Math.round((step/stepDefs.length)*100)}% complete</span>
+      </div>
+      <div className="card fade-up" key={step}>
+        <div style={{fontWeight:600,color:'var(--bright)',marginBottom:3,fontSize:13}}>{s.label}</div>
+        <div style={{fontSize:11,color:'var(--muted)',marginBottom:10,lineHeight:1.6}}>{s.sub}</div>
+        {renderField()}
+      </div>
+      {step>=3&&<MAV params={params} synOn={synOn}/>}
+      <div style={{display:'flex',justifyContent:'space-between'}}>
+        <button className="btn btn-ghost btn-sm" onClick={()=>setStep(Math.max(0,step-1))} disabled={step===0}>←</button>
+        <button className="btn btn-primary btn-sm" onClick={()=>setStep(Math.min(stepDefs.length-1,step+1))} disabled={step===stepDefs.length-1}>→</button>
+      </div>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   LAYER 12 — WDE (Word Deconstruction Engine — enhanced)
+   ══════════════════════════════════════════════════════════════════ */
+function WDE({synOn}){
+  const targets=[
+    {form:"kţalmöe",label:"Cognition: Polyadic Purposive",slots:[
+      {s:"Cr",v:"kţ",d:"Root KŢ: Cognition",c:"#991b1b"},
+      {s:"Vr",v:"al",d:"Stem 1 · Pat I · BSC · DYN",c:"#9a3412"},
+      {s:"Ca",v:"m",d:"UNI · CSL · P · DEL · NRM (Polyadic)",c:"#14532d"},
+      {s:"Vc",v:"öe",d:"Purposive case: for the purpose of",c:"#4c1d95"},
+    ],expl:"Root KŢ (cognition), Stem 1 (act of thinking), Polyadic perspective (set of instances), Purposive case."},
+    {form:"žbalvra",label:"Speech: Coherent Associative",slots:[
+      {s:"Cr",v:"žb",d:"Root ŽB: Speech/Communication",c:"#991b1b"},
+      {s:"Vr",v:"a",d:"Stem 1 · Pat I · BSC · STA",c:"#9a3412"},
+      {s:"Ca",v:"lvr",d:"COH · ASO · M · DEL · NRM",c:"#14532d"},
+      {s:"Vc",v:"a",d:"Thematic case",c:"#4c1d95"},
+    ],expl:"Coherent communication system (COH), Associative (parts differ in function), Monadic (this specific system), Thematic case."},
+    {form:"rmulçöa",label:"Value: Coalescent Abstract",slots:[
+      {s:"Cr",v:"rm",d:"Root RM: Value/Judgment",c:"#991b1b"},
+      {s:"Vr",v:"u",d:"Stem 2 · Pat I · BSC · STA",c:"#9a3412"},
+      {s:"Ca",v:"lç",d:"UNI · COA · M · DEL · NRM (Coalescent)",c:"#14532d"},
+      {s:"Vn",v:"ö",d:"Subjunctive mood",c:"#134e4a"},
+      {s:"Vc",v:"a",d:"Thematic case",c:"#4c1d95"},
+    ],expl:"Root RM Stem 2 (entity judged), Coalescent (formerly distinct value-systems now merged), Subjunctive mood."},
+  ];
+  const[ti,setTi]=useState(0);
+  const[phase,setPhase]=useState(0);
+  const[sel,setSel]=useState([]);
+  const t=targets[ti];
+  const next=()=>{setTi(i=>(i+1)%targets.length);setPhase(0);setSel([]);};
+  return(
+    <div className="flex-col gap12">
+      <div style={{display:'flex',gap:6,alignItems:'center'}}>
+        <span style={{fontSize:9,fontWeight:700,color:'var(--muted)',textTransform:'uppercase',letterSpacing:'.1em'}}>WDE — Parsing as Archaeology</span>
+        <select value={ti} onChange={e=>{setTi(+e.target.value);setPhase(0);setSel([]);}} style={{width:'auto',fontSize:11}}>
+          {targets.map((t2,i)=><option key={i} value={i}>{t2.label}</option>)}
+        </select>
+      </div>
+      <div className="card" style={{textAlign:'center',padding:20}}>
+        <div style={{fontSize:9,color:'var(--muted)',marginBottom:6,textTransform:'uppercase',letterSpacing:'.1em'}}>Form to Deconstruct</div>
+        <span className="ithkuil" style={{fontSize:32,color:'var(--bright)',letterSpacing:'.14em'}}>{t.form}</span>
+        {phase===0&&<div style={{marginTop:12}}><button className="btn btn-primary btn-sm" onClick={()=>setPhase(1)}>Begin Archaeological Dig</button></div>}
+      </div>
+      {phase>=1&&(
+        <div className="fade-up">
+          <div style={{fontSize:11,color:'var(--muted)',marginBottom:8}}>Click each morpheme segment to identify its slot and value:</div>
+          <div style={{display:'flex',gap:5,flexWrap:'wrap',marginBottom:10}}>
+            {t.slots.map((s2,i)=>(
+              <div key={i} className="slot syn-aura" onClick={()=>{
+                setSel(p=>p.includes(i)?p.filter(x=>x!==i):[...p,i]);
+                if(synOn) playTone(300+i*80,0.15,'sine');
+              }} style={{background:s2.c+'22',border:`1px solid ${sel.includes(i)?s2.c:s2.c+'44'}`,
+                boxShadow:sel.includes(i)?`0 0 12px ${s2.c}44`:'none',transform:sel.includes(i)?'scale(1.08)':'scale(1)',transition:'all .2s'}}>
+                <span className="slot-lbl" style={{color:s2.c}}>{s2.s}</span>
+                <span className="slot-val" style={{color:s2.c}}>{s2.v}</span>
+              </div>
+            ))}
+          </div>
+          {sel.length>0&&(
+            <div className="flex-col gap4 mb8">
+              {sel.map(i=>(
+                <div key={i} style={{padding:'6px 10px',borderRadius:5,background:t.slots[i].c+'15',border:`1px solid ${t.slots[i].c}33`,fontSize:11}}>
+                  <span style={{color:t.slots[i].c,fontWeight:600}}>{t.slots[i].s}: {t.slots[i].v}</span>
+                  <span style={{color:'var(--muted)',marginLeft:8}}>{t.slots[i].d}</span>
+                </div>
+              ))}
+            </div>
+          )}
+          {phase===1&&<button className="btn btn-primary btn-sm" onClick={()=>setPhase(2)}>Reveal Full Analysis</button>}
+          {phase===2&&(
+            <div className="card fade-up" style={{borderColor:'#4338ca44'}}>
+              <div style={{fontWeight:600,color:'var(--bright)',marginBottom:6}}>Complete Parse</div>
+              <p style={{fontSize:12,lineHeight:1.7,color:'var(--muted)'}}>{t.expl}</p>
+              <div style={{marginTop:10,fontFamily:'IBM Plex Mono',fontSize:12,color:'#a5b4fc',padding:'8px 12px',background:'#1e1b4b',borderRadius:6}}>{t.form}</div>
+              <button className="btn btn-ghost btn-sm" style={{marginTop:8}} onClick={next}>Next Form →</button>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   LAYER 13 — SEMANTIC GRAPH (enhanced)
+   ══════════════════════════════════════════════════════════════════ */
+function SemanticGraph(){
+  const[selected,setSelected]=useState(null);
+  const domainColors={"I":"#b91c1c","II":"#c2410c","III":"#92400e","IV":"#4d7c0f","V":"#0f766e","VI":"#1d4ed8","VII":"#6d28d9","VIII":"#7c3aed","IX":"#0369a1"};
+  const domainNames={"I":"Body","II":"Mind","III":"Language","IV":"Social","V":"Physical","VI":"Living","VII":"Artifact","VIII":"Value","IX":"Abstract"};
+  const positions={
+    LK:[120,80], ŢR:[180,120],
+    KŢ:[300,80], MŘ:[360,120], ŇV:[280,150],
+    ŽB:[460,80], RŇ:[500,130],
+    VŽ:[600,100], KF:[640,150],
+    ŢM:[720,80], XL:[780,120], ŘK:[750,170],
+    PŘ:[860,80], NŢ:[900,120],
+    KV:[960,80], ŽL:[1000,120],
+    RM:[1080,80], ŢV:[1120,130],
+    FL:[1180,80], ŇM:[1220,130],
+  };
+  const edges=[["KŢ","MŘ"],["MŘ","ŇV"],["ŽB","RŇ"],["VŽ","KF"],["ŢM","XL"],["XL","ŘK"],["PŘ","NŢ"],["KV","ŽL"],["RM","ŢV"],["FL","ŇM"],["KŢ","ŽB"],["MŘ","RM"]];
+  const svgW=1300,svgH=260;
+  const r=selected?ROOTS.find(x=>x.id===selected):null;
+  return <div>
+    <div style={{overflowX:'auto',background:'var(--surface)',border:'1px solid var(--border)',borderRadius:8,padding:8}}>
+      <svg width={svgW} height={svgH} viewBox={`0 0 ${svgW} ${svgH}`}>
+        {edges.map(([a,b],i)=>{
+          const pa=positions[a],pb=positions[b];
+          if(!pa||!pb) return null;
+          const isActive=selected&&(a===selected||b===selected);
+          return <line key={i} x1={pa[0]} y1={pa[1]} x2={pb[0]} y2={pb[1]}
+            stroke={isActive?"#4338ca":"#2a2a3a"} strokeWidth={isActive?1.5:1}/>;
+        })}
+        {ROOTS.map(root=>{
+          const pos=positions[root.id];
+          if(!pos) return null;
+          const color=domainColors[root.domain]||'#6d28d9';
+          const isSel=selected===root.id;
+          return <g key={root.id} style={{cursor:'pointer'}} onClick={()=>setSelected(isSel?null:root.id)}>
+            <circle cx={pos[0]} cy={pos[1]} r={isSel?16:12} fill={color+'33'}
+              stroke={isSel?color:'#3a3a4a'} strokeWidth={isSel?2:1}/>
+            <text x={pos[0]} y={pos[1]} textAnchor="middle" dominantBaseline="middle"
+              fill={color} fontSize={isSel?11:9} fontFamily="IBM Plex Mono" fontWeight="600">{root.id}</text>
+            <text x={pos[0]} y={pos[1]+22} textAnchor="middle" fill="#6e7099" fontSize={8} fontFamily="IBM Plex Sans">{root.name}</text>
+          </g>;
+        })}
+        {Object.entries(domainNames).map(([d,name])=>{
+          const domRoots=ROOTS.filter(r=>r.domain===d);
+          if(!domRoots.length) return null;
+          const xs=domRoots.map(r=>positions[r.id]?.[0]).filter(Boolean);
+          if(!xs.length) return null;
+          const midX=xs.reduce((a,b)=>a+b,0)/xs.length;
+          return <text key={d} x={midX} y={230} textAnchor="middle"
+            fill={domainColors[d]} fontSize={9} fontFamily="IBM Plex Sans" fontWeight="600" opacity={0.6}>
+            DOM {d}: {name}
+          </text>;
+        })}
+      </svg>
+    </div>
+    {r&&<div className="card fade-up" style={{marginTop:10,borderColor:domainColors[r.domain]+'44'}}>
+      <div style={{display:'flex',gap:12,alignItems:'flex-start'}}>
+        <span className="ithkuil" style={{fontSize:24,color:domainColors[r.domain]}}>{r.id}</span>
+        <div>
+          <div style={{fontWeight:600,color:'var(--bright)'}}>{r.name}</div>
+          <div style={{fontSize:12,color:'var(--muted)',marginBottom:8}}>{r.desc}</div>
+          <div style={{display:'flex',gap:8,marginBottom:10}}>
+            <Badge color={domainColors[r.domain]}>Domain {r.domain}</Badge>
+          </div>
+          <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:6}}>
+            {[1,2,3].map(s=><div key={s} style={{padding:'6px 10px',borderRadius:6,background:'var(--surface)',border:'1px solid var(--border)'}}>
+              <div style={{fontSize:10,color:'var(--muted)',textTransform:'uppercase',letterSpacing:'0.06em',marginBottom:2}}>Stem {s}</div>
+              <div style={{fontSize:12}}>{r[`stem${s}`]}</div>
+            </div>)}
+          </div>
+        </div>
+      </div>
+    </div>}
+  </div>;
+}
+/* ══════════════════════════════════════════════════════════════════
+   LAYER 14 — AI DIALOGUE MODE
+   ══════════════════════════════════════════════════════════════════ */
+function DialogueMode({apiKey}){
+  const[msgs,setMsgs]=useState([{role:"assistant",content:"Welcome to Conceptual Dialogue Mode. Express any idea — however complex or abstract — and I will guide you through its Ithkuil IV encoding. I operate as a Socratic tutor: I will ask questions before giving answers. What would you like to encode?"}]);
+  const[input,setInput]=useState("");
+  const[loading,setLoading]=useState(false);
+  const[mode,setMode]=useState("guided");
+  const endRef=useRef(null);
+  useEffect(()=>endRef.current?.scrollIntoView({behavior:'smooth'}),[msgs]);
+  const SYS=`You are an expert Ithkuil IV tutor in MORPHOS Conceptual Dialogue Mode. Mode: ${mode}.
+
+When a learner presents an idea, guide them through encoding it in Ithkuil IV using the Socratic method.
+
+Decompose ideas into these parameters (always use exact Ithkuil IV terminology):
+Configuration (UNI/DPX/DCT/AGG/SEG/CPN/COH/CST/MUL)
+Affiliation (CSL/ASO/VAR/COA)
+Perspective (M=Monadic/P=Polyadic/N=Noumenal/A=Abstract)
+Extension (DEL/PRX/DST/PXD/ICP/TRM)
+Essence (NRM/RPV)
+Specification (BSC/CTE/CSV/OBJ)
+Function (STA/DYN)
+Mood (FAC/SUB/ASM/SPE/CNT/IPT)
+Validation (OBS/RCL/PUR/RPR/APR/IMG)
+Bias (EUP/EUH/COR/DUB/TEN/NEG/SKP/CYN/CTM/EXA)
+Case — all 28 cases by semantic family.
+
+Mode behaviors:
+- guided: Heavy scaffolding, hints after each turn, guide gently to correct answer
+- collaborative: Co-construct parameter choices together, share reasoning openly
+- challenge: Only confirm/deny, learner must reason independently
+- critique: Accept a full Ithkuil specification from learner, then deliver detailed expert critique
+
+Always end your response by asking a specific probing question about one parameter. When you produce an Ithkuil form, use \`backticks\`.`;
+  const send=async()=>{
+    if(!input.trim()||loading) return;
+    const um={role:"user",content:input};
+    const nm=[...msgs,um];
+    setMsgs(nm);setInput("");setLoading(true);
+    try{
+      const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",
+        headers:{"Content-Type":"application/json","x-api-key":apiKey||"","anthropic-version":"2023-06-01"},
+        body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,system:SYS,
+          messages:nm.map(m=>({role:m.role,content:m.content}))})});
+      const d=await r.json();
+      setMsgs([...nm,{role:"assistant",content:d.content?.[0]?.text||"API error"}]);
+    }catch(e){
+      setMsgs([...nm,{role:"assistant",content:"Connection error. Check API key in Settings."}]);
+    }
+    setLoading(false);
+  };
+  const renderContent=text=>{
+    const parts=text.split(/`([^`]+)`/);
+    return parts.map((p2,i)=>i%2===1?<code key={i} style={{background:'#1e1b4b',color:'#a5b4fc',padding:'1px 6px',borderRadius:3,fontFamily:'IBM Plex Mono',fontWeight:600,fontSize:13}}>{p2}</code>:p2);
+  };
+  const modes=[{id:"guided",label:"Guided"},{id:"collaborative",label:"Collaborative"},{id:"challenge",label:"Challenge"},{id:"critique",label:"Critique"}];
+  return(
+    <div className="flex-col" style={{height:'100%',gap:10,minHeight:0}}>
+      <div style={{display:'flex',gap:4}}>
+        {modes.map(m=><button key={m.id} className="btn btn-xs" onClick={()=>setMode(m.id)}
+          style={{background:mode===m.id?'var(--accent)33':'transparent',color:mode===m.id?'var(--accent2)':'var(--muted)',border:`1px solid ${mode===m.id?'var(--accent)':'var(--border)'}`}}>{m.label}</button>)}
+      </div>
+      <div className="sy" style={{flex:1,minHeight:280,maxHeight:380,display:'flex',flexDirection:'column',gap:8,overflowY:'auto',padding:4}}>
+        {msgs.map((m,i)=>(
+          <div key={i} style={{display:'flex',justifyContent:m.role==="user"?"flex-end":"flex-start"}}>
+            <div style={{maxWidth:'88%',padding:'9px 13px',borderRadius:8,lineHeight:1.7,fontSize:12,whiteSpace:'pre-wrap',wordBreak:'break-word',
+              background:m.role==="user"?'rgba(80,70,229,.25)':'var(--card)',border:`1px solid ${m.role==="user"?'#5046e544':'var(--border)'}`}}>
+              {renderContent(m.content)}
+            </div>
+          </div>
+        ))}
+        {loading&&<div style={{display:'flex',gap:5,padding:'9px 13px'}}>
+          {[0,1,2].map(i=><div key={i} style={{width:5,height:5,borderRadius:'50%',background:'var(--muted)',animation:`pulse 1.2s ${i*0.2}s infinite`}}/>)}
+        </div>}
+        <div ref={endRef}/>
+      </div>
+      <div style={{display:'flex',gap:6}}>
+        <input type="text" value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&send()}
+          placeholder="Express any idea for Ithkuil encoding..." style={{flex:1,fontSize:12}}/>
+        <button className="btn btn-primary" onClick={send} disabled={loading||!input.trim()}>→</button>
+      </div>
+      {!apiKey&&<div style={{fontSize:10,color:'#b45309',background:'#451a0322',border:'1px solid #78350f44',borderRadius:5,padding:'5px 8px'}}>
+        Set Anthropic API key in Settings to enable AI dialogue.
+      </div>}
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   LAYER 15 — SANDBOX
+   ══════════════════════════════════════════════════════════════════ */
+function Sandbox({synOn}){
+  const[params,setParams]=useState(defaultP());
+  const[saved,setSaved]=useState([]);
+  const[notes,setNotes]=useState("");
+  const[compare,setCompare]=useState(null);
+  const[showAnatomy,setShowAnatomy]=useState(false);
+  const form=buildForm(params);
+  return(
+    <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:14,minHeight:0}}>
+      <div className="flex-col gap10 sy" style={{overflowY:'auto',maxHeight:'calc(100vh - 140px)',background:'var(--surface)',borderRadius:8,padding:12,border:'1px solid var(--border)'}}>
+        <div style={{fontSize:10,fontWeight:700,color:'var(--muted)',textTransform:'uppercase',letterSpacing:'.1em'}}>Parameter Assembly</div>
+        <PSP params={params} onChange={setParams} synOn={synOn}/>
+        <input type="text" value={notes} onChange={e=>setNotes(e.target.value)} placeholder="What does this form express?"/>
+        <button className="btn btn-primary" onClick={()=>{setSaved(p=>[...p,{params:{...params},form,notes,id:Date.now()}]);setNotes("");}}>Save to Lexicon</button>
+      </div>
+      <div className="flex-col gap10">
+        <MAV params={params} synOn={synOn}/>
+        <div className="card">
+          <div style={{fontSize:9,color:'var(--muted)',marginBottom:4,textTransform:'uppercase',letterSpacing:'.08em'}}>Assembled Form</div>
+          <div style={{display:'flex',gap:10,alignItems:'center',justifyContent:'space-between'}}>
+            <span className="ithkuil" style={{fontSize:28,color:'var(--bright)',letterSpacing:'.12em'}}>{form}</span>
+            <button className="btn btn-ghost btn-xs" onClick={()=>setShowAnatomy(v=>!v)}>
+              {showAnatomy?"Hide":"Anatomy"}
+            </button>
+          </div>
+          {showAnatomy&&(
+            <div className="fade-up" style={{marginTop:8,fontSize:10,lineHeight:1.8}}>
+              {[{l:"Root",v:`${params.root} — ${ROOTS.find(r=>r.id===params.root)?.name}`},{l:"Stem/Pat",v:`${params.stem} · ${params.pattern}`},{l:"Configuration",v:`${params.configuration}: ${PARAMS.configuration.values.find(v=>v.id===params.configuration)?.desc}`},{l:"Affiliation",v:`${params.affiliation}: ${PARAMS.affiliation.values.find(v=>v.id===params.affiliation)?.desc}`},{l:"Perspective",v:`${params.perspective}: ${PARAMS.perspective.values.find(v=>v.id===params.perspective)?.desc}`},{l:"Extension",v:`${params.extension}: ${PARAMS.extension.values.find(v=>v.id===params.extension)?.desc}`},{l:"Case",v:`${CASES.find(c=>c.id===params.case)?.label}: ${CASES.find(c=>c.id===params.case)?.desc}`}].map(item=>(
+                <div key={item.l} style={{display:'flex',gap:6}}>
+                  <span style={{color:'var(--muted)',minWidth:80,flexShrink:0}}>{item.l}:</span>
+                  <span style={{color:'var(--text)'}}>{item.v}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+        {compare&&(
+          <div className="card" style={{borderColor:'#0f766e44'}}>
+            <div style={{fontSize:9,color:'#0f766e',fontWeight:700,textTransform:'uppercase',marginBottom:4}}>Comparing</div>
+            <span className="ithkuil" style={{fontSize:20,color:'#0f766e'}}>{compare.form}</span>
+            <p style={{fontSize:10,color:'var(--muted)',marginTop:4}}>{compare.notes||'—'}</p>
+            <button className="btn btn-ghost btn-xs" style={{marginTop:4}} onClick={()=>setCompare(null)}>Clear</button>
+          </div>
+        )}
+        {saved.length>0&&(
+          <div>
+            <div style={{fontSize:9,color:'var(--muted)',marginBottom:5,textTransform:'uppercase',letterSpacing:'.08em'}}>Lexicon ({saved.length})</div>
+            <div className="flex-col gap3 sy" style={{maxHeight:180,overflowY:'auto'}}>
+              {saved.map(s=>(
+                <div key={s.id} style={{display:'flex',gap:6,alignItems:'center',padding:'5px 8px',borderRadius:5,background:'var(--surface)',border:'1px solid var(--border)'}}>
+                  <span className="ithkuil" style={{fontSize:12,color:'var(--bright)',minWidth:60}}>{s.form}</span>
+                  <span style={{fontSize:10,color:'var(--muted)',flex:1}}>{s.notes||'—'}</span>
+                  <button className="btn btn-xs btn-ghost" onClick={()=>setParams({...s.params})} title="Load">↑</button>
+                  <button className="btn btn-xs btn-ghost" onClick={()=>setCompare(s)} title="Compare">⇄</button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   LAYER 16 — DASHBOARD
+   ══════════════════════════════════════════════════════════════════ */
+function Dashboard({lm,onNav}){
+  const stage=calcStage(lm);
+  const stageColors=["","#1d4ed8","#7c3aed","#15803d","#b45309"];
+  const stageLabels=["","Explorer","Apprentice","Practitioner","Architect"];
+  const stageDesc=[
+    "",
+    "Mapping the landscape — begin with the Philosophical Framework to orient your approach.",
+    "Building pattern recognition — work through Situations and Synesthetic training.",
+    "Encoding with intention — Puzzles and Compression exercises solidify your toolkit.",
+    "Pre-linguistic assembly — forms arise before words; the grammar is becoming perception."
+  ];
+  const accuracy=lm.totalAttempts>0?Math.round(lm.totalCorrect/lm.totalAttempts*100):0;
+  const phases=[
+    {id:1,label:"Phase I: Ontological Foundation",color:"#1d4ed8",modules:[1,2,3]},
+    {id:2,label:"Phase II: Morphological Architecture",color:"#7c3aed",modules:[4,5,6,7]},
+    {id:3,label:"Phase III: Assembly & Compression",color:"#15803d",modules:[8,9,10]},
+    {id:4,label:"Phase IV: Native Structuring",color:"#b45309",modules:[11,12]},
+  ];
+  const paramNames=Object.keys(PARAMS).slice(0,6);
+  return(
+    <div style={{display:'flex',flexDirection:'column',gap:16}}>
+      {/* Mastery level banner */}
+      <div className="card" style={{borderColor:stageColors[stage]+'44',borderLeft:`3px solid ${stageColors[stage]}`}}>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start'}}>
+          <div>
+            <div style={{fontSize:9,color:stageColors[stage],fontWeight:700,textTransform:'uppercase',letterSpacing:'.1em',marginBottom:4}}>Mastery Path · Level {stage}/4</div>
+            <div style={{fontWeight:600,color:'var(--bright)',marginBottom:4}}>{stageLabels[stage]}</div>
+            <div style={{fontSize:11,color:'var(--muted)'}}>{stageDesc[stage]}</div>
+          </div>
+          <div style={{display:'flex',gap:3}}>
+            {[1,2,3,4].map(i=><div key={i} style={{width:12,height:12,borderRadius:'50%',background:i<=stage?stageColors[i]:'var(--border)',transition:'background .3s'}}/>)}
+          </div>
+        </div>
+      </div>
+      {/* 4-stat row */}
+      <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:10}}>
+        {[{label:"XP Earned",val:lm.xp,color:"#f59e0b"},{label:"Exercises",val:lm.totalAttempts,color:"#22c55e"},{label:"Streak",val:lm.streak,color:"#3b82f6"},{label:"Accuracy",val:lm.totalAttempts>0?accuracy+'%':'—',color:"#a78bfa"}].map(stat=>(
+          <div key={stat.label} className="card" style={{textAlign:'center'}}>
+            <div style={{fontSize:24,fontWeight:700,color:stat.color,fontFamily:'Cinzel,serif'}}>{stat.val}</div>
+            <div style={{fontSize:11,color:'var(--muted)',marginTop:2}}>{stat.label}</div>
+          </div>
+        ))}
+      </div>
+      {/* Module progress + Parameter mastery */}
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:14}}>
+        <div className="card">
+          <div style={{fontSize:12,fontWeight:600,color:'var(--bright)',marginBottom:12}}>Module Progress</div>
+          {phases.map(phase=>(
+            <div key={phase.id} style={{marginBottom:12}}>
+              <div style={{fontSize:10,color:phase.color,fontWeight:700,textTransform:'uppercase',letterSpacing:'0.08em',marginBottom:6}}>{phase.label}</div>
+              {phase.modules.map(mId=>{
+                const m=MODULES.find(x=>x.id===mId);
+                const prog=lm.moduleProgress[mId]||0;
+                return <div key={mId} style={{marginBottom:6,cursor:'pointer'}} onClick={()=>onNav&&onNav('puzzles')}>
+                  <div style={{display:'flex',justifyContent:'space-between',marginBottom:2}}>
+                    <span style={{fontSize:11,color:'var(--text)'}}>{m?.name}</span>
+                    <span style={{fontSize:10,color:'var(--muted)'}}>{Math.round(prog*100)}%</span>
+                  </div>
+                  <ProgressMeter value={prog} color={phase.color}/>
+                </div>;
+              })}
+            </div>
+          ))}
+        </div>
+        <div style={{display:'flex',flexDirection:'column',gap:10}}>
+          <div className="card">
+            <div style={{fontSize:12,fontWeight:600,color:'var(--bright)',marginBottom:12}}>Parameter Mastery</div>
+            {paramNames.map(pName=>{
+              const vals=lm[pName]||{};
+              const avg=Object.values(vals).length>0?Object.values(vals).reduce((a,b)=>a+b,0)/Object.values(vals).length:0;
+              const color=PARAMS[pName]?.hex||'#4338ca';
+              return <div key={pName} style={{marginBottom:8}}>
+                <div style={{display:'flex',justifyContent:'space-between',marginBottom:2}}>
+                  <span style={{fontSize:11,color:'var(--text)'}}>{PARAMS[pName]?.label}</span>
+                  <span style={{fontSize:10,color:'var(--muted)'}}>{Math.round(avg*100)}%</span>
+                </div>
+                <ProgressMeter value={avg} color={color}/>
+              </div>;
+            })}
+            <div style={{marginTop:12,padding:10,background:'var(--surface)',borderRadius:6,border:'1px solid var(--border)'}}>
+              <div style={{fontSize:11,color:'var(--muted)',marginBottom:4}}>Adaptive Focus (weakest areas)</div>
+              {paramNames.map(pName=>{
+                const vals=lm[pName]||{};
+                const weakest=Object.entries(vals).sort((a,b)=>a[1]-b[1]).slice(0,2);
+                return weakest.map(([vId,score])=>score<0.5?<div key={vId} style={{display:'flex',justifyContent:'space-between',fontSize:11}}>
+                  <span style={{color:'var(--text)'}}>{PARAMS[pName]?.values.find(v=>v.id===vId)?.label}</span>
+                  <span style={{color:'#f59e0b'}}>{Math.round(score*100)}%</span>
+                </div>:null);
+              })}
+            </div>
+          </div>
+          {/* SRS heatmap */}
+          <div className="card">
+            <div style={{fontSize:12,fontWeight:600,color:'var(--bright)',marginBottom:8}}>Spaced Repetition Queue</div>
+            <div style={{display:'flex',gap:3,flexWrap:'wrap'}}>
+              {Object.entries(PARAMS).map(([k,p])=>(
+                Object.entries(lm[k]||{}).map(([vid,score])=>(
+                  <div key={`${k}-${vid}`} style={{width:14,height:14,borderRadius:2,
+                    background:score<0.3?p.hex:score<0.6?p.hex+'88':score<0.85?p.hex+'44':'#1e1e35',
+                    border:`1px solid ${score<0.3?p.hex:p.hex+'44'}`,
+                    transition:'background .3s'}}
+                    title={`${p.label}: ${p.values.find(v=>v.id===vid)?.label} (${Math.round(score*100)}%)`}/>
+                ))
+              ))}
+            </div>
+            <div style={{display:'flex',gap:10,marginTop:6,flexWrap:'wrap'}}>
+              {[{c:'#e11d48',l:'Due now'},{c:'#88888888',l:'Due soon'},{c:'#44444444',l:'Scheduled'},{c:'#1e1e35',l:'Mastered'}].map(item=>(
+                <div key={item.l} style={{display:'flex',gap:4,alignItems:'center',fontSize:9,color:'var(--muted)'}}>
+                  <div style={{width:10,height:10,borderRadius:2,background:item.c}}/>{item.l}
+                </div>
+              ))}
+            </div>
+            <button className="btn btn-primary btn-sm" style={{marginTop:10}} onClick={()=>onNav&&onNav('puzzles')}>Go to Puzzle Hall →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   LAYER 16 — FUTURE FEATURES
+   ══════════════════════════════════════════════════════════════════ */
+function FutureFeatures(){
+  const[active,setActive]=useState("synesthetic");
+  const[synActive,setSynActive]=useState(false);
+  const[gameScore,setGameScore]=useState(0);
+  const[gameState,setGameState]=useState({round:0,question:null,answered:false});
+
+  const startGame=()=>{
+    const root=ROOTS[Math.floor(Math.random()*ROOTS.length)];
+    const confVal=PARAMS.configuration.values[Math.floor(Math.random()*PARAMS.configuration.values.length)];
+    setGameState({round:gameState.round+1,question:{root,confVal},answered:false,selected:null});
+  };
+
+  const features=[
+    {id:"synesthetic",label:"Synesthetic Mode",icon:"◈",color:"#7c3aed"},
+    {id:"games",label:"Semantic Puzzles",icon:"⬡",color:"#15803d"},
+    {id:"neuralmap",label:"Neural Concept Map",icon:"◉",color:"#1d4ed8"},
+    {id:"compression",label:"AI Compression Coach",icon:"⊙",color:"#c2410c"},
+  ];
+
+  const renderFeature=()=>{
+    if(active==="synesthetic") return <div>
+      <p style={{fontSize:13,color:'var(--muted)',marginBottom:14,lineHeight:1.7}}>Synesthetic Mode maps grammatical categories to sensory associations — color, sound, and spatial position — to build deeper, embodied neural representations of morphological structure.</p>
+      <div style={{display:'flex',gap:10,flexWrap:'wrap',marginBottom:14}}>
+        {Object.entries(PARAMS).slice(0,6).map(([k,p])=><div key={k} style={{padding:'8px 14px',borderRadius:8,background:p.hex+'15',border:`1px solid ${p.hex}44`,display:'flex',flexDirection:'column',gap:2}}>
+          <span style={{fontSize:10,color:p.hex,fontWeight:700,textTransform:'uppercase'}}>{p.label}</span>
+          <div style={{width:40,height:6,borderRadius:3,background:p.hex}}/>
+          <span style={{fontSize:10,color:'var(--muted)'}}>Slot: {p.slot}</span>
+        </div>)}
+      </div>
+      <button className="btn btn-primary" onClick={()=>setSynActive(!synActive)}>{synActive?"Deactivate":"Activate"} Synesthetic Overlay</button>
+      {synActive&&<div style={{marginTop:10,padding:10,borderRadius:6,background:'rgba(124,58,237,0.1)',border:'1px solid rgba(124,58,237,0.3)',fontSize:12,color:'var(--muted)'}}>
+        ◈ Synesthetic overlay active — slot colors now pulse when the parameter is engaged in exercises. Full audio/spatial mapping fully active in the Synesthetic Trainer module.
+      </div>}
+    </div>;
+
+    if(active==="games") return <div>
+      <p style={{fontSize:13,color:'var(--muted)',marginBottom:12,lineHeight:1.7}}>Root Detective: Identify which configuration value applies to a given scenario. Score: {gameScore}</p>
+      {!gameState.question&&<button className="btn btn-primary" onClick={startGame}>Start Round</button>}
+      {gameState.question&&<div className="card fade-up">
+        <div style={{fontWeight:600,color:'var(--bright)',marginBottom:8}}>Round {gameState.round}</div>
+        <p style={{fontSize:13,marginBottom:12}}>For root <span className="ithkuil" style={{color:'#b91c1c'}}>{gameState.question.root.id}</span> ({gameState.question.root.name}): which Configuration applies when describing <em>multiple, unified instances of the same type, partially separated</em>?</p>
+        <div style={{display:'flex',flexWrap:'wrap',gap:6}}>
+          {PARAMS.configuration.values.map(v=><button key={v.id} className="btn btn-sm" onClick={()=>{
+            if(!gameState.answered){
+              const correct=v.id==="SEG";
+              if(correct) setGameScore(s=>s+10);
+              setGameState({...gameState,answered:true,selected:v.id,correct});
+            }
+          }} style={{background:gameState.answered?(v.id==="SEG"?'rgba(34,197,94,0.2)':v.id===gameState.selected?'rgba(239,68,68,0.2)':'var(--surface)'):'var(--surface)',
+            border:`1px solid ${gameState.answered?(v.id==="SEG"?'#22c55e44':v.id===gameState.selected?'#ef444444':'var(--border)'):'var(--border)'}`,
+            color:gameState.answered?(v.id==="SEG"?'#22c55e':v.id===gameState.selected?'#ef4444':'var(--muted)'):'var(--muted)'}}>
+            {v.icon} {v.label}
+          </button>)}
+        </div>
+        {gameState.answered&&<div style={{marginTop:10}}>
+          <p style={{fontSize:12,color:gameState.correct?'#22c55e':'#ef4444',marginBottom:8}}>{gameState.correct?'✓ Correct! +10 XP':'✗ Segmentative: joined instances partially separated'}</p>
+          <button className="btn btn-primary btn-sm" onClick={startGame}>Next Round →</button>
+        </div>}
+      </div>}
+    </div>;
+
+    if(active==="neuralmap") return <div>
+      <p style={{fontSize:13,color:'var(--muted)',marginBottom:10,lineHeight:1.7}}>3D semantic space visualization. Below is a 2D projection of the root space showing conceptual proximity relationships.</p>
+      <div style={{background:'var(--surface)',border:'1px solid var(--border)',borderRadius:8,padding:8,marginBottom:10}}>
+        <svg width="100%" viewBox="0 0 600 300" style={{maxHeight:300}}>
+          {ROOTS.map((r,i)=>{
+            const angle=(i/ROOTS.length)*Math.PI*2;
+            const radius=80+Math.sin(i*2.3)*40;
+            const cx=300+Math.cos(angle)*radius;
+            const cy=150+Math.sin(angle)*radius*0.7;
+            const color=DOMAIN_META[r.domain]?.color||'#6d28d9';
+            return <g key={r.id}>
+              <circle cx={cx} cy={cy} r={8} fill={color+'44'} stroke={color} strokeWidth={1}/>
+              <text x={cx} y={cy} textAnchor="middle" dominantBaseline="middle" fill={color} fontSize={7} fontFamily="IBM Plex Mono" fontWeight="600">{r.id}</text>
+              <text x={cx} y={cy+14} textAnchor="middle" fill="#6e7099" fontSize={6} fontFamily="IBM Plex Sans">{r.name}</text>
+            </g>;
+          })}
+          <text x={300} y={20} textAnchor="middle" fill="#6e7099" fontSize={10} fontFamily="Cinzel,serif">Neural Conceptual Map — Root Space Projection</text>
+        </svg>
+      </div>
+      <p style={{fontSize:11,color:'var(--muted)'}}>Full 3D interactive map with UMAP dimensionality reduction planned for v4.0. Current view uses angular projection across the 9 semantic domains.</p>
+    </div>;
+
+    if(active==="compression") return <div>
+      <p style={{fontSize:13,color:'var(--muted)',marginBottom:12,lineHeight:1.7}}>AI Compression Coach analyzes your English writing and identifies where Ithkuil's morphological richness enables radical semantic compression.</p>
+      <div className="card" style={{borderColor:'#c2410c44',marginBottom:10}}>
+        <div style={{fontSize:11,color:'#c2410c',fontWeight:600,textTransform:'uppercase',letterSpacing:'0.08em',marginBottom:6}}>Example Compression</div>
+        <div style={{display:'grid',gridTemplateColumns:'1fr auto 1fr',gap:10,alignItems:'center'}}>
+          <div style={{padding:8,background:'var(--surface)',borderRadius:6,fontSize:12,lineHeight:1.7}}>
+            "Multiple specialists with different skills who had previously been working independently but are now coordinating their efforts toward a shared goal"
+            <div style={{marginTop:4,fontSize:10,color:'var(--muted)'}}>English: 26 words</div>
+          </div>
+          <span style={{color:'var(--muted)',fontSize:18}}>→</span>
+          <div style={{padding:8,background:'#1e1b4b',borderRadius:6}}>
+            <span className="ithkuil" style={{fontSize:20,color:'#a5b4fc',display:'block',textAlign:'center',marginBottom:4}}>vžulvra</span>
+            <div style={{fontSize:10,color:'var(--muted)',textAlign:'center'}}>Ithkuil IV: 7 characters<br/>CPN·COA·M·DEL·NRM</div>
+          </div>
+        </div>
+      </div>
+      <p style={{fontSize:11,color:'var(--muted)'}}>Full AI coaching integration (enter text → receive Ithkuil compression analysis) available via Dialogue Mode with API key configured.</p>
+    </div>;
+  };
+
+  return <div>
+    <div style={{display:'flex',gap:6,marginBottom:14,flexWrap:'wrap'}}>
+      {features.map(f=><button key={f.id} className="btn" onClick={()=>setActive(f.id)}
+        style={{background:active===f.id?f.color+'33':'var(--surface)',color:active===f.id?f.color:'var(--muted)',border:`1px solid ${active===f.id?f.color+'66':'var(--border)'}`}}>
+        {f.icon} {f.label}
+      </button>)}
+    </div>
+    <div className="fade-up" key={active}>{renderFeature()}</div>
+  </div>;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   LAYER 17 — CASE REFERENCE
+   ══════════════════════════════════════════════════════════════════ */
+function CaseReference(){
+  const[filter,setFilter]=useState("All");
+  const families=["All",...new Set(CASES.map(c=>c.family))];
+  const filtered=filter==="All"?CASES:CASES.filter(c=>c.family===filter);
+  return(
+    <div>
+      <div style={{display:'flex',gap:4,flexWrap:'wrap',marginBottom:12}}>
+        {families.map(f=><button key={f} className={`btn btn-xs ${filter===f?'btn-primary':'btn-ghost'}`} onClick={()=>setFilter(f)}>{f}</button>)}
+      </div>
+      <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(220px,1fr))',gap:8}}>
+        {filtered.map(c=>(
+          <div key={c.id} className="card2" style={{borderColor:c.color+'33'}}>
+            <div style={{display:'flex',justifyContent:'space-between',marginBottom:3}}>
+              <span style={{fontWeight:700,color:'var(--bright)',fontSize:12}}>{c.label}</span>
+              <span style={{fontFamily:'IBM Plex Mono',fontSize:10,color:c.color}}>{c.id}</span>
+            </div>
+            <div style={{fontSize:9,color:c.color,textTransform:'uppercase',letterSpacing:'.08em',fontWeight:600,marginBottom:4}}>{c.family}</div>
+            <div style={{fontSize:11,color:'var(--muted)',lineHeight:1.6}}>{c.desc}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   LAYER 18 — SETTINGS
+   ══════════════════════════════════════════════════════════════════ */
+function Settings({apiKey,setApiKey,synOn,setSynOn,tint,setTint,brightness,setBrightness}){
+  const[kv,setKv]=useState(apiKey||"");
+  const[ep,setEp]=useState("");
+  const preview=computeVars(tint,brightness);
+  const brStops=[{v:0,label:"Amoled",icon:"⬛"},{v:33,label:"Dark",icon:"☾"},{v:66,label:"Ash",icon:"◑"},{v:100,label:"Light",icon:"☀"}];
+  return(
+    <div style={{maxWidth:520}}>
+      <div className="card mb10">
+        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:14}}>
+          <div style={{fontWeight:600,color:'var(--bright)'}}>Appearance</div>
+          <div style={{display:'flex',alignItems:'center',gap:4}}>
+            {['--bg','--surface','--card','--border','--accent'].map(k=>(
+              <div key={k} style={{width:14,height:14,borderRadius:3,background:preview[k],border:'1px solid rgba(128,128,128,0.15)',flexShrink:0}}/>
+            ))}
+            <span style={{marginLeft:4,fontSize:10,fontFamily:'IBM Plex Mono',color:preview['--text'],background:preview['--bg'],padding:'1px 5px',borderRadius:3,border:`1px solid ${preview['--border']}`}}>Aa</span>
+          </div>
+        </div>
+
+        <div style={{marginBottom:16}}>
+          <div style={{display:'flex',justifyContent:'space-between',marginBottom:5}}>
+            <span style={{fontSize:10,color:'var(--muted)'}}>Lichess</span>
+            <span style={{fontSize:10,color:'var(--muted)'}}>Pure</span>
+            <span style={{fontSize:10,color:'var(--muted)'}}>Discord</span>
+          </div>
+          <input type="range" min={0} max={100} value={tint} onChange={e=>setTint(Number(e.target.value))}
+            style={{width:'100%',accentColor:'var(--accent)',cursor:'pointer'}}/>
+        </div>
+
+        <div>
+          <div style={{display:'flex',justifyContent:'space-between',marginBottom:5}}>
+            {brStops.map(s=>(
+              <span key={s.v} onClick={()=>setBrightness(s.v)} style={{fontSize:10,cursor:'pointer',
+                color:Math.abs(brightness-s.v)<10?'var(--bright)':'var(--muted)',
+                fontWeight:Math.abs(brightness-s.v)<10?600:400}}>
+                {s.icon} {s.label}
+              </span>
+            ))}
+          </div>
+          <input type="range" min={0} max={100} value={brightness} onChange={e=>setBrightness(Number(e.target.value))}
+            style={{width:'100%',accentColor:'var(--accent)',cursor:'pointer'}}/>
+        </div>
+      </div>
+      <div className="card mb10">
+        <div style={{fontWeight:600,color:'var(--bright)',marginBottom:3}}>Anthropic API Key</div>
+        <p style={{fontSize:11,color:'var(--muted)',marginBottom:8}}>Required for AI Dialogue Mode. Session-only storage — not persisted between page loads.</p>
+        <input type="text" value={kv} onChange={e=>setKv(e.target.value)} placeholder="sk-ant-api03-..."/>
+        <div style={{display:'flex',gap:8,marginTop:6,alignItems:'center'}}>
+          <button className="btn btn-primary btn-sm" onClick={()=>setApiKey(kv)}>Save</button>
+          {apiKey&&<span style={{fontSize:10,color:'#22c55e'}}>✓ Active</span>}
+        </div>
+      </div>
+      <div className="card mb10">
+        <div style={{fontWeight:600,color:'var(--bright)',marginBottom:3}}>Synesthetic Audio</div>
+        <p style={{fontSize:11,color:'var(--muted)',marginBottom:8}}>Each parameter value plays a unique tone when selected. Builds auditory-morphological associations.</p>
+        <label style={{display:'flex',alignItems:'center',gap:10,cursor:'pointer'}}>
+          <div onClick={()=>setSynOn(!synOn)} style={{width:40,height:22,borderRadius:11,background:synOn?'var(--accent)':'var(--border)',position:'relative',transition:'background .2s',cursor:'pointer'}}>
+            <div style={{width:16,height:16,borderRadius:'50%',background:'white',position:'absolute',top:3,left:synOn?21:3,transition:'left .2s'}}/>
+          </div>
+          <span style={{fontSize:12,color:'var(--text)'}}>{synOn?"Audio enabled — parameter selection plays tones":"Audio disabled"}</span>
+        </label>
+      </div>
+      <div className="card mb10">
+        <div style={{fontWeight:600,color:'var(--bright)',marginBottom:3}}>Database API Endpoint</div>
+        <p style={{fontSize:11,color:'var(--muted)',marginBottom:8}}>Connect to the Ithkuil IV GitHub database for complete morphological calculation.</p>
+        <input type="text" value={ep} onChange={e=>setEp(e.target.value)} placeholder="https://your-ithkuil-api.example.com/v1"/>
+        <div style={{display:'flex',gap:6,marginTop:6}}>
+          <button className="btn btn-ghost btn-sm" onClick={()=>{}}>Test Connection</button>
+          <button className="btn btn-ghost btn-sm">Save Endpoint</button>
+        </div>
+      </div>
+      <div className="card">
+        <div style={{fontWeight:600,color:'var(--bright)',marginBottom:3}}>About MORPHOS v3</div>
+        <p style={{fontSize:11,color:'var(--muted)',lineHeight:1.7}}>
+          Modular Ontological Reconceptualization and Precision Hyperlinguistic Operational System.<br/>
+          Ithkuil IV by John Quijada (2023). MORPHOS architecture v3.0.<br/>
+          Database integration ready: replace buildForm() with API calls.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+// Exact dark values for each endpoint — tint lerps between these
+const DARK={
+  lichess:{'--bg':'#0c0b0a','--surface':'#1b1917','--card':'#131211','--border':'#282522',
+           '--text':'#d8d4cf','--muted':'#6e6a66','--bright':'#f0ece8'},
+  discord:{'--bg':'#09090c','--surface':'#15161a','--card':'#0f1014','--border':'#222430',
+           '--text':'#d4d6df','--muted':'#606370','--bright':'#eceef5'},
+};
+const LIGHT_TEXT={
+  lichess:{'--text':'#201e1c','--muted':'#6e6a66','--bright':'#100e0c'},
+  discord:{'--text':'#1a1b1e','--muted':'#60656e','--bright':'#060607'},
+};
+
+// brightness: 0-100 continuous — named stops: 0=amoled(black) 33=dark 66=ash 100=light
+// tint: 0=lichess 100=discord
+function computeVars(tint,brightness){
+  const f=tint/100;
+  const h2=(hex,i)=>parseInt(hex.slice(i,i+2),16);
+  const lerpH=(a,b,t=f)=>{
+    const r=Math.round(h2(a,1)*(1-t)+h2(b,1)*t);
+    const g=Math.round(h2(a,3)*(1-t)+h2(b,3)*t);
+    const bv=Math.round(h2(a,5)*(1-t)+h2(b,5)*t);
+    return '#'+[r,g,bv].map(v=>Math.max(0,Math.min(255,v)).toString(16).padStart(2,'0')).join('');
+  };
+  const offsetH=(hex,off)=>{
+    return '#'+[1,3,5].map(i=>Math.max(0,Math.min(255,h2(hex,i)+off)).toString(16).padStart(2,'0')).join('');
+  };
+  // 0 → push bg to pure black, 33 → dark anchors (off=0), 66 → ash (+18), 100 → light (+220)
+  let bgOff;
+  if(brightness<=33)      bgOff=Math.round(-200*(1-brightness/33));
+  else if(brightness<=66) bgOff=Math.round(18*(brightness-33)/33);
+  else                    bgOff=Math.round(18+202*(brightness-66)/34);
+  const isLight=brightness>=80;
+  const vars={'--accent':'#3730a3','--accent2':'#4338ca'};
+  for(const k of['--bg','--surface','--card','--border']){
+    const base=lerpH(DARK.lichess[k],DARK.discord[k]);
+    const off=k==='--border'?Math.max(bgOff,-20):bgOff; // border never goes below ~dark-8
+    vars[k]=offsetH(base,off);
+  }
+  const txtSrc=isLight?LIGHT_TEXT:DARK;
+  for(const k of['--text','--muted','--bright'])
+    vars[k]=lerpH(txtSrc.lichess[k],txtSrc.discord[k]);
+  return vars;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   LAYER 19 — MAIN APP
+   ══════════════════════════════════════════════════════════════════ */
+function App(){
+  const[view,setView]=useState("dashboard");
+  const[apiKey,setApiKey]=useState("");
+  const[synOn,setSynOn]=useState(true);
+  const[lm,setLm]=useState(initLM());
+  const[sandboxParams,setSP]=useState(defaultP());
+  const[tint,setTint]=useState(50);
+  const[brightness,setBrightness]=useState(33); // 0-100: 0=amoled 33=dark 66=ash 100=light
+
+  useEffect(()=>{
+    const vars=computeVars(tint,brightness);
+    const root=document.documentElement;
+    Object.entries(vars).forEach(([k,v])=>root.style.setProperty(k,v));
+  },[tint,brightness]);
+
+  const updateLM=useCallback((targetParams,correct)=>{
+    setLm(prev=>{
+      const n={...prev,
+        totalAttempts:prev.totalAttempts+1,
+        totalCorrect:prev.totalCorrect+(correct?1:0),
+        xp:prev.xp+(correct?15:2),
+        streak:correct?prev.streak+1:0,
+      };
+      Object.entries(targetParams).forEach(([k,v])=>{
+        if(n[k]&&n[k][v]!==undefined){
+          n[k]={...n[k],[v]:Math.min(1,n[k][v]+(correct?0.07:-0.02))};
+        }
+      });
+      return n;
+    });
+  },[]);
+
+  const navSections=[
+    {id:"nav-learn",label:"Learn",items:[
+      {id:"framework",icon:"⊙",label:"Philosophy"},
+      {id:"dashboard",icon:"◈",label:"Dashboard"},
+    ]},
+    {id:"nav-train",label:"Train",items:[
+      {id:"puzzles",icon:"⬡",label:"Puzzle Hall"},
+      {id:"synesthetic",icon:"◉",label:"Synesthetic"},
+      {id:"cdw",icon:"◆",label:"Decompose"},
+      {id:"wde",icon:"⊘",label:"Deconstruct"},
+    ]},
+    {id:"nav-ref",label:"Reference",items:[
+      {id:"sandbox",icon:"□",label:"Sandbox"},
+      {id:"graph",icon:"∿",label:"Root Graph"},
+      {id:"cases",icon:"▷",label:"Cases"},
+    ]},
+    {id:"nav-adv",label:"Advanced",items:[
+      {id:"dialogue",icon:"~",label:"AI Dialogue"},
+      {id:"future",icon:"⊙",label:"Future"},
+      {id:"settings",icon:"⚙",label:"Settings"},
+    ]},
+  ];
+
+  const viewTitles={framework:"Philosophical Framework",dashboard:"Progress Dashboard",puzzles:"Puzzle Hall",synesthetic:"Synesthetic Training",cdw:"Concept Decomposition Workspace",wde:"Word Deconstruction Engine",sandbox:"Morphological Sandbox",graph:"Semantic Root Graph",cases:"Case Grammar Reference",dialogue:"Conceptual Dialogue Mode",future:"Future Features",settings:"Settings"};
+
+  const renderView=()=>{
+    if(view==="framework")  return <PhiloFramework/>;
+    if(view==="dashboard")  return <Dashboard lm={lm} onNav={setView}/>;
+    if(view==="puzzles")    return <PuzzleHall synOn={synOn} lm={lm} onXP={xp=>setLm(p=>({...p,xp:p.xp+xp}))}/>;
+    if(view==="synesthetic")return <SynestheticTrainer synOn={synOn} setSynOn={setSynOn}/>;
+    if(view==="cdw")        return <CDW params={sandboxParams} setParams={setSP} synOn={synOn}/>;
+    if(view==="wde")        return <WDE synOn={synOn}/>;
+    if(view==="sandbox")    return <Sandbox synOn={synOn}/>;
+    if(view==="graph")      return <SemanticGraph/>;
+    if(view==="cases")      return <CaseReference/>;
+    if(view==="dialogue")   return <DialogueMode apiKey={apiKey}/>;
+    if(view==="future")     return <FutureFeatures/>;
+    if(view==="settings")   return <Settings apiKey={apiKey} setApiKey={setApiKey} synOn={synOn} setSynOn={setSynOn} tint={tint} setTint={setTint} brightness={brightness} setBrightness={setBrightness}/>;
+  };
+
+  return(
+    <div style={{display:'flex',minHeight:'100vh'}}>
+      {/* SIDEBAR — v1 style */}
+      <div className="scroll-y" style={{width:180,background:'var(--surface)',borderRight:'1px solid var(--border)',display:'flex',flexDirection:'column',flexShrink:0,overflowY:'auto'}}>
+        <div style={{padding:'20px 14px 16px',borderBottom:'1px solid var(--border)'}}>
+          <h1 style={{fontSize:15,color:'var(--bright)',letterSpacing:'0.12em',lineHeight:1.2}}>MORPHOS</h1>
+          <p style={{fontSize:9,color:'var(--muted)',letterSpacing:'0.06em',marginTop:2}}>ITHKUIL IV LEARNING SYSTEM</p>
+          {synOn&&<div style={{marginTop:6,fontSize:9,color:'#16a34a',display:'flex',alignItems:'center',gap:4}}>
+            <div style={{width:5,height:5,borderRadius:'50%',background:'#16a34a',animation:'pulse 1.5s infinite'}}/>synesthetic active
+          </div>}
+        </div>
+        <nav style={{flex:1,padding:'8px 8px',display:'flex',flexDirection:'column',gap:2}}>
+          {navSections.map(sec=>(
+            <div key={sec.id}>
+              <div className="nav-section">{sec.label}</div>
+              {sec.items.map(item=>(
+                <button key={item.id} onClick={()=>setView(item.id)}
+                  style={{display:'flex',alignItems:'center',gap:8,padding:'7px 10px',borderRadius:6,border:'none',cursor:'pointer',textAlign:'left',fontFamily:'IBM Plex Sans,sans-serif',fontSize:12,fontWeight:view===item.id?600:400,background:view===item.id?'rgba(67,56,202,0.25)':'transparent',color:view===item.id?'var(--bright)':'var(--muted)',transition:'all 0.12s',width:'100%'}}>
+                  <span style={{fontSize:11,opacity:0.8}}>{item.icon}</span>{item.label}
+                </button>
+              ))}
+            </div>
+          ))}
+        </nav>
+        <div style={{padding:'10px 14px',borderTop:'1px solid var(--border)'}}>
+          <div style={{fontSize:10,color:'var(--muted)',marginBottom:4}}>Session XP</div>
+          <div style={{fontSize:20,fontFamily:'Cinzel,serif',color:'#f59e0b'}}>{lm.xp}</div>
+          <ProgressMeter value={Math.min(1,(lm.xp%200)/200)} color="#f59e0b"/>
+          <div style={{marginTop:4,fontSize:10,color:'var(--muted)'}}>Level {calcStage(lm)}/4 · {lm.streak}🔥 streak</div>
+        </div>
+      </div>
+      {/* MAIN */}
+      <div style={{flex:1,display:'flex',flexDirection:'column',minWidth:0}}>
+        <header style={{padding:'12px 24px',borderBottom:'1px solid var(--border)',background:'var(--surface)',display:'flex',alignItems:'center',justifyContent:'space-between',flexShrink:0}}>
+          <div>
+            <h2 style={{fontSize:15,color:'var(--bright)',fontFamily:'Cinzel,serif',letterSpacing:'0.06em'}}>{viewTitles[view]}</h2>
+          </div>
+          <div style={{display:'flex',gap:8,alignItems:'center'}}>
+            <InfoPill label="Streak" value={`${lm.streak}🔥`}/>
+            <InfoPill label="Exercises" value={lm.totalAttempts}/>
+            <button className="btn btn-ghost btn-sm" onClick={()=>{
+                const stops=[0,33,66,100];
+                const cur=stops.reduce((a,b)=>Math.abs(b-brightness)<Math.abs(a-brightness)?b:a);
+                setBrightness(stops[(stops.indexOf(cur)+1)%4]);
+              }} style={{color:'var(--muted)',borderColor:'var(--border)',minWidth:36}}>
+              {brightness<=16?"⬛":brightness<=50?"☾":brightness<=83?"◑":"☀"}
+            </button>
+            <button className="btn btn-ghost btn-sm" onClick={()=>setSynOn(v=>!v)}
+              style={{background:synOn?'rgba(67,56,202,0.2)':'transparent',color:synOn?'#818cf8':'var(--muted)',borderColor:synOn?'#4338ca44':'var(--border)'}}>
+              {synOn?"♪ on":"♪ off"}
+            </button>
+          </div>
+        </header>
+        <main className="scroll-y" style={{flex:1,padding:24,maxWidth:1100,width:'100%',margin:'0 auto',boxSizing:'border-box'}}>
+          <div className="anim-fade" key={view}>{renderView()}</div>
+        </main>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
