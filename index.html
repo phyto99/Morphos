@@ -9,6 +9,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.development.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.development.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/steveseguin/espeakng.js@master/js/espeakng.min.js"></script>
 <style>
 :root {
   --bg: #08080e; --surface: #0f0f1a; --card: #161623; --border: #252538;
@@ -3929,9 +3930,9 @@ function PuzzleHall({synOn,lm,onXP,onLmUpdate}){
                   const drillId=PARAM_DRILLS[pk]?.[0];
                   return(
                     <div key={`${pk}-${vid}`} style={{display:'flex',alignItems:'center',gap:8,padding:'5px 8px',borderRadius:5,
-                      background:'var(--surface)',border:`1px solid ${p.hex}33`}} onClick={()=>{
+                      background:'var(--surface)',border:`1px solid ${p.hex}33`,cursor:'pointer'}} onClick={()=>{
                         if(drillId&&PUZZLE_REGISTRY[drillId])setRegActive({id:drillId,def:PUZZLE_REGISTRY[drillId]});
-                      }} style={{cursor:'pointer'}}>
+                      }}>
                       <div style={{width:3,alignSelf:'stretch',background:p.hex,borderRadius:2,flexShrink:0}}/>
                       <div style={{flex:1}}>
                         <div style={{fontSize:11,color:'var(--text)'}}>{p.label} — <span style={{color:p.hex}}>{v.label}</span></div>
@@ -4658,7 +4659,10 @@ function WDE({synOn}){
       </div>
       <div className="card" style={{textAlign:'center',padding:20}}>
         <div style={{fontSize:9,color:'var(--muted)',marginBottom:6,textTransform:'uppercase',letterSpacing:'.1em'}}>Form to Deconstruct</div>
-        <span className="ithkuil" style={{fontSize:32,color:'var(--bright)',letterSpacing:'.14em'}}>{t.form}</span>
+        <div style={{display:'flex',alignItems:'center',justifyContent:'center',gap:10}}>
+          <span className="ithkuil" style={{fontSize:32,color:'var(--bright)',letterSpacing:'.14em'}}>{t.form}</span>
+          <button className="btn btn-ghost btn-sm" onClick={()=>speakIthkuil(t.form)} title="Hear pronunciation">▶</button>
+        </div>
         {phase===0&&<div style={{marginTop:12}}><button className="btn btn-primary btn-sm" onClick={()=>setPhase(1)}>Begin Archaeological Dig</button></div>}
       </div>
       {phase>=1&&(
@@ -5387,6 +5391,195 @@ function checkCluster(seq){
   return null;
 }
 
+/* ── ESPEAK-NG IPA SYNTHESIS ─────────────────────────────────────────────── */
+
+// Convert IPA string → eSpeak CXS phoneme notation for [[...]] inline input.
+// Multi-char sequences handled before single chars to avoid partial substitution.
+function ipaToEspeak(ipa) {
+  let s = ipa.trim();
+  // Affricates (before component stops)
+  s = s.replace(/tʃ/g,'tS');   s = s.replace(/dʒ/g,'dZ');
+  s = s.replace(/ts/g,'ts');   s = s.replace(/dz/g,'dz');
+  // Voiceless trill (r + U+0325 combining ring below) → trill approx
+  s = s.replace(/r\u0325/g,'r');
+  // Long vowels before length mark stripping
+  s = s.replace(/aː/g,'a:');   s = s.replace(/eː/g,'e:');
+  s = s.replace(/iː/g,'i:');   s = s.replace(/oː/g,'o:');   s = s.replace(/uː/g,'u:');
+  s = s.replace(/ː/g,':');
+  // Suprasegmentals
+  s = s.replace(/ˈ/g,"'");     s = s.replace(/ˌ/g,',');
+  // Vowels that need mapping (a e i o u pass through as-is)
+  s = s.replace(/ɛ/g,'E');     // open-mid front (Ithkuil 'e')
+  s = s.replace(/ø/g,'2');     // close-mid front rounded (Ithkuil 'ö')
+  s = s.replace(/y/g,'y');     // high front rounded (Ithkuil 'ü')
+  // Consonants — full Ithkuil inventory
+  s = s.replace(/θ/g,'T');     // voiceless dental fricative (ţ)
+  s = s.replace(/ð/g,'D');     // voiced dental fricative (ḑ)
+  s = s.replace(/ʃ/g,'S');     // voiceless postalveolar (š)
+  s = s.replace(/ʒ/g,'Z');     // voiced postalveolar (ž)
+  s = s.replace(/ç/g,'C');     // voiceless palatal fricative (ç)
+  s = s.replace(/ħ/g,'H');     // voiceless pharyngeal fricative (ħ)
+  s = s.replace(/ŋ/g,'N');     // velar nasal (ň)
+  s = s.replace(/ɬ/g,'l#');    // voiceless lateral fricative (ļ)
+  s = s.replace(/ʔ/g,'?');     // glottal stop (ʼ)
+  // p b t d k g q f v s z x h r l m n w j pass through unchanged
+  return s;
+}
+
+// Ithkuil romanization → IPA (built lazily from PHONO_CONSONANTS/PHONO_VOWELS)
+let _romKeys=null, _romMap=null;
+function romanToIPA(text) {
+  if (!_romKeys) {
+    _romMap={};
+    [...PHONO_CONSONANTS,...PHONO_VOWELS].forEach(x=>{ _romMap[x.r]=x.ipa; });
+    _romKeys=Object.keys(_romMap).sort((a,b)=>b.length-a.length);
+  }
+  let out='', i=0;
+  while(i<text.length){
+    const match=_romKeys.find(k=>text.startsWith(k,i));
+    if(match){out+=_romMap[match];i+=match.length;}
+    else{out+=text[i++];}
+  }
+  return out;
+}
+
+// eSpeak-NG engine (single instance, async init)
+let _espeakEngine=null, _espeakReady=false, _espeakQueue=[];
+(async function _initEspeak(){
+  const L=(msg,...a)=>console.log('[eSpeak]',msg,...a);
+  const E=(msg,...a)=>console.error('[eSpeak]',msg,...a);
+  L('starting init');
+  if(typeof eSpeakNG==='undefined'){E('eSpeakNG class not found — CDN script did not load');return;}
+  L('eSpeakNG class present');
+  try{
+    const CDN='https://cdn.jsdelivr.net/gh/steveseguin/espeakng.js@master/js/';
+    L('fetching worker + data from CDN...');
+    let workerSrc, dataBuf;
+    try{
+      workerSrc=await fetch(CDN+'espeakng.worker.js').then(r=>{
+        L('worker.js response status:',r.status);
+        if(!r.ok)throw new Error('worker.js HTTP '+r.status);
+        return r.text();
+      });
+      L('worker.js fetched, length:',workerSrc.length);
+      // Patch espeakPHONEMES flag: change hardcoded flags=0 → flags=256 in both branches of espeak_Synth call
+      const patched=workerSrc.replaceAll(',0,0,1,0,0,0,0)',',0,0,1,0,256,0,0)');
+      const patchCount=(workerSrc.match(/,0,0,1,0,0,0,0\)/g)||[]).length;
+      L('espeakPHONEMES patch applied to',patchCount,'call sites');
+      workerSrc=patched;
+    }catch(e){E('fetch worker.js failed:',e);throw e;}
+    try{
+      dataBuf=await fetch(CDN+'espeakng.worker.data').then(r=>{
+        L('worker.data response status:',r.status);
+        if(!r.ok)throw new Error('worker.data HTTP '+r.status);
+        return r.arrayBuffer();
+      });
+      L('worker.data fetched, bytes:',dataBuf.byteLength);
+    }catch(e){E('fetch worker.data failed:',e);throw e;}
+    L('base64-encoding data...');
+    const u8=new Uint8Array(dataBuf);
+    let bin='';
+    for(let i=0;i<u8.length;i+=0x8000) bin+=String.fromCharCode(...u8.subarray(i,i+0x8000));
+    const b64=btoa(bin);
+    L('base64 length:',b64.length);
+    const prefix=
+      `var _ED=(function(){const s=atob('${b64}');`+
+      `const a=new ArrayBuffer(s.length);const v=new Uint8Array(a);`+
+      `for(let i=0;i<s.length;i++)v[i]=s.charCodeAt(i);return a;})();\n`+
+      'self.postMessage({_espeakDataReady:true});\n'+
+      '(function(){const _X=XMLHttpRequest;'+
+      'XMLHttpRequest=function(){'+
+      '  const x=new _X(),_oo=x.open.bind(x),_os=x.send.bind(x);let _d=false;'+
+      '  x.open=function(m,u){'+
+      '    if(typeof u===\'string\'&&/\\.data$/.test(u)){_d=true;return;}'+
+      '    return _oo.apply(x,arguments);'+
+      '  };'+
+      '  x.send=function(){'+
+      '    if(_d){'+
+      '      setTimeout(function(){'+
+      '        Object.defineProperty(x,\'readyState\',{get:function(){return 4;},configurable:true});'+
+      '        Object.defineProperty(x,\'status\',{get:function(){return 200;},configurable:true});'+
+      '        Object.defineProperty(x,\'response\',{get:function(){return _ED;},configurable:true});'+
+      '        if(x.onreadystatechange)x.onreadystatechange();'+
+      '        if(x.onload)x.onload();'+
+      '      },0);return;'+
+      '    }'+
+      '    return _os.apply(x,arguments);'+
+      '  };'+
+      '  return x;'+
+      '};'+
+      'XMLHttpRequest.DONE=4;XMLHttpRequest.OPENED=1;'+
+      'XMLHttpRequest.HEADERS_RECEIVED=2;XMLHttpRequest.LOADING=3;XMLHttpRequest.UNSENT=0;'+
+      '})();\n';
+    L('building worker blob...');
+    const wURL=URL.createObjectURL(new Blob([prefix+workerSrc],{type:'application/javascript'}));
+    L('worker blob URL created, launching eSpeakNG...');
+    _espeakEngine=new eSpeakNG(wURL,(engine)=>{
+      L('ready callback fired, setting voice...');
+      _espeakEngine.set_voice('en');
+      L('voice set to en — engine ready');
+      _espeakReady=true;
+      URL.revokeObjectURL(wURL);
+      _espeakQueue.forEach(fn=>fn());
+      _espeakQueue=[];
+    });
+    // Log any messages coming back from the worker for diagnosis
+    if(_espeakEngine._worker){
+      const orig=_espeakEngine._worker.onmessage;
+      _espeakEngine._worker.addEventListener('message',e=>{
+        if(e.data&&e.data._espeakDataReady) L('worker: data decoded OK');
+      });
+      _espeakEngine._worker.addEventListener('error',e=>{
+        E('worker error:',e.message,e.filename,e.lineno);
+      });
+    }
+    L('eSpeakNG constructor returned, waiting for ready...');
+  }catch(e){E('init failed:',e);}
+})();
+
+function _doSpeakIPA(ipa){
+  if(!_espeakEngine) return;
+  const chunks=[];
+  const ph=ipaToEspeak(ipa.trim());
+  _espeakEngine.synthesize(`[[${ph}]]`,(samples)=>{
+    if(samples===undefined){
+      // End-of-synthesis signal — concatenate all chunks and play once
+      const total=chunks.reduce((s,c)=>s+c.length,0);
+      if(!total) return;
+      const ctx=getAudioCtx();
+      ctx.resume().then(()=>{
+        const buf=ctx.createBuffer(1,total,22050);
+        const ch=buf.getChannelData(0);
+        let off=0;
+        for(const c of chunks){ch.set(c,off);off+=c.length;}
+        const src=ctx.createBufferSource();
+        src.buffer=buf; src.connect(ctx.destination); src.start();
+      });
+      return;
+    }
+    const buf=samples instanceof ArrayBuffer?samples:samples.buffer;
+    if(!buf||!buf.byteLength) return;
+    // eSpeak worker delivers Float32 stereo-interleaved [L0,R0,L1,R1,...] at 22050 Hz
+    // L == R (mono source duplicated), so just take left channel
+    const f32=new Float32Array(buf);
+    const frames=Math.floor(f32.length/2);
+    if(!frames) return;
+    const mono=new Float32Array(frames);
+    for(let i=0;i<frames;i++) mono[i]=f32[i*2];
+    chunks.push(mono);
+  });
+}
+
+// Speak an IPA string (queues if engine not yet ready)
+function speakIPA(ipa){
+  if(!ipa) return;
+  if(_espeakReady) _doSpeakIPA(ipa);
+  else _espeakQueue.push(()=>_doSpeakIPA(ipa));
+}
+
+// Speak an Ithkuil word in romanized form
+function speakIthkuil(roman){ speakIPA(romanToIPA(roman)); }
+
 /* ── PHONOLOGY VIEW ──────────────────────────────────────────────────────── */
 function Phonology(){
   const[tab,setTab]=useState('consonants');
@@ -5405,18 +5598,7 @@ function Phonology(){
     consonants:PHONO_CONSONANTS.filter(c=>c.manner===mn),
   })).filter(g=>g.consonants.length);
 
-  const speak=(ipa,note)=>{
-    if(!window.speechSynthesis) return;
-    // Extract an example word from the note (e.g. 'as in English "pin"' → "pin")
-    const wordMatch = note && note.match(/"([^"]+)"/);
-    const exampleWord = wordMatch ? wordMatch[1] : null;
-    const u = new SpeechSynthesisUtterance(exampleWord || ipa);
-    u.lang = 'en-US';
-    u.rate = 0.6;
-    u.pitch = 1;
-    window.speechSynthesis.cancel();
-    window.speechSynthesis.speak(u);
-  };
+  const speak=(ipa)=>speakIPA(ipa);
 
   const clusterResult=checkCluster(testInput);
 
@@ -5474,7 +5656,7 @@ function Phonology(){
           <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:8}}>
             <span style={{fontSize:36,fontFamily:'IBM Plex Mono',color:'var(--bright)'}}>{sel.r}</span>
             <span style={{fontSize:24,fontFamily:'IBM Plex Mono',color:'var(--accent2)'}}>[{sel.ipa}]</span>
-            <button className="btn btn-ghost btn-sm" onClick={()=>speak(sel.ipa,sel.note)}>▶ Hear</button>
+            <button className="btn btn-ghost btn-sm" onClick={()=>speak(sel.ipa)}>▶ Hear</button>
             <div style={{marginLeft:'auto',fontSize:11,color:'var(--muted)'}}>{sel.place} · {sel.manner} · {sel.voice?'voiced':'voiceless'}</div>
           </div>
           <p style={{fontSize:12,color:'var(--text)',lineHeight:1.7}}>{sel.note}</p>
@@ -5535,7 +5717,7 @@ function Phonology(){
                   <span style={{fontFamily:'IBM Plex Mono',fontWeight:700,fontSize:16,color:'var(--bright)',minWidth:24}}>{v.r}</span>
                   <span style={{fontFamily:'IBM Plex Mono',color:'var(--accent2)',fontSize:12,minWidth:36}}>[{v.ipa}]</span>
                   <span style={{fontSize:11,color:'var(--muted)',lineHeight:1.4,flex:1}}>{v.desc}</span>
-                  <button className="btn btn-ghost btn-xs" onClick={()=>speak(v.ipa,v.desc)}>▶</button>
+                  <button className="btn btn-ghost btn-xs" onClick={()=>speak(v.ipa)}>▶</button>
                 </div>
               ))}
             </div>
@@ -5583,7 +5765,8 @@ function Phonology(){
           <div style={{fontSize:11,fontWeight:600,color:'var(--bright)',marginBottom:8}}>Cluster Validity Checker</div>
           <p style={{fontSize:11,color:'var(--muted)',marginBottom:10}}>Enter a consonant sequence to check phonotactic validity.</p>
           <div style={{display:'flex',gap:8,alignItems:'center',marginBottom:8}}>
-            <input value={testInput} onChange={e=>setTestInput(e.target.value)} placeholder="e.g. str, kl, nl…" style={{flex:1}}/>
+            <input value={testInput} onChange={e=>setTestInput(e.target.value)} placeholder="e.g. kţalö, str, rmela…" style={{flex:1}}/>
+            <button className="btn btn-ghost btn-sm" onClick={()=>testInput&&speakIthkuil(testInput)} title="Hear pronunciation">▶</button>
             <div style={{padding:'6px 12px',borderRadius:6,fontSize:12,fontWeight:600,minWidth:80,textAlign:'center',
               background:clusterResult===null?'var(--surface)':clusterResult?'rgba(34,197,94,.15)':'rgba(239,68,68,.1)',
               border:`1px solid ${clusterResult===null?'var(--border)':clusterResult?'#22c55e44':'#ef444444'}`,
@@ -5629,7 +5812,7 @@ function Phonology(){
             <div key={r} style={{display:'flex',gap:10,padding:'6px 0',borderBottom:'1px solid var(--border)22'}}>
               <span style={{fontFamily:'IBM Plex Mono',fontWeight:700,fontSize:18,color:'var(--bright)',minWidth:24,flexShrink:0}}>{r}</span>
               <span style={{fontSize:11,color:'var(--text)',lineHeight:1.6}}>{tip}</span>
-              <button className="btn btn-ghost btn-xs" style={{flexShrink:0,alignSelf:'flex-start'}} onClick={()=>speak(PHONO_CONSONANTS.find(c=>c.r===r)?.ipa||r, tip)}>▶</button>
+              <button className="btn btn-ghost btn-xs" style={{flexShrink:0,alignSelf:'flex-start'}} onClick={()=>speak(PHONO_CONSONANTS.find(c=>c.r===r)?.ipa)}>▶</button>
             </div>
           ))}
         </div>
