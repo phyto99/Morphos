@@ -9,6 +9,16 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.development.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.development.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+<!-- meSpeak.js: eSpeak compiled to JS — handles IPA phonemes including ř ļ ħ ç -->
+<script src="https://cdn.jsdelivr.net/npm/mespeak@2.0.2/src/mespeak.js"></script>
+<script>
+// Load meSpeak with English voice (closest to Ithkuil phonology base)
+// We'll use IPA mode ([[...]] notation) for accurate phoneme rendering
+if(typeof meSpeak !== 'undefined'){
+  meSpeak.loadConfig('https://cdn.jsdelivr.net/npm/mespeak@2.0.2/src/mespeak_config.json');
+  meSpeak.loadVoice('https://cdn.jsdelivr.net/npm/mespeak@2.0.2/voices/en/en.json');
+}
+</script>
 <style>
 :root {
   --bg: #08080e; --surface: #0f0f1a; --card: #161623; --border: #252538;
@@ -4712,7 +4722,6 @@ function SemanticGraph(){
   const[pan,setPan]=useState({x:0,y:0});
   const[dragging,setDragging]=useState(false);
   const dragStart=useRef(null);
-  const svgRef=useRef(null);
   const W=1800,H=1200;
   const domainColors={"I":"#b91c1c","II":"#c2410c","III":"#92400e","IV":"#4d7c0f","V":"#0f766e","VI":"#1d4ed8","VII":"#6d28d9","VIII":"#7c3aed","IX":"#0369a1"};
   const domainNames={"I":"Body","II":"Mind","III":"Language","IV":"Social","V":"Physical","VI":"Living","VII":"Artifact","VIII":"Value","IX":"Abstract"};
@@ -4755,8 +4764,16 @@ function SemanticGraph(){
   },[dragging]);
   const onMouseUp=useCallback(()=>setDragging(false),[]);
   const onWheel=useCallback(e=>{
-    e.preventDefault();
     setZoom(z=>Math.max(0.15,Math.min(3,z*(e.deltaY<0?1.1:0.91))));
+  },[]);
+  // Attach non-passive wheel listener so we can preventDefault (React onWheel is passive)
+  const containerRef=useRef(null);
+  useEffect(()=>{
+    const el=containerRef.current;
+    if(!el) return;
+    const handler=(e)=>{ e.preventDefault(); setZoom(z=>Math.max(0.15,Math.min(3,z*(e.deltaY<0?1.1:0.91)))); };
+    el.addEventListener('wheel',handler,{passive:false});
+    return ()=>el.removeEventListener('wheel',handler);
   },[]);
 
   const r=selected?ROOTS.find(x=>x.id===selected):null;
@@ -4779,7 +4796,7 @@ function SemanticGraph(){
     {/* SVG canvas */}
     <div style={{flex:1,minHeight:480,background:'var(--surface)',border:'1px solid var(--border)',borderRadius:8,overflow:'hidden',cursor:dragging?'grabbing':'grab',position:'relative'}}
       onMouseDown={onMouseDown} onMouseMove={onMouseMove} onMouseUp={onMouseUp} onMouseLeave={onMouseUp}
-      onWheel={onWheel} ref={svgRef}>
+      ref={containerRef}>
       <svg width="100%" height="100%" viewBox={`0 0 900 600`} preserveAspectRatio="xMidYMid meet"
         style={{display:'block'}}>
         <g transform={`translate(${pan.x*0.5},${pan.y*0.5}) scale(${zoom})`}
@@ -5399,6 +5416,25 @@ function Phonology(){
   })).filter(g=>g.consonants.length);
 
   const speak=(text)=>{
+    // Ithkuil romanization → IPA mapping for meSpeak [[ipa]] mode
+    const IPA_MAP={
+      'ř':'r̝','ļ':'ɬ','ţ':'θ','ḑ':'ð','ç':'ç','x':'x','ħ':'ħ',
+      'ʼ':'ʔ','č':'tʃ','j':'dʒ','š':'ʃ','ž':'ʒ','ň':'ŋ',
+      'â':'aː','ê':'eː','î':'iː','ô':'oː','û':'uː','ö':'ø','ü':'y',
+      'á':'a','é':'e','í':'i','ó':'o','ú':'u',
+    };
+    // Build IPA string by replacing known chars
+    let ipa=text;
+    Object.entries(IPA_MAP).forEach(([rom,ph])=>{ ipa=ipa.split(rom).join(ph); });
+
+    // Try meSpeak IPA mode first
+    if(typeof meSpeak!=='undefined'&&meSpeak.isConfigLoaded()){
+      try{
+        meSpeak.speak('[['+ipa+']]',{speed:120,pitch:50,volume:1});
+        return;
+      }catch(e){}
+    }
+    // Fallback: Web Speech API
     if(!window.speechSynthesis)return;
     const u=new SpeechSynthesisUtterance(text);
     u.rate=0.5;u.pitch=1;
