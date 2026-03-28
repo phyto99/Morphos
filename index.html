@@ -4791,8 +4791,9 @@ function computeVars(tint,brightness){
     const darkBase=lerpH(DARK.lichess[k],DARK.discord[k]);
     let color;
     if(brightness<=33){
-      // lerp from pure black (#000000) to the dark anchor
-      color=lerpH('#000000',darkBase,t01);
+      // bg/surface/card lerp to pure black; border keeps a faint floor so separators stay visible
+      const amoledFloor=k==='--border'?'#1a1a1a':'#000000';
+      color=lerpH(amoledFloor,darkBase,t01);
     } else if(brightness<=66){
       const t=( brightness-33)/33;
       color=offsetH(darkBase,Math.round(18*t));
