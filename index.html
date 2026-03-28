@@ -9,16 +9,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.development.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.development.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
-<!-- meSpeak.js: eSpeak compiled to JS — handles IPA phonemes including ř ļ ħ ç -->
-<script src="https://cdn.jsdelivr.net/npm/mespeak@2.0.2/src/mespeak.js"></script>
-<script>
-// Load meSpeak with English voice (closest to Ithkuil phonology base)
-// We'll use IPA mode ([[...]] notation) for accurate phoneme rendering
-if(typeof meSpeak !== 'undefined'){
-  meSpeak.loadConfig('https://cdn.jsdelivr.net/npm/mespeak@2.0.2/src/mespeak_config.json');
-  meSpeak.loadVoice('https://cdn.jsdelivr.net/npm/mespeak@2.0.2/voices/en/en.json');
-}
-</script>
 <style>
 :root {
   --bg: #08080e; --surface: #0f0f1a; --card: #161623; --border: #252538;
@@ -5415,29 +5405,16 @@ function Phonology(){
     consonants:PHONO_CONSONANTS.filter(c=>c.manner===mn),
   })).filter(g=>g.consonants.length);
 
-  const speak=(text)=>{
-    // Ithkuil romanization → IPA mapping for meSpeak [[ipa]] mode
-    const IPA_MAP={
-      'ř':'r̝','ļ':'ɬ','ţ':'θ','ḑ':'ð','ç':'ç','x':'x','ħ':'ħ',
-      'ʼ':'ʔ','č':'tʃ','j':'dʒ','š':'ʃ','ž':'ʒ','ň':'ŋ',
-      'â':'aː','ê':'eː','î':'iː','ô':'oː','û':'uː','ö':'ø','ü':'y',
-      'á':'a','é':'e','í':'i','ó':'o','ú':'u',
-    };
-    // Build IPA string by replacing known chars
-    let ipa=text;
-    Object.entries(IPA_MAP).forEach(([rom,ph])=>{ ipa=ipa.split(rom).join(ph); });
-
-    // Try meSpeak IPA mode first
-    if(typeof meSpeak!=='undefined'&&meSpeak.isConfigLoaded()){
-      try{
-        meSpeak.speak('[['+ipa+']]',{speed:120,pitch:50,volume:1});
-        return;
-      }catch(e){}
-    }
-    // Fallback: Web Speech API
-    if(!window.speechSynthesis)return;
-    const u=new SpeechSynthesisUtterance(text);
-    u.rate=0.5;u.pitch=1;
+  const speak=(ipa,note)=>{
+    if(!window.speechSynthesis) return;
+    // Extract an example word from the note (e.g. 'as in English "pin"' → "pin")
+    const wordMatch = note && note.match(/"([^"]+)"/);
+    const exampleWord = wordMatch ? wordMatch[1] : null;
+    const u = new SpeechSynthesisUtterance(exampleWord || ipa);
+    u.lang = 'en-US';
+    u.rate = 0.6;
+    u.pitch = 1;
+    window.speechSynthesis.cancel();
     window.speechSynthesis.speak(u);
   };
 
@@ -5497,7 +5474,7 @@ function Phonology(){
           <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:8}}>
             <span style={{fontSize:36,fontFamily:'IBM Plex Mono',color:'var(--bright)'}}>{sel.r}</span>
             <span style={{fontSize:24,fontFamily:'IBM Plex Mono',color:'var(--accent2)'}}>[{sel.ipa}]</span>
-            <button className="btn btn-ghost btn-sm" onClick={()=>speak(sel.r)}>▶ Hear</button>
+            <button className="btn btn-ghost btn-sm" onClick={()=>speak(sel.ipa,sel.note)}>▶ Hear</button>
             <div style={{marginLeft:'auto',fontSize:11,color:'var(--muted)'}}>{sel.place} · {sel.manner} · {sel.voice?'voiced':'voiceless'}</div>
           </div>
           <p style={{fontSize:12,color:'var(--text)',lineHeight:1.7}}>{sel.note}</p>
@@ -5558,7 +5535,7 @@ function Phonology(){
                   <span style={{fontFamily:'IBM Plex Mono',fontWeight:700,fontSize:16,color:'var(--bright)',minWidth:24}}>{v.r}</span>
                   <span style={{fontFamily:'IBM Plex Mono',color:'var(--accent2)',fontSize:12,minWidth:36}}>[{v.ipa}]</span>
                   <span style={{fontSize:11,color:'var(--muted)',lineHeight:1.4,flex:1}}>{v.desc}</span>
-                  <button className="btn btn-ghost btn-xs" onClick={()=>speak(v.r)}>▶</button>
+                  <button className="btn btn-ghost btn-xs" onClick={()=>speak(v.ipa,v.desc)}>▶</button>
                 </div>
               ))}
             </div>
@@ -5652,7 +5629,7 @@ function Phonology(){
             <div key={r} style={{display:'flex',gap:10,padding:'6px 0',borderBottom:'1px solid var(--border)22'}}>
               <span style={{fontFamily:'IBM Plex Mono',fontWeight:700,fontSize:18,color:'var(--bright)',minWidth:24,flexShrink:0}}>{r}</span>
               <span style={{fontSize:11,color:'var(--text)',lineHeight:1.6}}>{tip}</span>
-              <button className="btn btn-ghost btn-xs" style={{flexShrink:0,alignSelf:'flex-start'}} onClick={()=>speak(r)}>▶</button>
+              <button className="btn btn-ghost btn-xs" style={{flexShrink:0,alignSelf:'flex-start'}} onClick={()=>speak(PHONO_CONSONANTS.find(c=>c.r===r)?.ipa||r, tip)}>▶</button>
             </div>
           ))}
         </div>
