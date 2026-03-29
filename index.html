@@ -148,6 +148,16 @@ body, .card, .card2, .glass, .sidebar, .topbar, .nav-btn, .btn, .tab, .slot, .sl
 /* SCENARIO CANVAS */
 .scenario-box { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 12px; min-height: 120px; display: flex; align-items: center; justify-content: center; }
 .stage { padding: 8px 12px; border-radius: 6px; border: 1px solid; font-size: 13px; }
+
+/* YUORB TIP CARD */
+.ytip-btn { background: none; border: none; cursor: pointer; color: #4338ca; font-size: 11px; padding: 0 3px; line-height: 1; opacity: .7; transition: opacity .1s; vertical-align: middle; }
+.ytip-btn:hover { opacity: 1; }
+.ytip-anchor { position: relative; display: inline-block; }
+.ytip-card { position: absolute; z-index: 9999; width: 290px; background: #0f0f1e; border: 1px solid #4338ca55; border-radius: 9px; padding: 13px 14px 11px; box-shadow: 0 12px 40px rgba(0,0,0,.7); animation: fadeIn .15s ease; }
+.ytip-card.up   { bottom: calc(100% + 7px); left: 50%; transform: translateX(-50%); }
+.ytip-card.down { top: calc(100% + 7px); left: 50%; transform: translateX(-50%); }
+.ytip-card.left { bottom: calc(100% + 7px); right: 0; transform: none; }
+.ytip-card.right{ bottom: calc(100% + 7px); left: 0; transform: none; }
 </style>
 </head>
 <body>
@@ -1535,6 +1545,203 @@ function lookupRoot(cr){
   return window.IK.rootIndex[cr.toLowerCase()]||null;
 }
 
+/* ══════════════════════════════════════════════════════════════════
+   YUORB TIP SYSTEM
+   Fetches yuorb.github.io reference sections on demand, caches in
+   localStorage for 24 h. Each ⓘ button maps to a specific anchor.
+   ══════════════════════════════════════════════════════════════════ */
+const YUORB_BASE='https://yuorb.github.io/en/docs/';
+const TIP_TTL=86400000;
+const _tipMem={};
+
+const TIP_MAP={
+  // ── Phonology (ch.01) ──────────────────────────────────────────
+  'phono:vowels':       {page:'01.html',anchor:'Sec1_2_1',label:'Vowel Pronunciation'},
+  'phono:consonants':   {page:'01.html',anchor:'Sec1_2_2',label:'Consonant Pronunciation'},
+  'phono:stress':       {page:'01.html',anchor:'Sec1_3_1',label:'Syllabic Stress'},
+  'phono:gemination':   {page:'01.html',anchor:'Sec1_4',  label:'Gemination'},
+  'phono:phonotactics': {page:'01.html',anchor:'Sec1_5',  label:'Phonotactics'},
+  // ── Slots / Morpho-Phonology (ch.02) ──────────────────────────
+  'slot:Cc':  {page:'02.html',anchor:'Sec2_3',   label:'Slot I — Cc (Concatenation)'},
+  'slot:Vv':  {page:'02.html',anchor:'Sec2_3',   label:'Slot II — Vv (Version/Stem)'},
+  'slot:Cr':  {page:'02.html',anchor:'Sec2_4_1', label:'Slot III — Cr (Root)'},
+  'slot:Vr':  {page:'02.html',anchor:'Sec2_3',   label:'Slot IV — Vr (Function/Spec/Context)'},
+  'slot:Ca':  {page:'03.html',anchor:'Sec3_6',   label:'Slot VI — Ca Complex'},
+  'slot:Vc':  {page:'04.html',anchor:'Sec4_1',   label:'Slot IX — Vc (Case)'},
+  'slot:Vn':  {page:'05.html',anchor:'Sec5_1',   label:'Slot VIII — Vn (Valence/Mood)'},
+  // ── Ca parameters (ch.03) ─────────────────────────────────────
+  'param:configuration':{page:'03.html',anchor:'Sec3_1',  label:'Configuration'},
+  'param:affiliation':  {page:'03.html',anchor:'Sec3_2',  label:'Affiliation'},
+  'param:perspective':  {page:'03.html',anchor:'Sec3_3',  label:'Perspective'},
+  'param:extension':    {page:'03.html',anchor:'Sec3_4',  label:'Extension'},
+  'param:essence':      {page:'03.html',anchor:'Sec3_5',  label:'Essence'},
+  'param:specification':{page:'02.html',anchor:'Sec2_4_4',label:'Specification'},
+  'param:function':     {page:'03.html',anchor:'Sec3_8',  label:'Function (STA/DYN)'},
+  'param:context':      {page:'03.html',anchor:'Sec3_9',  label:'Context'},
+  // ── Register / verbal (ch.05–06) ──────────────────────────────
+  'param:mood':         {page:'05.html',anchor:'Sec5_2',  label:'Mood'},
+  'param:validation':   {page:'06.html',anchor:'Sec6_1_2',label:'Validation'},
+  'param:aspect':       {page:'05.html',anchor:'Sec5_6',  label:'Aspect (36 values)'},
+  'param:phase':        {page:'05.html',anchor:'Sec5_3',  label:'Phase'},
+  'param:effect':       {page:'05.html',anchor:'Sec5_4',  label:'Effect'},
+  'param:level':        {page:'05.html',anchor:'Sec5_5',  label:'Level'},
+  'param:valence':      {page:'05.html',anchor:'Sec5_1',  label:'Valence'},
+  'param:bias':         {page:'08.html',anchor:'Sec8_5',  label:'Bias Adjuncts'},
+  'param:illocution':   {page:'06.html',anchor:'Sec6_1',  label:'Illocution'},
+  // ── Cases (ch.04) — transrelative ─────────────────────────────
+  'case:THM':{page:'04.html',anchor:'Sec4_1_1',label:'Thematic'},
+  'case:INS':{page:'04.html',anchor:'Sec4_1_1',label:'Instrumental'},
+  'case:ABS':{page:'04.html',anchor:'Sec4_1_1',label:'Absolutive'},
+  'case:AFF':{page:'04.html',anchor:'Sec4_1_1',label:'Affective'},
+  'case:STM':{page:'04.html',anchor:'Sec4_1_1',label:'Stimulative'},
+  'case:EFF':{page:'04.html',anchor:'Sec4_1_1',label:'Effectuative'},
+  'case:ERG':{page:'04.html',anchor:'Sec4_1_1',label:'Ergative'},
+  'case:DAT':{page:'04.html',anchor:'Sec4_1_1',label:'Dative'},
+  'case:IND':{page:'04.html',anchor:'Sec4_1_1',label:'Inducive'},
+  // appositive
+  'case:POS':{page:'04.html',anchor:'Sec4_2',label:'Possessive'},
+  'case:PRP':{page:'04.html',anchor:'Sec4_2',label:'Proprietive'},
+  'case:GEN':{page:'04.html',anchor:'Sec4_2',label:'Genitive'},
+  'case:ATT':{page:'04.html',anchor:'Sec4_2',label:'Attributive'},
+  'case:PDC':{page:'04.html',anchor:'Sec4_2',label:'Productive'},
+  'case:ITP':{page:'04.html',anchor:'Sec4_2',label:'Interpretative'},
+  'case:OGN':{page:'04.html',anchor:'Sec4_2',label:'Originative'},
+  'case:IDP':{page:'04.html',anchor:'Sec4_2',label:'Interdependent'},
+  'case:PAR':{page:'04.html',anchor:'Sec4_2',label:'Partitive'},
+  // associative
+  'case:APL':{page:'04.html',anchor:'Sec4_3',label:'Applicative'},
+  'case:PUR':{page:'04.html',anchor:'Sec4_3',label:'Purposive'},
+  'case:TRA':{page:'04.html',anchor:'Sec4_3',label:'Transmissive'},
+  'case:DFR':{page:'04.html',anchor:'Sec4_3',label:'Deferential'},
+  'case:CRS':{page:'04.html',anchor:'Sec4_3',label:'Contrastive'},
+  'case:TSP':{page:'04.html',anchor:'Sec4_3',label:'Transpositive'},
+  'case:CMM':{page:'04.html',anchor:'Sec4_3',label:'Commutative'},
+  'case:CMP':{page:'04.html',anchor:'Sec4_3',label:'Comparative'},
+  'case:CSD':{page:'04.html',anchor:'Sec4_3',label:'Considerative'},
+  // adverbial
+  'case:FUN':{page:'04.html',anchor:'_4-5-adverbial-cases',label:'Functive'},
+  'case:TFM':{page:'04.html',anchor:'_4-5-adverbial-cases',label:'Transformative'},
+  'case:CLA':{page:'04.html',anchor:'_4-5-adverbial-cases',label:'Classificative'},
+  'case:RSL':{page:'04.html',anchor:'_4-5-adverbial-cases',label:'Resultative'},
+  'case:CSM':{page:'04.html',anchor:'_4-5-adverbial-cases',label:'Consumptive'},
+  'case:CON':{page:'04.html',anchor:'_4-5-adverbial-cases',label:'Concessive'},
+  'case:AVR':{page:'04.html',anchor:'_4-5-adverbial-cases',label:'Aversive'},
+  'case:CVS':{page:'04.html',anchor:'_4-5-adverbial-cases',label:'Conversive'},
+  'case:SIT':{page:'04.html',anchor:'_4-5-adverbial-cases',label:'Situative'},
+  // relational
+  'case:PRN':{page:'04.html',anchor:'Sec4_6',label:'Pertinential'},
+  'case:DSP':{page:'04.html',anchor:'Sec4_6',label:'Descriptive'},
+  'case:COR':{page:'04.html',anchor:'Sec4_6',label:'Correlative'},
+  'case:CPS':{page:'04.html',anchor:'Sec4_6',label:'Compositive'},
+  'case:COM':{page:'04.html',anchor:'Sec4_6',label:'Comitative'},
+  'case:UTL':{page:'04.html',anchor:'Sec4_6',label:'Utilitative'},
+  'case:PRD':{page:'04.html',anchor:'Sec4_6',label:'Predicative'},
+  'case:RLT':{page:'04.html',anchor:'Sec4_6',label:'Relative'},
+  // affinitive
+  'case:ACT':{page:'04.html',anchor:'_4-7-the-affinitive-cases',label:'Activative'},
+  'case:ASI':{page:'04.html',anchor:'_4-7-the-affinitive-cases',label:'Assimilative'},
+  'case:ESS':{page:'04.html',anchor:'_4-7-the-affinitive-cases',label:'Essive'},
+  'case:TRM':{page:'04.html',anchor:'_4-7-the-affinitive-cases',label:'Terminative'},
+  'case:SEL':{page:'04.html',anchor:'_4-7-the-affinitive-cases',label:'Selective'},
+  'case:CFM':{page:'04.html',anchor:'_4-7-the-affinitive-cases',label:'Conformative'},
+  'case:DEP':{page:'04.html',anchor:'_4-7-the-affinitive-cases',label:'Dependent'},
+  'case:VOC':{page:'04.html',anchor:'_4-7-the-affinitive-cases',label:'Vocative'},
+};
+
+// Fetch a section from yuorb, extract text after the anchor heading, cache 24h
+async function fetchYuorbTip(page,anchor){
+  const key=page+'#'+anchor;
+  if(_tipMem[key]&&Date.now()-_tipMem[key].ts<TIP_TTL) return _tipMem[key].text;
+  try{
+    const stored=JSON.parse(localStorage.getItem('yuorb:'+key)||'null');
+    if(stored&&Date.now()-stored.ts<TIP_TTL){_tipMem[key]=stored;return stored.text;}
+  }catch(e){}
+  try{
+    const html=await fetch(YUORB_BASE+page,{cache:'no-store'}).then(r=>r.text());
+    const doc=new DOMParser().parseFromString(html,'text/html');
+    // Try id match, then name match
+    let el=doc.getElementById(anchor)||doc.querySelector(`[name="${anchor}"]`);
+    // Also try the heading that contains a child with this id (VuePress wraps anchors in <a>)
+    if(!el){
+      const a=doc.querySelector(`a[href="#${anchor}"]`);
+      el=a?a.closest('h1,h2,h3,h4,h5,p'):null;
+    }
+    if(!el) return null;
+    // Walk siblings to collect up to 3 paragraphs of content
+    let text='',node=el.nextElementSibling,count=0;
+    while(node&&count<4){
+      const tag=node.tagName.toLowerCase();
+      if(/^h[1-4]$/.test(tag)) break;
+      const t=node.textContent.replace(/\s+/g,' ').trim();
+      if(t.length>20){text+=t+' ';count++;}
+      node=node.nextElementSibling;
+    }
+    text=text.trim().replace(/\s+/g,' ').slice(0,420);
+    if(!text) return null;
+    const entry={text,ts:Date.now()};
+    _tipMem[key]=entry;
+    try{localStorage.setItem('yuorb:'+key,JSON.stringify(entry));}catch(e){}
+    return text;
+  }catch(e){return null;}
+}
+
+function YuorbTip({tipKey,placement='up'}){
+  const[open,setOpen]=useState(false);
+  const[text,setText]=useState(null);
+  const[loading,setLoading]=useState(false);
+  const ref=useRef();
+  const entry=TIP_MAP[tipKey];
+  if(!entry) return null;
+
+  const load=async(e)=>{
+    e.stopPropagation();
+    if(open){setOpen(false);return;}
+    setOpen(true);
+    if(text!==null) return;
+    setLoading(true);
+    const t=await fetchYuorbTip(entry.page,entry.anchor);
+    setText(t);
+    setLoading(false);
+  };
+
+  useEffect(()=>{
+    if(!open) return;
+    const h=(e)=>{if(ref.current&&!ref.current.contains(e.target))setOpen(false);};
+    document.addEventListener('mousedown',h);
+    return()=>document.removeEventListener('mousedown',h);
+  },[open]);
+
+  return(
+    <span ref={ref} className="ytip-anchor">
+      <button className="ytip-btn" onClick={load} title={`yuorb: ${entry.label}`}>ⓘ</button>
+      {open&&(
+        <div className={`ytip-card ${placement}`}>
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:6}}>
+            <span style={{fontSize:9,fontWeight:700,color:'#818cf8',textTransform:'uppercase',letterSpacing:'.1em'}}>{entry.label}</span>
+            <button onClick={()=>setOpen(false)} style={{background:'none',border:'none',color:'var(--muted)',cursor:'pointer',fontSize:12,lineHeight:1,padding:'0 0 0 8px'}}>✕</button>
+          </div>
+          {loading
+            ?<div style={{fontSize:11,color:'var(--muted)',fontStyle:'italic'}}>Loading from yuorb…</div>
+            :text
+              ?<>
+                <div style={{fontSize:11,color:'var(--text)',lineHeight:1.7,marginBottom:8}}>{text}</div>
+                <a href={`${YUORB_BASE}${entry.page}#${entry.anchor}`} target="_blank" rel="noopener noreferrer"
+                   style={{fontSize:10,color:'#818cf8',textDecoration:'none',display:'inline-flex',alignItems:'center',gap:3}}>
+                  → read full section on yuorb
+                </a>
+              </>
+              :<div style={{fontSize:11,color:'var(--muted)'}}>
+                Content unavailable offline.{' '}
+                <a href={`${YUORB_BASE}${entry.page}#${entry.anchor}`} target="_blank" rel="noopener noreferrer"
+                   style={{color:'#818cf8',textDecoration:'none'}}>Open yuorb →</a>
+              </div>
+          }
+        </div>
+      )}
+    </span>
+  );
+}
+
 /* useIthkuil — subscribes to 'ithkuil-loaded' event dispatched by ESM module */
 function useIthkuil(){
   const[state,setState]=useState(function(){
@@ -2028,7 +2235,7 @@ function PSP({params,onChange,synOn}){
               {g.keys.map(k=>(
                 <div key={k}>
                   <div style={{display:'flex',justifyContent:'space-between',marginBottom:4}}>
-                    <span style={{fontSize:9,fontWeight:700,letterSpacing:'.09em',textTransform:'uppercase',color:PARAMS[k]?.hex}}>{PARAMS[k]?.label}</span>
+                    <span style={{fontSize:9,fontWeight:700,letterSpacing:'.09em',textTransform:'uppercase',color:PARAMS[k]?.hex}}>{PARAMS[k]?.label} <YuorbTip tipKey={`param:${k}`} placement="up"/></span>
                     <span style={{fontSize:9,color:'var(--muted)',fontStyle:'italic'}}>{PARAMS[k]?.spatialAxis}</span>
                   </div>
                   <ParamStrip paramKey={k} selectedId={params[k]} onChange={v=>{
@@ -4675,7 +4882,7 @@ function WDE({synOn}){
                 if(synOn) playTone(300+i*80,0.15,'sine');
               }} style={{background:s2.c+'22',border:`1px solid ${sel.includes(i)?s2.c:s2.c+'44'}`,
                 boxShadow:sel.includes(i)?`0 0 12px ${s2.c}44`:'none',transform:sel.includes(i)?'scale(1.08)':'scale(1)',transition:'all .2s'}}>
-                <span className="slot-lbl" style={{color:s2.c}}>{s2.s}</span>
+                <span className="slot-lbl" style={{color:s2.c}}>{s2.s} <YuorbTip tipKey={`slot:${s2.s}`} placement="up"/></span>
                 <span className="slot-val" style={{color:s2.c}}>{s2.v}</span>
               </div>
             ))}
@@ -5290,8 +5497,8 @@ function CaseReference(){
       <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(220px,1fr))',gap:8}}>
         {filtered.map(c=>(
           <div key={c.id} className="card2" style={{borderColor:c.color+'33'}}>
-            <div style={{display:'flex',justifyContent:'space-between',marginBottom:3}}>
-              <span style={{fontWeight:700,color:'var(--bright)',fontSize:12}}>{c.label}</span>
+            <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:3}}>
+              <span style={{fontWeight:700,color:'var(--bright)',fontSize:12}}>{c.label} <YuorbTip tipKey={`case:${c.id}`} placement="up"/></span>
               <span style={{fontFamily:'IBM Plex Mono',fontSize:10,color:c.color}}>{c.id}</span>
             </div>
             <div style={{fontSize:9,color:c.color,textTransform:'uppercase',letterSpacing:'.08em',fontWeight:600,marginBottom:4}}>{c.family}</div>
@@ -5657,6 +5864,7 @@ function Phonology(){
             <span style={{fontSize:36,fontFamily:'IBM Plex Mono',color:'var(--bright)'}}>{sel.r}</span>
             <span style={{fontSize:24,fontFamily:'IBM Plex Mono',color:'var(--accent2)'}}>[{sel.ipa}]</span>
             <button className="btn btn-ghost btn-sm" onClick={()=>speak(sel.ipa)}>▶ Hear</button>
+            <YuorbTip tipKey="phono:consonants" placement="up"/>
             <div style={{marginLeft:'auto',fontSize:11,color:'var(--muted)'}}>{sel.place} · {sel.manner} · {sel.voice?'voiced':'voiceless'}</div>
           </div>
           <p style={{fontSize:12,color:'var(--text)',lineHeight:1.7}}>{sel.note}</p>
