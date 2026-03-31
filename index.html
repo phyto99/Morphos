@@ -10,6 +10,18 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.development.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
 <script src="https://cdn.jsdelivr.net/gh/steveseguin/espeakng.js@master/js/espeakng.min.js"></script>
+<script type="module">(async()=>{
+  try{
+    const[{formativeToIthkuil},{parseWord},{glossWord}]=await Promise.all([
+      import('https://esm.sh/@zsnout/ithkuil/generate'),
+      import('https://esm.sh/@zsnout/ithkuil/parse'),
+      import('https://esm.sh/@zsnout/ithkuil/gloss'),
+    ]);
+    window._iz={formativeToIthkuil,parseWord,glossWord};
+    window.dispatchEvent(new CustomEvent('ithkuil-loaded',{detail:{version:'zsnout-live'}}));
+    console.log('[zsnout] loaded — form generation, parsing, and glossing active');
+  }catch(e){console.warn('[zsnout] failed:',e);}
+})();</script>
 <style>
 :root {
   --bg: #08080e; --surface: #0f0f1a; --card: #161623; --border: #252538;
@@ -1457,17 +1469,21 @@ function moduleUnlocked(lm,modId){
   return MODULE_PREREQS[modId]?.every(pre=>(lm.moduleProgress[pre]||0)>=0.4)??true;
 }
 function nextRecommendedPuzzle(lm){
-  // Highest-priority: SRS due items → weakest params → lowest module
+  // Priority: FSRS due concepts → weakest mastery → any unlocked puzzle
   const due=srsDue(lm);
   if(due.length){
+    // due[0] is the oldest-overdue concept key like 'configuration__UNI'
     const pk=due[0].split('__')[0];
+    const card=fsrsGet(lm,pk,due[0].split('__')[1]);
     const id=PARAM_DRILLS[pk]?.[0];
-    if(id&&PUZZLE_REGISTRY[id])return{id,def:PUZZLE_REGISTRY[id],reason:'SRS due: '+PARAMS[pk]?.label};
+    if(id&&PUZZLE_REGISTRY[id])return{id,def:PUZZLE_REGISTRY[id],
+      reason:`Due · ${PARAMS[pk]?.label} · S=${card.s.toFixed(1)}`};
   }
   const weak=srsWeakest(lm,1)[0];
   if(weak){
     const id=PARAM_DRILLS[weak.paramKey]?.[0];
-    if(id&&PUZZLE_REGISTRY[id])return{id,def:PUZZLE_REGISTRY[id],reason:'Weakest: '+PARAMS[weak.paramKey]?.label+' ('+Math.round(weak.score*100)+'%)'};
+    if(id&&PUZZLE_REGISTRY[id])return{id,def:PUZZLE_REGISTRY[id],
+      reason:`Weakest: ${PARAMS[weak.paramKey]?.label} (${Math.round(weak.score*100)}%)`};
   }
   return null;
 }
@@ -1862,24 +1878,81 @@ const ILLOCUTION_SAMPLES=[
   {illocution:'PER',label:'Performative',sample:"By the authority vested in me, I pronounce you bound by this agreement.",clues:"Performs an act (commissive/declarative) constituted by the utterance itself."},
 ];
 
-/* ── LAYER 3C — SM-2 SPACED REPETITION ──────────────────────────────── */
+/* ── LAYER 3C — FSRS-4.5 SPACED REPETITION ──────────────────────────── */
+/* Tracks per-concept: param values, roots, cases — anything that can be    */
+/* right or wrong. Rating auto-computed from correct + response time.        */
+/* Ref: open-spaced-repetition/fsrs4anki-helper (power forgetting curve)    */
+const FSRS_W=[0.4072,1.1829,3.1262,15.4722,7.2102,0.5316,1.0651,0.0589,1.5330,0.1544,1.0071,1.9395,0.11,0.29605,2.2700,0.166,2.9898,0.51,0.4517];
+const FSRS_DECAY=-0.5;                          // power forgetting curve exponent
+const FSRS_FACTOR=Math.pow(0.9,1/FSRS_DECAY)-1; // ≈0.2346 — so R(S,S)≈0.9
+// R(t,S) = (1 + FACTOR·t/S)^DECAY  — retrievability at elapsed days t, stability S
+function fsrsR(t,s){return Math.pow(1+FSRS_FACTOR*Math.max(0.001,t)/Math.max(0.1,s),FSRS_DECAY);}
+// Optimal interval: at DR=0.9, next_interval(S) ≈ S days
+function fsrsInterval(s){return Math.max(1,Math.round(s));}
+function fsrsInitD(r){return Math.min(10,Math.max(1,FSRS_W[4]-Math.exp(FSRS_W[5]*(r-1))+1));}
+function fsrsNextD(d,r){return Math.min(10,Math.max(1,FSRS_W[6]*fsrsInitD(4)+(1-FSRS_W[6])*(d-FSRS_W[7]*(r-3))));}
+function fsrsSR(s,d,R,r){  // stability after recall
+  var hp=r===2?FSRS_W[15]:1,eb=r===4?FSRS_W[16]:1;
+  return Math.max(s,s*(Math.exp(FSRS_W[8])*(11-d)*Math.pow(Math.max(0.1,s),-FSRS_W[9])*(Math.exp(FSRS_W[10]*(1-R))-1)+1)*hp*eb);
+}
+function fsrsSF(s,d,R){  // stability after forgetting
+  return Math.max(0.1,FSRS_W[11]*Math.pow(Math.max(1,d),-FSRS_W[12])*(Math.pow(s+1,FSRS_W[13])-1)*Math.exp(FSRS_W[14]*(1-R)));
+}
+// Auto-rate from correctness + response time (ms). No user input needed.
+// correct+fast(<4s)→Easy(4), correct+medium(4-12s)→Good(3), correct+slow(>12s)→Hard(2), wrong→Again(1)
+function fsrsAutoRating(correct,ms){
+  if(!correct) return 1;
+  var s=ms/1000;
+  return s<4?4:s<12?3:2;
+}
+
 function srsKey(pk,vid){return pk+'__'+vid;}
-function srsGet(lm,pk,vid){return(lm.srs&&lm.srs[srsKey(pk,vid)])||{interval:1,ef:2.5,due:0};}
-function srsUpdate(lm,pk,vid,correct){
+function fsrsGet(lm,pk,vid){
   var k=srsKey(pk,vid);
-  var cur=srsGet(lm,pk,vid);
-  var interval=cur.interval,ef=cur.ef;
-  var q=correct?5:2;
-  ef=Math.max(1.3,ef+(0.1-(5-q)*(0.08+(5-q)*0.02)));
-  interval=correct?(interval<=1?3:interval<=3?7:Math.round(interval*ef)):1;
+  var c=lm.srs&&lm.srs[k];
+  if(!c) return{s:0,d:5,reps:0,lapses:0,state:0,due:0,lastReview:0,avgMs:0,nMs:0};
+  // Migrate SM-2 format on the fly
+  if(c.interval!==undefined&&c.s===undefined)
+    return{s:c.interval||1,d:5,reps:1,lapses:0,state:2,due:c.due||0,lastReview:(c.due||0)-864e5*(c.interval||1),avgMs:0,nMs:0};
+  return c;
+}
+// Apply one review: correct=bool, ms=response time in milliseconds
+function fsrsRate(lm,pk,vid,correct,ms){
+  var r=fsrsAutoRating(correct,ms||5000);
+  var k=srsKey(pk,vid);
+  var now=Date.now();
+  var c=fsrsGet(lm,pk,vid);
+  var s=c.s,d=c.d,reps=c.reps,lapses=c.lapses,state=c.state;
+  var t=c.lastReview?(now-c.lastReview)/864e5:0;
+  // Running average response time (exponential, weight 0.3 for new measurements)
+  var nMs=c.nMs+1;
+  var avgMs=c.nMs===0?ms:Math.round(c.avgMs*0.7+(ms||5000)*0.3);
+  var newState,newDue;
+  if(state===0||state===1){
+    s=FSRS_W[Math.min(r-1,3)]; d=fsrsInitD(r); reps++;
+    if(r===1){newState=1;newDue=now+60000;}
+    else{newState=2;newDue=now+fsrsInterval(s)*864e5;}
+  } else if(state===2){
+    var R=fsrsR(t,s);
+    if(r===1){lapses++;s=fsrsSF(s,d,R);d=fsrsNextD(d,r);newState=3;newDue=now+10*60000;}
+    else{s=fsrsSR(s,d,R,r);d=fsrsNextD(d,r);reps++;newState=2;newDue=now+fsrsInterval(s)*864e5;}
+  } else {
+    d=fsrsNextD(d,r);
+    if(r===1){newState=3;newDue=now+10*60000;}
+    else{s=Math.max(1,s);reps++;newState=2;newDue=now+fsrsInterval(s)*864e5;}
+  }
   var srs=Object.assign({},lm.srs||{});
-  srs[k]={interval:interval,ef:ef,due:Date.now()+interval*864e5};
+  srs[k]={s:s,d:d,reps:reps,lapses:lapses,state:newState,due:newDue,lastReview:now,avgMs:avgMs,nMs:nMs};
   return Object.assign({},lm,{srs:srs});
 }
+// Concepts due for review (state≥1 and past due date)
 function srsDue(lm){
   var now=Date.now();
-  return Object.entries(lm.srs||{}).filter(function(e){return e[1].due<=now;}).map(function(e){return e[0];});
+  return Object.entries(lm.srs||{})
+    .filter(function(e){return e[1].due<=now&&(e[1].state||0)>=1;})
+    .map(function(e){return e[0];});
 }
+// Weakest n concepts by score (param mastery)
 function srsWeakest(lm,n){
   n=n||5;
   var pairs=[];
@@ -1889,6 +1962,20 @@ function srsWeakest(lm,n){
   });
   return pairs.sort(function(a,b){return a.score-b.score;}).slice(0,n);
 }
+// Interval preview string for a concept card given a hypothetical rating
+function fsrsIvlStr(c,r){
+  var s=c.s||0,d=c.d||5,state=c.state||0,t=c.lastReview?(Date.now()-c.lastReview)/864e5:0;
+  if(state===0||state===1){if(r===1)return'1m';return fsrsInterval(FSRS_W[Math.min(r-1,3)])+'d';}
+  if(state===2){
+    if(r===1)return'10m';
+    var R=fsrsR(t,s),ns=fsrsSR(s,d,R,r),ivl=fsrsInterval(ns);
+    return ivl>=365?Math.round(ivl/365)+'yr':ivl>=30?Math.round(ivl/30)+'mo':ivl+'d';
+  }
+  return r===1?'10m':Math.max(1,Math.round(s))+'d';
+}
+// Compat shim — existing code calls srsUpdate(lm,pk,vid,correct)
+function srsUpdate(lm,pk,vid,correct){return fsrsRate(lm,pk,vid,correct,correct?5000:15000);}
+function srsGet(lm,pk,vid){return fsrsGet(lm,pk,vid);}
 
 /* PARAM_DRILLS: param → puzzle IDs that train it most directly */
 const PARAM_DRILLS={
@@ -1908,15 +1995,29 @@ const PARAM_DRILLS={
 
 function adaptiveDrills(lm,max){
   max=max||12;
+  var now=Date.now();
+  // FSRS due concepts → derive which params they belong to → which puzzles train those params
+  var dueConcepts=srsDue(lm); // e.g. ['configuration__UNI','case__THM',...]
+  var dueParams=[...new Set(dueConcepts.map(function(k){return k.split('__')[0];}))];
+  // Weakest concepts by mastery score
   var weak=srsWeakest(lm,6);
   var weakParams=[...new Set(weak.map(function(w){return w.paramKey;}))];
-  var dueParams=srsDue(lm).map(function(k){return k.split('__')[0];});
+  // All params sorted: due first, then weak, then rest
+  var allParams=[...new Set(dueParams.concat(weakParams).concat(Object.keys(PARAMS)))];
   var ids=[...new Set(
-    weakParams.concat(dueParams).reduce(function(acc,pk){
+    allParams.reduce(function(acc,pk){
       return acc.concat(PARAM_DRILLS[pk]||[]);
     },[])
   )];
-  return ids.filter(function(id){return PUZZLE_REGISTRY[id];}).slice(0,max).map(function(id){return{id:id,def:PUZZLE_REGISTRY[id]};});
+  // Also surface the new zsnout puzzle types at the top when _iz is loaded
+  if(window._iz) ids=['zs_decode','zs_gloss','zs_build','zs_ca_full'].concat(ids);
+  // Root puzzles for learners who've seen basic params
+  var avgMastery=Object.keys(PARAMS).reduce(function(s,pk){
+    var v=Object.values(lm[pk]||{});return s+(v.length?v.reduce(function(a,b){return a+b;},0)/v.length:0);
+  },0)/Object.keys(PARAMS).length;
+  if(avgMastery>0.2) ids=ids.concat(['root_vocab','root_stems','root_domain']);
+  return [...new Set(ids)].filter(function(id){return PUZZLE_REGISTRY[id];}).slice(0,max)
+    .map(function(id){return{id:id,def:PUZZLE_REGISTRY[id]};});
 }
 
 /* ── LAYER 3D — SENTENCE EXERCISES ──────────────────────────────────── */
@@ -3539,18 +3640,27 @@ function MCQEngine({def,onScore,synOn,lm,headerSlot}){
   // Difficulty tiering: high mastery → show all options; low mastery → show 3 (easier)
   const paramKeys=Object.entries(PARAM_DRILLS).filter(([,ids])=>def.id&&ids.includes(def.id)).map(([pk])=>pk);
   const mastery=paramKeys.length?Math.max(...paramKeys.map(pk=>masteryLevel(lm||{},pk))):0.5;
-  const maxOpts=mastery<0.3?3:mastery<0.6?4:4; // 3 early, 4 normal/advanced
+  const maxOpts=mastery<0.3?3:mastery<0.6?4:4;
   const[q,setQ]=useState(()=>def.generate());
   const[sel,setSel]=useState(null);
   const[done,setDone]=useState(false);
-  const next=()=>{setQ(def.generate());setSel(null);setDone(false);};
+  const[startMs,setStartMs]=useState(()=>Date.now());
+  const[elapsed,setElapsed]=useState(0);
+  const next=()=>{setQ(def.generate());setSel(null);setDone(false);setStartMs(Date.now());setElapsed(0);};
   const visibleOpts=q.options?q.options.slice(0,Math.max(maxOpts,(q.options.filter(o=>o.correct).length)+1)):[];
   const submit=()=>{
     if(!sel||done)return;
+    const ms=Date.now()-startMs;
+    setElapsed(ms);
     const correct=q.multi?q.answer.includes(sel):(visibleOpts.find(o=>o.id===sel)?.correct??false);
-    setDone(true);onScore&&onScore(correct);
+    setDone(true);
+    // Pass correctness + response time to parent for FSRS auto-rating
+    onScore&&onScore(correct,ms);
   };
   if(!q)return null;
+  const rating=done?fsrsAutoRating(visibleOpts.find(o=>o.id===sel)?.correct??false,elapsed):null;
+  const ratingLabel=rating===4?'Easy':rating===3?'Good':rating===2?'Hard':'Again';
+  const ratingCol=rating===4?'#60a5fa':rating===3?'#22c55e':rating===2?'#f59e0b':'#ef4444';
   return(
     <div className="anim-fade">
       {headerSlot}
@@ -3575,9 +3685,16 @@ function MCQEngine({def,onScore,synOn,lm,headerSlot}){
         </div>
         {done&&q.note&&<p style={{fontSize:11,color:'var(--muted)',marginTop:10,fontStyle:'italic'}}>{q.note}</p>}
       </div>
-      <div style={{display:'flex',gap:8}}>
-        {!done?<button className="btn btn-primary btn-sm" onClick={submit} disabled={!sel}>Submit Answer</button>
-          :<button className="btn btn-primary btn-sm" onClick={next}>Next →</button>}
+      <div style={{display:'flex',gap:8,alignItems:'center'}}>
+        {!done
+          ?<button className="btn btn-primary btn-sm" onClick={submit} disabled={!sel}>Submit</button>
+          :<>
+            <button className="btn btn-primary btn-sm" onClick={next}>Next →</button>
+            {/* Auto-computed FSRS quality — shown for transparency, no user action needed */}
+            <span style={{fontSize:10,padding:'2px 8px',borderRadius:10,background:ratingCol+'22',color:ratingCol,border:'1px solid '+ratingCol+'44'}}>
+              {ratingLabel} · {(elapsed/1000).toFixed(1)}s
+            </span>
+          </>}
       </div>
     </div>
   );
@@ -4009,12 +4126,13 @@ Object.assign(PUZZLE_REGISTRY,{
 
 function UniversalRunner({defId,def,onBack,synOn,onLmUpdate,lm}){
   const[score,setScore]=useState({correct:0,total:0});
-  const handleScore=useCallback(correct=>{
+  // onScore receives (correct, ms) — ms is optional (MCQ passes it, others don't)
+  const handleScore=useCallback((correct,ms)=>{
     setScore(s=>({correct:s.correct+(correct?1:0),total:s.total+1}));
-    // SRS + mastery update: map def.cat back to param key(s) that this puzzle trains
+    // Map puzzle back to param keys it trains, pass ms for per-concept FSRS update
     const paramKeys=Object.entries(PARAM_DRILLS)
       .filter(([,ids])=>ids.includes(defId)).map(([pk])=>pk);
-    onLmUpdate&&onLmUpdate(paramKeys,correct);
+    onLmUpdate&&onLmUpdate(paramKeys,correct,ms);
   },[defId,onLmUpdate]);
   const catMeta=REG_CAT_META[def.cat]||{color:'#6e7099'};
   const header=(
@@ -4156,11 +4274,37 @@ function PuzzleHall({synOn,lm,onXP,onLmUpdate}){
         const due=lm?srsDue(lm):[];
         return(
           <div>
+            {/* FSRS due concepts — show before heatmap */}
+            {due.length>0&&<div className="card mb10" style={{borderColor:'#ef444433',borderLeft:'3px solid #ef4444'}}>
+              <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:8}}>
+                <span style={{fontSize:11,fontWeight:600,color:'#ef4444'}}>⟳ Due for Review</span>
+                <span style={{fontSize:10,color:'var(--muted)'}}>{due.length} concept{due.length!==1?'s':''}</span>
+              </div>
+              <div style={{display:'flex',flexWrap:'wrap',gap:5}}>
+                {due.slice(0,18).map(k=>{
+                  const[pk,vid]=k.split('__');
+                  const p=PARAMS[pk]; const v=p?.values.find(x=>x.id===vid);
+                  if(!p||!v) return null;
+                  const card=fsrsGet(lm,pk,vid);
+                  const drillId=PARAM_DRILLS[pk]?.[0];
+                  return(
+                    <div key={k} onClick={()=>{if(drillId&&PUZZLE_REGISTRY[drillId])setRegActive({id:drillId,def:PUZZLE_REGISTRY[drillId]});}}
+                      style={{display:'flex',flexDirection:'column',alignItems:'flex-start',gap:1,padding:'4px 8px',
+                        borderRadius:5,background:p.hex+'18',border:`1px solid ${p.hex}44`,cursor:'pointer',fontSize:10}}>
+                      <span style={{color:p.hex,fontWeight:600}}>{v.label}</span>
+                      <span style={{color:'var(--muted)',fontSize:9}}>S={card.s.toFixed(1)} · {card.lapses||0} lapse{card.lapses!==1?'s':''}</span>
+                    </div>
+                  );
+                })}
+                {due.length>18&&<span style={{fontSize:10,color:'var(--muted)',alignSelf:'center'}}>+{due.length-18} more</span>}
+              </div>
+            </div>}
+
             {/* Weak-spot heatmap */}
             <div className="card mb10">
               <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:8}}>
                 <span style={{fontSize:11,fontWeight:600,color:'var(--bright)'}}>Mastery Heatmap</span>
-                <span style={{fontSize:10,color:'var(--muted)'}}>{due.length} SRS items due</span>
+                <span style={{fontSize:10,color:'var(--muted)'}}>{due.length} due</span>
               </div>
               <div style={{display:'flex',gap:3,flexWrap:'wrap',marginBottom:8}}>
                 {Object.entries(PARAMS).flatMap(([pk,p])=>
@@ -4206,7 +4350,10 @@ function PuzzleHall({synOn,lm,onXP,onLmUpdate}){
                           <div style={{width:`${score*100}%`,height:'100%',background:p.hex,borderRadius:2}}/>
                         </div>
                       </div>
-                      <span style={{fontSize:10,color:'var(--muted)',fontFamily:'IBM Plex Mono'}}>{Math.round(score*100)}%</span>
+                      <div style={{display:'flex',flexDirection:'column',alignItems:'flex-end',gap:1}}>
+                        <span style={{fontSize:10,color:'var(--muted)',fontFamily:'IBM Plex Mono'}}>{Math.round(score*100)}%</span>
+                        {(()=>{const c=fsrsGet(lm,pk,vid);return c.reps>0?<span style={{fontSize:9,color:'var(--muted)'}}>S={c.s.toFixed(1)}d</span>:null;})()}
+                      </div>
                     </div>
                   );
                 })}
@@ -5395,29 +5542,68 @@ function Dashboard({lm,onNav}){
               })}
             </div>
           </div>
-          {/* SRS heatmap */}
-          <div className="card">
-            <div style={{fontSize:12,fontWeight:600,color:'var(--bright)',marginBottom:8}}>Spaced Repetition Queue</div>
-            <div style={{display:'flex',gap:3,flexWrap:'wrap'}}>
-              {Object.entries(PARAMS).map(([k,p])=>(
-                Object.entries(lm[k]||{}).map(([vid,score])=>(
-                  <div key={`${k}-${vid}`} style={{width:14,height:14,borderRadius:2,
-                    background:score<0.3?p.hex:score<0.6?p.hex+'88':score<0.85?p.hex+'44':'#1e1e35',
-                    border:`1px solid ${score<0.3?p.hex:p.hex+'44'}`,
-                    transition:'background .3s'}}
-                    title={`${p.label}: ${p.values.find(v=>v.id===vid)?.label} (${Math.round(score*100)}%)`}/>
-                ))
-              ))}
-            </div>
-            <div style={{display:'flex',gap:10,marginTop:6,flexWrap:'wrap'}}>
-              {[{c:'#e11d48',l:'Due now'},{c:'#88888888',l:'Due soon'},{c:'#44444444',l:'Scheduled'},{c:'#1e1e35',l:'Mastered'}].map(item=>(
-                <div key={item.l} style={{display:'flex',gap:4,alignItems:'center',fontSize:9,color:'var(--muted)'}}>
-                  <div style={{width:10,height:10,borderRadius:2,background:item.c}}/>{item.l}
+          {/* FSRS stats card */}
+          {(()=>{
+            const now=Date.now();
+            const allCards=Object.entries(lm.srs||{});
+            const reviewed=allCards.filter(([,c])=>c.reps>0);
+            const dueNow=allCards.filter(([,c])=>c.due<=now&&(c.state||0)>=1);
+            // Estimated retention: R(elapsed, S) averaged over all review-state cards
+            const retCards=allCards.filter(([,c])=>(c.state||0)===2&&c.s>0&&c.lastReview>0);
+            const avgRet=retCards.length?retCards.reduce((sum,[,c])=>{
+              const t=(now-c.lastReview)/864e5;
+              return sum+fsrsR(t,c.s);
+            },0)/retCards.length:null;
+            // Due forecast: next 14 days
+            const forecast=Array.from({length:14},(_,i)=>{
+              const dayStart=now+i*864e5, dayEnd=dayStart+864e5;
+              return allCards.filter(([,c])=>c.due>=dayStart&&c.due<dayEnd&&(c.state||0)>=1).length;
+            });
+            const maxForecast=Math.max(...forecast,1);
+            // Avg response time
+            const timed=allCards.filter(([,c])=>c.avgMs>0);
+            const avgMs=timed.length?timed.reduce((s,[,c])=>s+c.avgMs,0)/timed.length:null;
+            return(
+              <div className="card">
+                <div style={{fontSize:12,fontWeight:600,color:'var(--bright)',marginBottom:10}}>FSRS Memory State</div>
+                <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:8,marginBottom:12}}>
+                  <div style={{textAlign:'center'}}>
+                    <div style={{fontSize:20,fontWeight:700,color:'#ef4444',fontFamily:'Cinzel,serif'}}>{dueNow.length}</div>
+                    <div style={{fontSize:10,color:'var(--muted)'}}>Due now</div>
+                  </div>
+                  <div style={{textAlign:'center'}}>
+                    <div style={{fontSize:20,fontWeight:700,color:'#60a5fa',fontFamily:'Cinzel,serif'}}>{reviewed.length}</div>
+                    <div style={{fontSize:10,color:'var(--muted)'}}>Concepts seen</div>
+                  </div>
+                  <div style={{textAlign:'center'}}>
+                    <div style={{fontSize:20,fontWeight:700,color:'#22c55e',fontFamily:'Cinzel,serif'}}>
+                      {avgRet!=null?Math.round(avgRet*100)+'%':'—'}
+                    </div>
+                    <div style={{fontSize:10,color:'var(--muted)'}}>Est. retention</div>
+                  </div>
                 </div>
-              ))}
-            </div>
-            <button className="btn btn-primary btn-sm" style={{marginTop:10}} onClick={()=>onNav&&onNav('puzzles')}>Go to Puzzle Hall →</button>
-          </div>
+                {/* 14-day due forecast bar chart */}
+                <div style={{fontSize:10,color:'var(--muted)',marginBottom:5}}>14-day due forecast</div>
+                <div style={{display:'flex',gap:2,alignItems:'flex-end',height:36}}>
+                  {forecast.map((n,i)=>{
+                    const isToday=i===0;
+                    const h=Math.max(2,Math.round((n/maxForecast)*34));
+                    return(
+                      <div key={i} title={`Day +${i}: ${n} due`} style={{flex:1,display:'flex',flexDirection:'column',alignItems:'center',gap:1}}>
+                        <div style={{width:'100%',height:h,borderRadius:2,
+                          background:isToday?'#ef4444':n>0?'#4338ca':'var(--border)',transition:'height .3s'}}/>
+                        {(i===0||i===6||i===13)&&<span style={{fontSize:8,color:'var(--muted)'}}>{i===0?'T':'+'+i}</span>}
+                      </div>
+                    );
+                  })}
+                </div>
+                {avgMs!=null&&<div style={{marginTop:8,fontSize:10,color:'var(--muted)'}}>
+                  Avg response: {(avgMs/1000).toFixed(1)}s · {timed.length} timed reviews
+                </div>}
+                <button className="btn btn-primary btn-sm" style={{marginTop:10,width:'100%'}} onClick={()=>onNav&&onNav('puzzles')}>Go to Puzzle Hall →</button>
+              </div>
+            );
+          })()}
         </div>
       </div>
     </div>
@@ -6343,6 +6529,107 @@ Object.assign(PUZZLE_REGISTRY,{
 
 });
 
+/* ── @ZSNOUT/ITHKUIL POWERED PUZZLES ────────────────────────────────────
+   All fall back to equivalent local puzzles when window._iz is not yet
+   loaded. Tracks per-concept FSRS keys via paramKey / rootId fields.   */
+Object.assign(PUZZLE_REGISTRY,{
+
+  // Decode a live @zsnout-generated word — identify one Ca component
+  zs_decode:{label:"Decode Live Form",cat:"Live Decode",module:5,phase:2,engine:'MCQ',paramKey:'configuration',
+    generate:()=>{
+      if(!window._iz) return PUZZLE_REGISTRY.ca_decode.generate();
+      const pks=['configuration','affiliation','perspective','extension','essence'];
+      const target=_s(pks); const p=PARAMS[target];
+      const correct=_s(p.values);
+      const params={configuration:'UNI',affiliation:'CSL',perspective:'M',extension:'DEL',essence:'NRM'};
+      params[target]=correct.id;
+      try{
+        const form=window._iz.formativeToIthkuil({type:'UNF/C',root:'kţ',ca:params});
+        return _q(`Live form: "${form}"\nWhat is its ${p.label}?`,correct,_dist(correct,p.values));
+      }catch(e){return PUZZLE_REGISTRY.ca_decode.generate();}
+    }},
+
+  // Show a zsnout gloss → identify which param value it encodes
+  zs_gloss:{label:"Read the Gloss",cat:"Live Decode",module:6,phase:2,engine:'MCQ',
+    generate:()=>{
+      if(!window._iz) return PUZZLE_REGISTRY.cfg_id.generate();
+      const pk=_s(['configuration','perspective','case','mood','aspect']);
+      const p=PARAMS[pk]; const correct=_s(p.values);
+      try{
+        const base={...defaultP(),[pk]:correct.id};
+        const form=buildForm(base);
+        const parsed=window._iz.parseWord(form);
+        if(!parsed) return PUZZLE_REGISTRY.cfg_id.generate();
+        const gloss=window._iz.glossWord(parsed);
+        return _q(`Gloss: "${gloss.short}"\nWhich ${p.label} does this encode?`,correct,_dist(correct,p.values));
+      }catch(e){return PUZZLE_REGISTRY.cfg_id.generate();}
+    }},
+
+  // Given param+value description, choose the correctly generated form
+  zs_build:{label:"Build the Form",cat:"Live Build",module:6,phase:2,engine:'MCQ',
+    generate:()=>{
+      if(!window._iz) return PUZZLE_REGISTRY.paradigm_complete.generate();
+      const pk=_s(['configuration','affiliation','perspective','extension','case','mood']);
+      const p=PARAMS[pk]; const correct=_s(p.values);
+      const wrongs=_pick(p.values.filter(v=>v.id!==correct.id),3);
+      const makeForm=v=>{try{return buildForm({...defaultP(),[pk]:v.id});}catch(e){return'?';}};
+      const cf=makeForm(correct); const wf=wrongs.map(makeForm);
+      const opts=_shuf([{id:cf,label:cf,correct:true},...wf.map(f=>({id:f,label:f,correct:false}))]);
+      return{question:`Which form encodes ${p.label} = ${correct.label} ("${correct.desc}")?`,
+        options:opts,answer:cf,note:`${p.label} ${correct.label}: ${correct.desc}`};
+    }},
+
+  // Parse a live form → identify ALL five Ca components (harder)
+  zs_ca_full:{label:"Full Ca Decode",cat:"Live Decode",module:7,phase:3,engine:'MCQ',paramKey:'configuration',
+    generate:()=>{
+      if(!window._iz) return PUZZLE_REGISTRY.ca_all.generate();
+      const cfg=_s(PARAMS.configuration.values),afl=_s(PARAMS.affiliation.values);
+      const per=_s(PARAMS.perspective.values),ext=_s(PARAMS.extension.values),ess=_s(PARAMS.essence.values);
+      try{
+        const form=window._iz.formativeToIthkuil({type:'UNF/C',root:'kţ',
+          ca:{configuration:cfg.id,affiliation:afl.id,perspective:per.id,extension:ext.id,essence:ess.id}});
+        // Ask about the rarest/hardest component
+        const target=_s(['affiliation','extension','essence']);
+        const p=PARAMS[target];
+        const correct={configuration:cfg,affiliation:afl,perspective:per,extension:ext,essence:ess}[target];
+        return _q(`"${form}" — identify its ${p.label}:`,correct,_dist(correct,p.values));
+      }catch(e){return PUZZLE_REGISTRY.ca_all.generate();}
+    }},
+
+  // Root vocabulary — identify a root from its stem1 description
+  root_vocab:{label:"Root Vocabulary",cat:"Root Knowledge",module:3,phase:1,engine:'MCQ',
+    generate:()=>{
+      const r=_s(ROOTS.filter(x=>x.stem1&&x.stem1.length>3));
+      const wrongs=_pick(ROOTS.filter(x=>x.id!==r.id&&x.stem1),3);
+      return _q(`Root meaning: "${r.stem1.slice(0,60)}"`,{id:r.id,label:`${r.id} — ${r.name}`},
+        wrongs.map(w=>({id:w.id,label:`${w.id} — ${w.name}`})));
+    }},
+
+  // Root identification from domain + name clue
+  root_domain:{label:"Root Domain",cat:"Root Knowledge",module:3,phase:1,engine:'MCQ',
+    generate:()=>{
+      const r=_s(ROOTS.filter(x=>x.domain));
+      const domains=[...new Set(ROOTS.filter(x=>x.domain).map(x=>x.domain))];
+      const correct={id:r.domain,label:`Domain ${r.domain}`};
+      const wrongs=_pick(domains.filter(d=>d!==r.domain),3).map(d=>({id:d,label:`Domain ${d}`}));
+      return _q(`Root "${r.id}" (${r.name}) belongs to which domain?`,correct,wrongs);
+    }},
+
+  // Root → stem distinction
+  root_stems:{label:"Root Stems",cat:"Root Knowledge",module:4,phase:2,engine:'MCQ',
+    generate:()=>{
+      const r=_s(ROOTS.filter(x=>x.stem1&&x.stem2&&x.stem3&&x.stem1!==x.stem2));
+      const stemMap={stem1:'Stem 1',stem2:'Stem 2',stem3:'Stem 3'};
+      const targetStem=_s(['stem1','stem2','stem3']);
+      const correct={id:targetStem,label:`${stemMap[targetStem]}: ${r[targetStem].slice(0,50)}`};
+      const wrongs=(['stem1','stem2','stem3']).filter(s=>s!==targetStem)
+        .map(s=>({id:s,label:`${stemMap[s]}: ${r[s].slice(0,50)}`}));
+      return{question:`Root "${r.id}" (${r.name}) — which description fits ${stemMap[targetStem]}?`,
+        options:_shuf([correct,...wrongs]).map(o=>({...o,correct:o.id===targetStem})),answer:targetStem,
+        note:`${r.id} · ${r.name}: S1=${r.stem1}, S2=${r.stem2}, S3=${r.stem3}`};
+    }},
+});
+
 /* ══════════════════════════════════════════════════════════════════
    LAYER 18 — SETTINGS
    ══════════════════════════════════════════════════════════════════ */
@@ -6556,7 +6843,8 @@ function App(){
   const renderView=()=>{
     if(view==="framework")  return <PhiloFramework/>;
     if(view==="dashboard")  return <Dashboard lm={lm} onNav={setView}/>;
-    if(view==="phonology")  return <Phonology/>;    if(view==="puzzles")    return <PuzzleHall synOn={synOn} lm={lm} onXP={xp=>setLm(p=>({...p,xp:p.xp+xp}))} onLmUpdate={(paramKeys,correct)=>{
+    if(view==="phonology")  return <Phonology/>;
+    if(view==="puzzles")    return <PuzzleHall synOn={synOn} lm={lm} onXP={xp=>setLm(p=>({...p,xp:p.xp+xp}))} onLmUpdate={(paramKeys,correct,ms)=>{
       setLm(prev=>{
         let n={...prev,
           totalAttempts:prev.totalAttempts+1,
@@ -6567,19 +6855,19 @@ function App(){
         paramKeys.forEach(pk=>{
           if(!PARAMS[pk])return;
           const vals=n[pk]||{};
-          // Nudge all values gently in the right direction
+          // Nudge mastery scores
           const updated={};
           Object.entries(vals).forEach(([vid,score])=>{
             updated[vid]=Math.min(1,Math.max(0,score+(correct?0.04:-0.01)));
           });
           n={...n,[pk]:updated};
-          // SM-2 SRS: update all tracked values for this param
-          Object.keys(vals).forEach(vid=>{ n=srsUpdate(n,pk,vid,correct); });
-          // Module progress: increment toward 1.0 slowly
-          const module=PUZZLE_REGISTRY[Object.entries(PARAM_DRILLS).find(([,ids])=>ids.includes(pk))?.[0]||'']?.module;
-          if(module){
-            const prev=n.moduleProgress[module]||0;
-            n={...n,moduleProgress:{...n.moduleProgress,[module]:Math.min(1,prev+(correct?0.015:0))}};
+          // FSRS: update every value for this param with response time
+          Object.keys(vals).forEach(vid=>{ n=fsrsRate(n,pk,vid,correct,ms||5000); });
+          // Module progress
+          const mod=PUZZLE_REGISTRY[Object.entries(PARAM_DRILLS).find(([,ids])=>ids.includes(pk))?.[0]||'']?.module;
+          if(mod){
+            const p2=n.moduleProgress[mod]||0;
+            n={...n,moduleProgress:{...n.moduleProgress,[mod]:Math.min(1,p2+(correct?0.015:0))}};
           }
         });
         return n;
