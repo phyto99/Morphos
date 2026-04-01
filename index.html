@@ -1979,18 +1979,18 @@ function srsGet(lm,pk,vid){return fsrsGet(lm,pk,vid);}
 
 /* PARAM_DRILLS: param → puzzle IDs that train it most directly */
 const PARAM_DRILLS={
-  configuration:['cfg_id','match_cfg','sort_cfg','build_cfg','cfg_shape','odd_one_out','ca_base_decode','blank_canvas'],
-  affiliation:  ['afl_id','ca_all','match_cfg','ca_base_decode'],
-  perspective:  ['per_id','sort_per','per_depth','build_per','ladder','ca_per_decode'],
-  extension:    ['ext_id','sort_ext','ext_reach','ca_per_decode'],
-  essence:      ['ess_id','ca_all'],
-  specification:['spc_id','ca_all','vr_full'],
+  configuration:['cfg_id','match_cfg','sort_cfg','build_cfg','cfg_shape','odd_one_out','ca_base_decode','blank_canvas','synesthetic_cfg','ca_merge','semantic_nuance','zs_minimal_pair','zs_decode'],
+  affiliation:  ['afl_id','ca_all','match_cfg','ca_base_decode','ca_merge','semantic_nuance'],
+  perspective:  ['per_id','sort_per','per_depth','build_per','ladder','ca_per_decode','zs_minimal_pair','semantic_nuance','semantic_diff_free'],
+  extension:    ['ext_id','sort_ext','ext_reach','ca_per_decode','ca_merge','zs_minimal_pair'],
+  essence:      ['ess_id','ca_all','ca_merge'],
+  specification:['spc_id','ca_all','vr_full','spec_context','case_spec_multi','semantic_diff_free'],
   function:     ['ca_all','full_decode','vn_slot'],
-  mood:         ['moo_id','mood_imply','mood_illocution','build_mood_val','counterfactual','bias_vs_mood','vn_slot','blank_canvas'],
-  validation:   ['val_id','val_imply','match_val','timeline_val','build_mood_val','vn_slot','blank_canvas'],
-  bias:         ['bia_id','bias_ctx','match_bias','sort_bias','bias_vs_mood','blank_canvas'],
-  aspect:       ['asp_id','aspect_timeline','sort_asp','timeline_asp','vn_slot'],
-  case:         ['cas_id','case_assign','case_family','case_reframe','build_case_pair','blank_canvas'],
+  mood:         ['moo_id','mood_imply','mood_illocution','build_mood_val','counterfactual','bias_vs_mood','vn_slot','blank_canvas','semantic_nuance','semantic_diff_free'],
+  validation:   ['val_id','val_imply','match_val','timeline_val','build_mood_val','vn_slot','blank_canvas','aspect_val_multi','semantic_nuance','semantic_diff_free','compress_free'],
+  bias:         ['bia_id','bias_ctx','match_bias','sort_bias','bias_vs_mood','blank_canvas','semantic_nuance','compress_free','semantic_diff_free'],
+  aspect:       ['asp_id','aspect_timeline','sort_asp','timeline_asp','vn_slot','aspect_val_multi','semantic_diff_free'],
+  case:         ['cas_id','case_assign','case_family','case_reframe','build_case_pair','blank_canvas','case_depth','obviative_proximate','sort_cases_family','case_spec_multi'],
 };
 
 function adaptiveDrills(lm,max){
@@ -2009,13 +2009,15 @@ function adaptiveDrills(lm,max){
       return acc.concat(PARAM_DRILLS[pk]||[]);
     },[])
   )];
-  // Also surface the new zsnout puzzle types at the top when _iz is loaded
-  if(window._iz) ids=['zs_decode','zs_gloss','zs_build','zs_ca_full'].concat(ids);
-  // Root puzzles for learners who've seen basic params
+  // Surface zsnout live puzzles at the top when _iz is loaded
+  if(window._iz) ids=['zs_decode','zs_gloss','zs_build','zs_ca_full','zs_minimal_pair','zs_stem_id'].concat(ids);
+  // Root + advanced puzzles for learners past the basics
   var avgMastery=Object.keys(PARAMS).reduce(function(s,pk){
     var v=Object.values(lm[pk]||{});return s+(v.length?v.reduce(function(a,b){return a+b;},0)/v.length:0);
   },0)/Object.keys(PARAMS).length;
-  if(avgMastery>0.2) ids=ids.concat(['root_vocab','root_stems','root_domain']);
+  if(avgMastery>0.15) ids=ids.concat(['root_vocab','root_stems','root_domain','root_by_context','compound_roots','root_proximity','root_cluster']);
+  if(avgMastery>0.3) ids=ids.concat(['semantic_diff_free','affix_shift_free','compress_free','obviative_proximate','case_depth','spec_context','affix_decode_deg']);
+  if(avgMastery>0.5) ids=ids.concat(['ca_merge','semantic_nuance','form_vs_ref','strip_affixes','aspect_val_multi','case_spec_multi','sort_cases_family','speed_affix','construct_sprint','synesthetic_cfg','param_slot_visual']);
   return [...new Set(ids)].filter(function(id){return PUZZLE_REGISTRY[id];}).slice(0,max)
     .map(function(id){return{id:id,def:PUZZLE_REGISTRY[id]};});
 }
@@ -6628,6 +6630,490 @@ Object.assign(PUZZLE_REGISTRY,{
         options:_shuf([correct,...wrongs]).map(o=>({...o,correct:o.id===targetStem})),answer:targetStem,
         note:`${r.id} · ${r.name}: S1=${r.stem1}, S2=${r.stem2}, S3=${r.stem3}`};
     }},
+});
+
+/* ── LAYER 17B — 24 NEW PUZZLE TYPES ────────────────────────────────────────
+   BUILD · VISUAL · INPUT · MCQ · SORT · SPEED · MULTI · ZSNOUT-LIVE          */
+Object.assign(PUZZLE_REGISTRY,{
+
+  // ─── BUILD ───────────────────────────────────────────────────────────────
+
+  // Given a Ca description mix, select all correct param values to merge
+  ca_merge:{label:"Build: Ca Merge",cat:"Build",module:5,phase:2,engine:'BUILD',
+    generate:()=>{
+      const scenarios=[
+        {ctx:"Merge: Word A has Configuration=DPX and Affiliation=VAR. Word B adds Extension=PRX. Select the merged Ca parameters:",
+         targets:[{pk:'configuration',val:'DPX'},{pk:'affiliation',val:'VAR'},{pk:'extension',val:'PRX'}],
+         note:"DPX=duplex pair · VAR=variative (different roles) · PRX=proximal/near extent"},
+        {ctx:"Compound: one root is Noumenal perspective, the other is Consolidative affiliation. Encode the merged Ca:",
+         targets:[{pk:'perspective',val:'N'},{pk:'affiliation',val:'CSL'}],
+         note:"N=Noumenal (the abstract type) · CSL=Consolidative (same function, unified)"},
+        {ctx:"Merge two words: first is Aggregative+DEL extension, second adds Representative essence. Select all three merged Ca values:",
+         targets:[{pk:'configuration',val:'AGG'},{pk:'extension',val:'DEL'},{pk:'essence',val:'RPV'}],
+         note:"AGG=tight cluster · DEL=full spatial extent · RPV=representative sample"},
+        {ctx:"Reframe a Dispersed+Polyadic source by adding Dilative extension. Select all Ca parameters for the result:",
+         targets:[{pk:'configuration',val:'DCT'},{pk:'perspective',val:'P'},{pk:'extension',val:'DST'}],
+         note:"DCT=scattered instances · P=as a set · DST=distal/far end"},
+        {ctx:"Compound targets: Configuration=CPN (componential) with CSL affiliation and NRM essence — select them all:",
+         targets:[{pk:'configuration',val:'CPN'},{pk:'affiliation',val:'CSL'},{pk:'essence',val:'NRM'}],
+         note:"CPN=componential distinct parts · CSL=unified function · NRM=normal/concrete essence"},
+      ];
+      const s=_s(scenarios);
+      return {prompt:s.ctx,targets:s.targets,note:s.note};
+    }},
+
+  // Given two root glosses, identify the compound conceptual meaning
+  compound_roots:{label:"Compound Root Meaning",cat:"Root Knowledge",module:5,phase:2,engine:'MCQ',
+    generate:()=>{
+      const pairs=[
+        {r1:'kţ',n1:'cognition',r2:'kš',n2:'speech/utterance',compound:"cognitive speech — verbalised thought",wrong:["physical locomotion","non-verbal sensation","spatial boundary","temporal sequence"]},
+        {r1:'žb',n1:'sound/acoustic',r2:'ll',n2:'mind/psyche',compound:"mental auditory experience — inner hearing",wrong:["external environmental noise","tactile sensation","visual perception","written symbol"]},
+        {r1:'rr',n1:'motion/movement',r2:'ţk',n2:'containment/enclosure',compound:"controlled movement within a boundary",wrong:["static enclosed space","free unimpeded motion","emission outward","structural rigidity"]},
+        {r1:'nk',n1:'desire/will',r2:'řs',n2:'obstruction/barrier',compound:"frustrated volition — thwarted desire",wrong:["fulfilled desire","neutral observation","compelled obedience","sensory pleasure"]},
+        {r1:'sm',n1:'existence/being',r2:'kk',n2:'negation/absence',compound:"non-existence — cessation of being",wrong:["continued existence","partial presence","transformation into something else","potential being"]},
+        {r1:'ll',n1:'mind/psyche',r2:'nk',n2:'desire/will',compound:"volitional mental state — consciously willed thought",wrong:["involuntary reflex","passive observation","physical sensation","external compulsion"]},
+      ];
+      const p=_s(pairs);
+      const correct={id:'c',label:p.compound};
+      const wrongs=_shuf(p.wrong).slice(0,3).map((w,i)=>({id:'w'+i,label:w}));
+      return _q(`Root "${p.r1}" (${p.n1}) combined with root "${p.r2}" (${p.n2}) — what compound concept emerges?`,correct,wrongs);
+    }},
+
+  // Complex English description → select best multi-param encoding
+  semantic_nuance:{label:"Semantic Nuance Encoding",cat:"Build",module:10,phase:3,engine:'BUILD',
+    generate:()=>{
+      const cases=[
+        {en:"The speaker vaguely recalls a rumour that something might happen imminently.",
+         targets:[{pk:'validation',val:'PUR'},{pk:'aspect',val:'IMM'},{pk:'mood',val:'SPE'}],
+         note:"PUR=hearsay · IMM=imminent/about-to-begin · SPE=speculative epistemic stance"},
+        {en:"Multiple organisms of the same species, observed directly, arranged in an ordered formation.",
+         targets:[{pk:'configuration',val:'MSS'},{pk:'affiliation',val:'CSL'},{pk:'validation',val:'OBS'}],
+         note:"MSS=massative ordered · CSL=same type/function · OBS=directly witnessed"},
+        {en:"One specific act of thinking, viewed as fully completed, witnessed by the speaker.",
+         targets:[{pk:'perspective',val:'M'},{pk:'validation',val:'OBS'},{pk:'aspect',val:'RTR'}],
+         note:"M=monadic one event · OBS=witnessed · RTR=completed retrospective"},
+        {en:"The speaker is deeply skeptical of a habitually-reported practice.",
+         targets:[{pk:'validation',val:'RPR'},{pk:'aspect',val:'HAB'},{pk:'bias',val:'SKP'}],
+         note:"RPR=reportive (named source) · HAB=habitual recurrence · SKP=skeptical bias"},
+        {en:"Assume for argument's sake that several scattered distinct instances exist.",
+         targets:[{pk:'mood',val:'ASM'},{pk:'configuration',val:'DCT'}],
+         note:"ASM=assumptive mood · DCT=discrete scattered instances"},
+        {en:"The pure abstract category of motion itself — not any particular moving thing — vividly imagined.",
+         targets:[{pk:'perspective',val:'N'},{pk:'validation',val:'IMG'},{pk:'mood',val:'SPE'}],
+         note:"N=Noumenal type itself · IMG=imaginative/hypothetical · SPE=speculative stance"},
+      ];
+      const c=_s(cases);
+      return {prompt:`Select all parameters that together best encode:\n"${c.en}"`,targets:c.targets,note:c.note};
+    }},
+
+  // Formative vs referential distinction
+  form_vs_ref:{label:"Formative vs Referential",cat:"Discrimination",module:9,phase:3,engine:'MCQ',
+    generate:()=>{
+      const cases=[
+        {stmt:"Encoding 'running' as an action with full temporal and causal structure",ans:'formative',why:"Formatives are semantic heads with complete Ca/Vn morphology — they carry the full predicate"},
+        {stmt:"A short stand-in word pointing back to a participant already in discourse",ans:'referential',why:"Referentials serve as discourse anaphors once a participant is active in the speech context"},
+        {stmt:"Introducing 'the philosopher' for the first time as a topic",ans:'formative',why:"First introduction of a referent requires a full formative — referentials presuppose prior establishment"},
+        {stmt:"Re-mentioning an established entity with a short pronominal form",ans:'referential',why:"Subsequent mentions use referentials that point back to the previously introduced formative"},
+        {stmt:"Encoding 'the act of conscious deliberation' as the semantic head of a clause",ans:'formative',why:"Semantic clause-heads are formatives; all morphological parameter slots apply to them"},
+        {stmt:"Using a one-word substitute for a complex formative already established in the utterance",ans:'referential',why:"Referentials condense established formatives into a compact discourse pointer"},
+      ];
+      const c=_s(cases);
+      const correct={id:c.ans,label:c.ans==='formative'?'Formative':'Referential'};
+      const wrong={id:c.ans==='formative'?'referential':'formative',label:c.ans==='formative'?'Referential':'Formative'};
+      return _q(`"${c.stmt}"\n\nThis Ithkuil structure is a:`,correct,[wrong],c.why);
+    }},
+
+  // Strip affixes: identify the base root category from an affixed description
+  strip_affixes:{label:"Strip to Base Root",cat:"Compression",module:10,phase:3,engine:'MCQ',
+    generate:()=>{
+      const cases=[
+        {q:"A word meaning 'intensely recurring cognition'. After stripping the intensity + frequency affixes, the base root domain is:",a:"cognition/thinking",w:["motion/movement","speech/utterance","sensory perception","spatial containment"]},
+        {q:"After removing a degree-7 intensity affix, the remaining meaning is 'spatial containment'. The base root category is:",a:"containment/enclosure",w:["motion","sound","existence","desire"]},
+        {q:"A causative affix is removed from a word meaning 'to cause particles to move'. The base root domain is:",a:"physical motion",w:["speech/utterance","cognition","existence/being","auditory perception"]},
+        {q:"Remove the reciprocal affix from 'mutual communication'. The base root encodes:",a:"speech/utterance",w:["desire/will","cognition","physical contact","hearing/sound"]},
+        {q:"A word meaning 'no longer existing here' has a locative-absence affix removed. The base root encodes:",a:"existence/being",w:["spatial position","temporal duration","motion","absence itself"]},
+        {q:"Strip the inceptive affix from 'just beginning to contain something'. The base root is about:",a:"containment/enclosure",w:["motion","perception","desire","spatial position"]},
+      ];
+      const c=_s(cases);
+      const correct={id:'a',label:c.a};
+      const wrongs=_shuf(c.w).slice(0,3).map((w,i)=>({id:'w'+i,label:w}));
+      return _q(c.q,correct,wrongs);
+    }},
+
+  // ─── VISUAL ──────────────────────────────────────────────────────────────
+
+  // Match Configuration values to their synesthetic/visual descriptions
+  synesthetic_cfg:{label:"Config Synesthetic Match",cat:"Visual",module:2,phase:1,engine:'VISUAL',
+    generate:()=>{
+      const mappings=[
+        {id:'UNI',feel:'One self-contained point of pure light (●)'},
+        {id:'DPX',feel:'Two perfectly mirrored shapes (●●)'},
+        {id:'DCT',feel:'Scattered independent specks — no connections (∷)'},
+        {id:'AGG',feel:'Tightly packed cluster, parts indistinguishable (⬡)'},
+        {id:'SEG',feel:'A chain of distinct segments — separate but linked (◉—◉—◉)'},
+        {id:'CPN',feel:'Interlocking different shapes forming one machine (⚙)'},
+        {id:'COH',feel:'A flowing mass — parts merge into each other (~)'},
+        {id:'MSS',feel:'Ordered rows of identical units — a formation (|||)'},
+      ];
+      const sub=_pick(mappings,4);
+      const items=sub.map(p=>({id:p.id,label:PARAMS.configuration.values.find(v=>v.id===p.id)?.label||p.id}));
+      const slots=sub.map(p=>({id:p.id+'_v',label:p.feel,answer:p.id}));
+      return {prompt:'Match each Configuration to its synesthetic / visual gestalt:',items,slots,
+        note:'Configuration encodes the spatial/structural relationship between the instances of an entity'};
+    }},
+
+  // Root semantic clustering into domain zones
+  root_cluster:{label:"Root Domain Clustering",cat:"Visual",module:3,phase:1,engine:'VISUAL',
+    generate:()=>{
+      // Build domain→root buckets from ROOTS array
+      const buckets={};
+      ROOTS.forEach(r=>{
+        const d=r.domain||'Other';
+        if(!buckets[d]) buckets[d]=[];
+        buckets[d].push(r);
+      });
+      const domains=Object.keys(buckets).filter(d=>buckets[d].length>=2);
+      if(domains.length<2) return PUZZLE_REGISTRY.root_vocab.generate();
+      const chosen=_pick(domains,Math.min(4,domains.length));
+      const pairs=chosen.map(d=>({domain:d,root:_s(buckets[d])})).slice(0,4);
+      if(pairs.length<2) return PUZZLE_REGISTRY.root_vocab.generate();
+      const items=pairs.map(p=>({id:p.root.id,label:`${p.root.id} — ${p.root.name.slice(0,28)}`}));
+      const slots=pairs.map(p=>({id:p.domain+'_slot',label:`${p.domain} domain`,answer:p.root.id}));
+      return {prompt:'Cluster each root into its primary semantic domain:',items,slots,
+        note:'Roots are grouped by conceptual domain in the Ithkuil lexicon'};
+    }},
+
+  // Param slot mapping: drag each parameter to its morphological slot
+  param_slot_visual:{label:"Parameter Slot Map",cat:"Visual",module:4,phase:2,engine:'VISUAL',
+    generate:()=>{
+      const slotGroups=[
+        {slot:'Ca complex',params:['configuration','affiliation','perspective','extension','essence']},
+        {slot:'Vn slot',params:['mood','aspect','validation']},
+        {slot:'Vc case suffix',params:['case']},
+        {slot:'Cb bias particle',params:['bias']},
+      ];
+      // Pick 4 param→slot pairs (max 2 per slot to avoid crowding)
+      const flat=slotGroups.flatMap(g=>g.params.slice(0,2).map(pk=>({pk,slot:g.slot})));
+      const sub=_pick(flat,4);
+      const items=sub.map(x=>({id:x.pk,label:PARAMS[x.pk]?.label||x.pk}));
+      const slots=sub.map(x=>({id:x.slot+'__'+x.pk,label:`Slot: ${x.slot}`,answer:x.pk}));
+      return {prompt:'Match each parameter to the morphological slot it occupies in an Ithkuil formative:',
+        items,slots,note:'Ca: Configuration/Affiliation/Perspective/Extension/Essence · Vn: Mood/Aspect/Validation · Vc: Case · Cb: Bias'};
+    }},
+
+  // ─── INPUT ───────────────────────────────────────────────────────────────
+
+  // Free text: describe the semantic contrast between two parameter values
+  semantic_diff_free:{label:"Describe Value Contrast",cat:"Input",module:5,phase:2,engine:'INPUT',
+    generate:()=>{
+      const pairs=[
+        {pk:'mood',a:'FAC',b:'SPE',q:'What is the epistemic difference between Factual mood (FAC) and Speculative mood (SPE)?',
+         accept:['factual','fact','asserts','true','speculative','uncertain','may','might','possibility','unconfirmed'],
+         expl:'FAC asserts content as definitively true; SPE marks it as possible but unconfirmed — neither asserting nor denying'},
+        {pk:'validation',a:'OBS',b:'RPR',q:'How does Observational validation (OBS) differ from Reportive validation (RPR)?',
+         accept:['witness','direct','saw','observed','report','named','source','told','reported','secondhand'],
+         expl:'OBS = speaker directly witnessed it; RPR = speaker received information from a named/identified external source'},
+        {pk:'configuration',a:'AGG',b:'DCT',q:'What is the structural difference between Aggregative (AGG) and Discrete (DCT) configuration?',
+         accept:['aggregate','joined','cluster','bound','discrete','scattered','separate','apart','unconnected','dispersed'],
+         expl:'AGG = multiple identical instances bound into one cluster; DCT = multiple identical instances that are separate/dispersed'},
+        {pk:'aspect',a:'PRG',b:'RTR',q:'Distinguish Progressive aspect (PRG) from Retrospective aspect (RTR).',
+         accept:['ongoing','in progress','continuing','progressive','retrospective','past','completed','looking back','done','finished'],
+         expl:'PRG = event viewed as ongoing from the reference point; RTR = event viewed as complete, looking backward from that point'},
+        {pk:'perspective',a:'P',b:'N',q:'What is the conceptual gap between Polyadic (P) and Noumenal (N) perspective?',
+         accept:['polyadic','set','multiple','instances','noumenal','type','category','abstract','kind','the type itself'],
+         expl:'P = the set of specific instances; N = the type/category itself as an abstraction — not any particular instance'},
+        {pk:'bias',a:'EUP',b:'SKP',q:'How does Euphoric bias (EUP) differ from Skeptical bias (SKP) in speaker attitude?',
+         accept:['euphoric','positive','elation','joy','optimistic','skeptical','doubt','distrust','questioning','disbelief'],
+         expl:'EUP = speaker expresses genuine elation/joy about the content; SKP = speaker doubts or distrusts the content'},
+      ];
+      const p=_s(pairs);
+      return {question:p.q,hint:`Think about what distinguishes ${p.a} from ${p.b} along the ${PARAMS[p.pk]?.label||p.pk} axis.`,
+        accept:p.accept,explanation:p.expl};
+    }},
+
+  // Free text: how does a specific affix shift the base root meaning
+  affix_shift_free:{label:"Describe Affix Shift",cat:"Input",module:10,phase:3,engine:'INPUT',
+    generate:()=>{
+      const cases=[
+        {q:'Root KŢ encodes "cognition/thinking". A degree-9 frequency affix is added. Describe the resulting meaning.',
+         accept:['frequent','constantly','always','perpetual','continuous','habitual','incessant','thinking'],
+         expl:"'Perpetually / constantly thinking' — degree 9 of a frequency affix encodes the maximum frequency (constant/always)"},
+        {q:'A root for "motion" receives a causative affix. How does the meaning shift?',
+         accept:['cause','make move','compel','induce','causing','force','make it move','bring about motion'],
+         expl:"Causative introduces an external agent that brings about the motion: 'to cause [something] to move'"},
+        {q:'A speech root receives a privative affix (negation of the property). What does the result mean?',
+         accept:['silent','speechless','unable to speak','absence of speech','without speech','mutism','voiceless'],
+         expl:"Privative = absence of: 'absence of speech / being without the capacity for speech'"},
+        {q:'A "containment" root receives an inceptive affix (onset marker). What meaning emerges?',
+         accept:['begin','start','entering','onset','just starting','becoming contained','initial','beginning to enclose'],
+         expl:"Inceptive marks the very beginning: 'just beginning to be contained / entering a state of enclosure'"},
+        {q:'A root meaning "desire/will" receives a reciprocal affix. Describe the compound meaning.',
+         accept:['mutual','each other','reciprocal','bidirectional','shared desire','desire each other','want each other'],
+         expl:"Reciprocal = each participant does it toward/with the other: 'mutual desire / each desiring the other'"},
+        {q:'Root for "sound/acoustic" receives an augmentative (degree-8) intensity affix. Result?',
+         accept:['very loud','intense','powerful sound','overwhelming','deafening','high intensity','amplified'],
+         expl:"Degree 8 intensity = near-maximum: 'very intense / nearly overwhelming sound'"},
+      ];
+      const c=_s(cases);
+      return {question:c.q,hint:'Start from the base root meaning, then apply the affix transformation step by step.',
+        accept:c.accept,explanation:c.expl};
+    }},
+
+  // Free text: describe how Ithkuil compresses a verbose philosophical statement
+  compress_free:{label:"Compression: Describe Encoding",cat:"Input",module:10,phase:3,engine:'INPUT',
+    generate:()=>{
+      const cases=[
+        {q:'English: "I seem to recall, based on something I once heard, that there may have been multiple identical events of this type occurring at irregular intervals in the past."\n\nName at least three Ithkuil parameters compressing this and explain each.',
+         accept:['validation','purportive','PUR','aspect','retrospective','RTR','habitual','HAB','configuration','DCT','hearsay'],
+         expl:'PUR (hearsay validation) + RTR (past/retrospective aspect) + HAB (irregular habitual recurrence) + DCT (multiple discrete events) — four morphological markers replace ~35 English words'},
+        {q:'English: "The philosopher is directly witnessing, right now, the pure abstract concept of motion itself — not any particular moving thing."\n\nWhich Ithkuil parameters encode this, and what does each do?',
+         accept:['validation','OBS','observational','perspective','noumenal','N','aspect','progressive','PRG','witnessed'],
+         expl:'OBS (direct witness validation) + N (Noumenal perspective: the abstract type) + PRG (ongoing right now) — three parameters encode what English needed ~25 words for'},
+        {q:'English: "The speaker is deeply skeptical, while acknowledging the hearsay report, that this alleged habitual practice actually occurred."\n\nName the parameters encoding the speaker\'s epistemic and attitudinal stance.',
+         accept:['bias','skeptical','SKP','validation','reportive','RPR','aspect','habitual','HAB','stance'],
+         expl:'SKP (skeptical bias) + RPR (reportive: based on a named report) + HAB (habitual aspect) — three morphological markers handle the full English subordinate clause'},
+        {q:'English: "She assumes that the vague, scattered forms she can barely make out are all instances of the same general type."\n\nIdentify the Ithkuil parameters involved.',
+         accept:['mood','assumptive','ASM','configuration','DCT','perspective','N','noumenal','validation'],
+         expl:'ASM (assumptive mood) + DCT (discrete scattered instances) + N (Noumenal perspective: the general type) — three parameters compress the hedged assumption about scattered tokens of a type'},
+      ];
+      const c=_s(cases);
+      return {question:c.q,hint:'Identify parameter+value pairs (e.g. validation=OBS) — at least three. Explain what each encodes.',
+        accept:c.accept,explanation:c.expl};
+    }},
+
+  // ─── MCQ ─────────────────────────────────────────────────────────────────
+
+  // Proximate vs Obviative in discourse contexts
+  obviative_proximate:{label:"Proximate vs Obviative",cat:"Cases",module:12,phase:4,engine:'MCQ',
+    generate:()=>{
+      const cases=[
+        {ctx:"The teacher praised the student. He smiled.",q:"In Ithkuil, the proximate referent ('he') is:",a:"student — most recently introduced",w:["teacher — first introduced","ambiguous — no distinction","the praising event"]},
+        {ctx:"The philosopher argued with the student. She then left.",q:"Which participant holds the obviative (first-introduced) role?",a:"philosopher — introduced first",w:["student — introduced second","both simultaneously","neither — Ithkuil doesn't distinguish"]},
+        {ctx:"The dog chased the cat until it hid under the bed.",q:"The obviative marker attaches to:",a:"dog — the first-introduced agent",w:["cat — the more recent patient","both equally","the bed as location"]},
+        {ctx:"Surgeon A operated on patient B. She remained calm throughout.",q:"'She' (proximate) refers to:",a:"patient B — most recently introduced",w:["surgeon A — first introduced","both equally","whichever is female"]},
+        {ctx:"The mentor guided the apprentice. He learned quickly.",q:"In precise Ithkuil the proximate 'he' maps to:",a:"apprentice — the last-mentioned participant",w:["mentor — introduced first","unclear without context","the learning process"]},
+      ];
+      const c=_s(cases);
+      const correct={id:'a',label:c.a};
+      const wrongs=_shuf(c.w).slice(0,3).map((w,i)=>({id:'w'+i,label:w}));
+      return {question:`${c.ctx}\n\n${c.q}`,
+        options:_shuf([{...correct,correct:true},...wrongs.map(w=>({...w,correct:false}))]),
+        answer:'a',note:'Proximate = most recently mentioned participant; Obviative = earlier-introduced participant'};
+    }},
+
+  // Affix degree: given a degree description, identify which degree number it is
+  affix_decode_deg:{label:"Affix Degree ID",cat:"Compression",module:10,phase:3,engine:'MCQ',
+    generate:()=>{
+      const affsWithDeg=AFFIXES.filter(a=>a.degrees&&a.degrees.length===9);
+      if(!affsWithDeg.length) return PUZZLE_REGISTRY.affix_degree.generate();
+      const aff=_s(affsWithDeg);
+      const degIdx=Math.floor(Math.random()*9);
+      const desc=aff.degrees[degIdx];
+      if(!desc) return PUZZLE_REGISTRY.affix_degree.generate();
+      const correct={id:String(degIdx+1),label:`Degree ${degIdx+1}`};
+      const wrongs=_pick([1,2,3,4,5,6,7,8,9].filter(d=>d!==(degIdx+1)),3).map(d=>({id:String(d),label:`Degree ${d}`}));
+      return _q(`Affix ${aff.id} (${aff.label||aff.id}): "${desc.slice(0,80)}"\n\nWhich degree is this?`,correct,wrongs);
+    }},
+
+  // Case depth: semantic chain — which case after a reframe
+  case_depth:{label:"Case Depth Chain",cat:"Cases",module:9,phase:3,engine:'MCQ',
+    generate:()=>{
+      const chains=[
+        {q:"'The rain fell' (THM). Reframe: rain is now seen as an enabling force behind plant growth — without volition. Its case becomes:",a:"EFF",w:["ERG","INS","ABL","AFF"],note:"EFF = entity whose inherent properties produce an effect, with no volitional agency"},
+        {q:"'I push the box' — 'I' holds ERG. Reframe: the box becomes the focused entity undergoing a state change. The box's case:",a:"THM",w:["ERG","PAT","ABS","DAT"],note:"THM = entity that undergoes or is located in a state — the patient of the proposition"},
+        {q:"'She sings' (ERG). Reframe: she experiences a compulsion to sing rather than choosing it. Her case shifts to:",a:"AFF",w:["ERG","DAT","INS","OBL"],note:"AFF = entity experiencing an internal compulsion or emotional/cognitive stimulus"},
+        {q:"A message travels via a messenger (INS). Focus shifts to where the message originated. The origin's case:",a:"ABL",w:["INS","ERG","LOC","PRP"],note:"ABL = the source/origin point from which something proceeds"},
+        {q:"'She gave knowledge to the student.' The knowledge is THM. Reframe: focus on who receives and is affected. The recipient's case:",a:"DAT",w:["THM","ERG","BEN","AFF"],note:"DAT = recipient of a transferred entity — beneficiary of the transfer"},
+        {q:"'The hammer broke the glass.' Reframe: the hammer is the means/instrument, not a volitional being. Its case:",a:"INS",w:["ERG","AFF","EFF","ABL"],note:"INS = Instrumental — the tool or means by which an action is accomplished"},
+      ];
+      const c=_s(chains);
+      const correct={id:c.a,label:`${c.a} — ${CASES.find(x=>x.id===c.a)?.label||c.a}`};
+      const wrongs=_shuf(c.w).slice(0,3).map(w=>({id:w,label:`${w} — ${CASES.find(x=>x.id===w)?.label||w}`}));
+      return _q(c.q,correct,wrongs,c.note);
+    }},
+
+  // Root by context: which root best fits the described concept
+  root_by_context:{label:"Root by Context",cat:"Root Knowledge",module:4,phase:2,engine:'MCQ',
+    generate:()=>{
+      const pool=ROOTS.filter(r=>r.stem1&&r.stem1.length>6&&r.name&&r.name.length>3).slice(0,40);
+      if(pool.length<4) return PUZZLE_REGISTRY.root_vocab.generate();
+      const target=_s(pool);
+      const wrongs=_pick(pool.filter(r=>r.id!==target.id),3);
+      const templates=[
+        `The ___ was unusually intense and prolonged. (Root domain: "${target.name}")`,
+        `She engaged in deep ___, unable to stop. (Stem 1: "${target.stem1.slice(0,45)}")`,
+        `The concept of ___ underlies the whole passage. (Root: ${target.id}, meaning: "${target.name}")`,
+        `Everything reduced to ___ in the end. (Root meaning: "${target.stem1.slice(0,50)}")`,
+      ];
+      return _q(_s(templates),
+        {id:target.id,label:`${target.id} — ${target.name}`},
+        wrongs.map(r=>({id:r.id,label:`${r.id} — ${r.name}`})));
+    }},
+
+  // Specification from context: BSC/CTE/CSV/OBJ identification
+  spec_context:{label:"Specification from Context",cat:"Param ID",module:5,phase:2,engine:'MCQ',paramKey:'specification',
+    generate:()=>{
+      const scenarioMap={
+        BSC:["Just the default action of running — nothing highlighted",
+             "'The tree stands there' — treating it as a holistic integrated fact",
+             "No special aspect narrowed — the root in its unmarked, basic sense"],
+        CTE:["The inner feeling of running — what it's like from the inside",
+             "'The experience of the tree's presence' — its phenomenal quality",
+             "What it's subjectively like to undergo this — the internal content"],
+        CSV:["The visible physical act of running as external observers see it",
+             "The tree as a perceivable material object",
+             "The tangible, observable form the root concept takes in the world"],
+        OBJ:["The runner — the entity characterised by running",
+             "The tree as a conceptual object of study",
+             "The entity or theme that the root property is attributed to"],
+      };
+      const spk=_s(Object.keys(scenarioMap));
+      const scenario=_s(scenarioMap[spk]);
+      const correct=PARAMS.specification.values.find(v=>v.id===spk)||{id:spk,label:spk};
+      return _q(`"${scenario}"\n\nWhich Specification does this represent?`,correct,_dist(correct,PARAMS.specification.values));
+    }},
+
+  // ─── SORT ────────────────────────────────────────────────────────────────
+
+  // Sort roots by semantic proximity to a given anchor concept
+  root_proximity:{label:"Sort Roots by Proximity",cat:"Sort",module:5,phase:2,engine:'SORT',
+    generate:()=>{
+      const chains=[
+        {anchor:"MIND/COGNITION",order:['kţ','ll','kš','žb'],
+         note:"kţ (cognition) → ll (psyche) → kš (speech) → žb (sound): from inner thought to outer acoustic"},
+        {anchor:"VOLITION & ACTION",order:['nk','rr','ţk','sm'],
+         note:"nk (desire) → rr (motion) → ţk (containment) → sm (existence): from intent to physical outcome"},
+      ];
+      const ch=_s(chains);
+      const validOrder=ch.order.filter(id=>ROOTS.find(r=>r.id===id));
+      if(validOrder.length<3) return PUZZLE_REGISTRY.root_vocab.generate();
+      const items=_shuf(validOrder).map(id=>{
+        const r=ROOTS.find(x=>x.id===id);
+        return {id,label:r?`${id} — ${r.name}`:`${id}`};
+      });
+      return {prompt:`Sort these roots from most to least semantically related to "${ch.anchor}":`,
+        items,correct:validOrder,note:ch.note};
+    }},
+
+  // Sort cases by their semantic role family (agent→patient→experiencer etc.)
+  sort_cases_family:{label:"Sort Cases by Family",cat:"Cases",module:6,phase:2,engine:'SORT',
+    generate:()=>{
+      const families=[
+        {name:"Transrelative core: volitional agent → patient → experiencer",order:['ERG','THM','AFF'],
+         note:"ERG=volitional agent · THM=entity undergoing state change · AFF=experiencer of stimulus"},
+        {name:"Spatial path: origin → traversal → destination",order:['ABL','TRA','ALL'],
+         note:"ABL=from (origin) · TRA=through (path) · ALL=toward/to (goal)"},
+        {name:"Possession & relation: possessor → topic → beneficiary",order:['PRP','TOP','BEN'],
+         note:"PRP=possessor · TOP=discourse topic · BEN=beneficiary of action"},
+      ];
+      const f=_s(families);
+      const validIds=f.order.filter(id=>CASES.find(c=>c.id===id));
+      if(validIds.length<3) return PUZZLE_REGISTRY.case_family.generate();
+      const items=_shuf(validIds).map(id=>({id,label:`${id} — ${CASES.find(c=>c.id===id)?.label||id}`}));
+      return {prompt:`Arrange these cases in the correct semantic order:\n"${f.name}"`,
+        items,correct:validIds,note:f.note};
+    }},
+
+  // ─── SPEED ───────────────────────────────────────────────────────────────
+
+  // Speed: Affix meaning flash — which affix does this degree description belong to
+  speed_affix:{label:"Speed: Affix Flash",cat:"Speed",module:11,phase:4,engine:'SPEED',
+    generate:()=>{
+      const pool=AFFIXES.filter(a=>a.degrees&&a.degrees.length>0&&a.label&&a.label!==a.id);
+      if(!pool.length) return PUZZLE_REGISTRY.speed_any.generate();
+      const aff=_s(pool);
+      const degIdx=Math.floor(Math.random()*Math.min(9,aff.degrees.length));
+      const desc=aff.degrees[degIdx];
+      if(!desc) return PUZZLE_REGISTRY.speed_any.generate();
+      const correct={id:aff.id,label:`${aff.id} — ${aff.label}`};
+      const wrongs=_pick(pool.filter(a=>a.id!==aff.id),3).map(a=>({id:a.id,label:`${a.id} — ${a.label}`}));
+      return _q(`Degree ${degIdx+1}: "${desc.slice(0,75)}"\n— which affix?`,correct,wrongs);
+    }},
+
+  // Speed: Construction sprint — given a meaning, choose the correct value ID
+  construct_sprint:{label:"Speed: Construct Sprint",cat:"Speed",module:11,phase:4,engine:'SPEED',
+    generate:()=>{
+      const pk=_s(Object.keys(PARAMS));const p=PARAMS[pk];const v=_s(p.values);
+      const prompts=[
+        `${p.label}: "${v.desc?.slice(0,60)||v.label}" — value ID?`,
+        `Quick-encode "${v.label}" (${p.label}). The abbreviation is:`,
+        `Which ${p.label} value encodes: "${v.desc?.slice(0,55)||v.label}"?`,
+      ];
+      return _q(_s(prompts),{id:v.id,label:v.id},_dist(v,p.values).map(x=>({id:x.id,label:x.id})));
+    }},
+
+  // ─── MULTI ───────────────────────────────────────────────────────────────
+
+  // Aspect + Validation simultaneous decode
+  aspect_val_multi:{label:"Aspect + Validation Pair",cat:"Multi",module:7,phase:2,engine:'MULTI',
+    generate:()=>{
+      const asp=_s(PARAMS.aspect.values.filter(v=>['PRG','RTR','HAB','INC','IMM'].includes(v.id)));
+      const val=_s(PARAMS.validation.values.filter(v=>VAL_SRC[v.id]));
+      const src=_s(VAL_SRC[val.id]||['from an unspecified source']);
+      const ctx=`The event is ${asp.desc?.slice(0,50)||asp.label} — and the speaker knows this ${src}.`;
+      const mkO=(p,cv)=>_shuf([cv,..._dist(cv,p.values)]).map(v=>({id:v.id,label:v.label}));
+      return {question:`Context: "${ctx}"\n\nIdentify both Aspect AND Validation:`,
+        groups:[
+          {id:'aspect',    label:'Aspect',    answer:asp.id,options:mkO(PARAMS.aspect,asp)},
+          {id:'validation',label:'Validation',answer:val.id,options:mkO(PARAMS.validation,val)},
+        ],note:`${asp.label} · ${val.label}`};
+    }},
+
+  // Case + Specification simultaneous decode
+  case_spec_multi:{label:"Case + Specification Pair",cat:"Multi",module:8,phase:3,engine:'MULTI',
+    generate:()=>{
+      const casPool=CASES.filter(c=>CASE_SCN[c.id]);
+      const cas=_s(casPool);
+      const spc=_s(PARAMS.specification.values);
+      const scn=_s(CASE_SCN[cas.id]);
+      const spcDesc={BSC:'its basic integrated meaning',CTE:'its internal experiential content',
+        CSV:'its physical/observable manifestation',OBJ:'the conceptual entity it characterises'}[spc.id]||spc.label;
+      const ctx=`"${scn}" — and the root itself expresses ${spcDesc}.`;
+      const mkO=(vals,cv)=>_shuf([cv,..._pick(vals.filter(v=>v.id!==cv.id),3)]).map(v=>({id:v.id,label:v.label}));
+      return {question:`${ctx}\n\nIdentify the Case AND the Specification:`,
+        groups:[
+          {id:'case',         label:'Case',         answer:cas.id,options:mkO(CASES,cas)},
+          {id:'specification',label:'Specification',answer:spc.id,options:mkO(PARAMS.specification.values,spc)},
+        ],note:`${cas.id} (${cas.label||cas.id}) · ${spc.label}`};
+    }},
+
+  // ─── ZSNOUT-POWERED ──────────────────────────────────────────────────────
+
+  // Generate two forms differing by exactly one param — identify which param changed
+  zs_minimal_pair:{label:"Live Minimal Pair",cat:"Live Decode",module:7,phase:3,engine:'MCQ',
+    generate:()=>{
+      if(!window._iz) return PUZZLE_REGISTRY.param_diff.generate();
+      const pks=['configuration','affiliation','perspective','extension','essence'];
+      const pk=_s(pks);const p=PARAMS[pk];
+      const va=_s(p.values),vb=_s(p.values.filter(v=>v.id!==va.id));
+      try{
+        const base={configuration:'UNI',affiliation:'CSL',perspective:'M',extension:'DEL',essence:'NRM'};
+        const fa=window._iz.formativeToIthkuil({type:'UNF/C',root:'kţ',ca:{...base,[pk]:va.id}});
+        const fb=window._iz.formativeToIthkuil({type:'UNF/C',root:'kţ',ca:{...base,[pk]:vb.id}});
+        const correct={id:pk,label:p.label};
+        const wrongs=_pick(pks.filter(x=>x!==pk),3).map(x=>({id:x,label:PARAMS[x]?.label||x}));
+        return _q(`"${fa}"  vs  "${fb}"\n\nWhich single Ca parameter changed between these two forms?`,correct,wrongs);
+      }catch(e){return PUZZLE_REGISTRY.param_diff.generate();}
+    }},
+
+  // Live form with a specific stem — identify which stem is in use
+  zs_stem_id:{label:"Live: Identify Stem",cat:"Live Decode",module:5,phase:2,engine:'MCQ',
+    generate:()=>{
+      if(!window._iz) return PUZZLE_REGISTRY.stem_id.generate();
+      const pool=ROOTS.filter(r=>r.stem1&&r.stem2&&r.stem3&&r.id&&r.id.length>=2);
+      if(!pool.length) return PUZZLE_REGISTRY.stem_id.generate();
+      const r=_s(pool);
+      const stemNum=_s([1,2,3]);
+      const stemKey={1:'stem1',2:'stem2',3:'stem3'}[stemNum];
+      try{
+        const form=window._iz.formativeToIthkuil({type:'UNF/C',root:r.id,stem:stemNum});
+        const correct={id:'S'+stemNum,label:`Stem ${stemNum}: "${r[stemKey]?.slice(0,40)||'S'+stemNum}"`};
+        const wrongs=[1,2,3].filter(s=>s!==stemNum)
+          .map(s=>({id:'S'+s,label:`Stem ${s}: "${r[{1:'stem1',2:'stem2',3:'stem3'}[s]]?.slice(0,40)||'S'+s}"`}));
+        return _q(`Live form: "${form}" (root: ${r.id} — ${r.name})\n\nWhich stem is active?`,correct,wrongs);
+      }catch(e){return PUZZLE_REGISTRY.stem_id.generate();}
+    }},
+
 });
 
 /* ══════════════════════════════════════════════════════════════════
