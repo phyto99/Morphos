@@ -218,6 +218,13 @@ const TONE_MAP={
   OBS:523.3, RCL:493.9, PUR:466.2, RPR:440.0, APR:415.3, IMG:392.0,
   // Bias: Chromatic (emotional range)
   EUP:587.3, EUH:554.4, COR:523.3, DUB:493.9, TEN:466.2, NEG:440.0, SKP:415.3, CYN:391.0, CTM:369.9, EXA:349.2,
+  SGS:622, ANN:659, REV:698, GRT:739, SOL:783, STU:830, FOR:880, DLC:932, IPT:987, DSP:1047, ANT:1109, OPT:1175, RPT:1245,
+  // Effect: gradient green-to-red
+  B1:587, B2:554, B3:523, BSF:494, UNK:440, DSF:415, D3:392, D2:370, D1:349,
+  // Level: rising scale blue
+  MIN:220, SBE:261, IFR:293, DFC:329, EQU:392, SUR:440, SPL:494, SPQ:523, EXC:587,
+  // Aspect additions
+  CSS:277, PAU:261, RGR:246, PCL:233, RSM:220, SMM:207, EXP:196, ICS:184,
 };
 function playTone(freq,dur=0.12,type='sine',vol=0.08){
   if(!freq) return;
@@ -367,6 +374,19 @@ const PARAMS={
       {id:"CYN",label:"Cynical",       icon:"⊗",desc:"Expressing cynicism or irony",            freq:391,  hue:"#9f1239"},
       {id:"CTM",label:"Contemptuous",  icon:"↓",desc:"Expressing contempt",                     freq:369.9,hue:"#881337"},
       {id:"EXA",label:"Exasperative",  icon:"!",desc:"Expressing frustration or exasperation",  freq:349.2,hue:"#be123c"},
+      {id:"SGS",label:"Suggestive",    icon:"↝",desc:"Gently hinting or offering a suggestion",  freq:622,  hue:"#f9a8d4"},
+      {id:"ANN",label:"Anoetic",       icon:"⁇",desc:"Expressing utter stupefaction or bafflement",freq:659, hue:"#fbcfe8"},
+      {id:"REV",label:"Revelatory",    icon:"✦",desc:"Sudden realization or moment of revelation",freq:698, hue:"#fce7f3"},
+      {id:"GRT",label:"Gratificative", icon:"♡",desc:"Expressing gratitude or warm appreciation", freq:739, hue:"#fda4af"},
+      {id:"SOL",label:"Solicitative",  icon:"⊹",desc:"Pleading, beseeching, or earnestly imploring",freq:783,hue:"#fecdd3"},
+      {id:"STU",label:"Stupefactive",  icon:"⊛",desc:"Expressing amazement or awestruck wonder",  freq:830, hue:"#ffe4e6"},
+      {id:"FOR",label:"Fortuitous",    icon:"⋆",desc:"Expressing pleasant surprise at good fortune",freq:880,hue:"#fef9c3"},
+      {id:"DLC",label:"Delectative",   icon:"∾",desc:"Expressing delicious satisfaction or savoring",freq:932,hue:"#fef08a"},
+      {id:"IPT",label:"Impatient",     icon:"⇒",desc:"Expressing impatience or urgent need",       freq:987, hue:"#fde68a"},
+      {id:"DSP",label:"Despairing",    icon:"⊟",desc:"Expressing hopelessness or deep despair",    freq:1047,hue:"#e2e8f0"},
+      {id:"ANT",label:"Anticipative",  icon:"⟹",desc:"Expressing eager anticipation",              freq:1109,hue:"#bfdbfe"},
+      {id:"OPT",label:"Optiative",     icon:"◌",desc:"Expressing a wish or longing for something",  freq:1175,hue:"#c7d2fe"},
+      {id:"RPT",label:"Repudiative",   icon:"⊘",desc:"Firmly rejecting or repudiating something",  freq:1245,hue:"#ddd6fe"},
     ]
   },
   aspect:{
@@ -381,6 +401,14 @@ const PARAMS={
       {id:"IMM",label:"Imminent",      icon:"▷",desc:"About to begin",                          freq:523.3,hue:"#d8b4fe"},
       {id:"INC",label:"Inceptive",     icon:"⊢",desc:"Just beginning",                         freq:349.2,hue:"#e9d5ff"},
       {id:"TRM2",label:"Terminative",  icon:"⊣",desc:"Just ending",                            freq:293.7,hue:"#f3e8ff"},
+      {id:"CSS",label:"Cessative",     icon:"⊡",desc:"In the process of coming to an end",     freq:277,  hue:"#ede9fe"},
+      {id:"PAU",label:"Pausal",        icon:"⏸",desc:"Temporarily suspended or paused",        freq:261,  hue:"#ddd6fe"},
+      {id:"RGR",label:"Regressive",    icon:"⇐",desc:"Gradually reversing or undoing",         freq:246,  hue:"#c4b5fd"},
+      {id:"PCL",label:"Precyclical",   icon:"⟳",desc:"In the final phase before a cycle resets",freq:233, hue:"#a78bfa"},
+      {id:"RSM",label:"Resumptive",    icon:"▷▷",desc:"Resuming after a break or interruption", freq:220, hue:"#8b5cf6"},
+      {id:"SMM",label:"Summative",     icon:"Σ", desc:"The total cumulative effect over time",  freq:207,  hue:"#7c3aed"},
+      {id:"EXP",label:"Experiential",  icon:"◎",desc:"Occurred at least once; experiential 'ever'",freq:196,hue:"#6d28d9"},
+      {id:"ICS",label:"Incessative",   icon:"∞",desc:"Without any pause or break whatsoever",  freq:184,  hue:"#5b21b6"},
     ]
   },
   phase:{
@@ -407,6 +435,38 @@ const PARAMS={
       {id:"FNC",label:"Functional",       icon:"⚙",desc:"The referent in its primary functional or purposive role",      freq:392,  hue:"#d97706"},
       {id:"RPS",label:"Representational", icon:"□",desc:"As a representative example or symbol of its type",            freq:440,  hue:"#f59e0b"},
       {id:"AMG",label:"Amalgamative",     icon:"∪",desc:"As an undifferentiated member of a broader category or mass",  freq:494,  hue:"#fbbf24"},
+    ]
+  },
+  effect:{
+    label:"Effect", slot:"Vn", cssVar:"--p-eff", hex:"#15803d",
+    synNote:"Benefactive gradient. Green-to-red spectrum. Who gains or suffers.",
+    spatialAxis:"who is benefited (+) or harmed (−) by the action",
+    values:[
+      {id:"B1",label:"1st:Beneficial",    icon:"↑₁",desc:"The action benefits the speaker (1st person)",                        freq:587, hue:"#4ade80"},
+      {id:"B2",label:"2nd:Beneficial",    icon:"↑₂",desc:"The action benefits the addressee (2nd person)",                      freq:554, hue:"#86efac"},
+      {id:"B3",label:"3rd:Beneficial",    icon:"↑₃",desc:"The action benefits a third party",                                   freq:523, hue:"#bbf7d0"},
+      {id:"BSF",label:"Self:Beneficial",  icon:"↑ₛ",desc:"The action is reflexively beneficial to the subject itself",          freq:494, hue:"#a7f3d0"},
+      {id:"UNK",label:"Unknown Effect",   icon:"∅ₑ",desc:"The benefactive or detrimental effect is unknown or unspecified",      freq:440, hue:"#cbd5e1"},
+      {id:"DSF",label:"Self:Detrimental", icon:"↓ₛ",desc:"The action is reflexively detrimental to the subject itself",         freq:415, hue:"#fca5a5"},
+      {id:"D3",label:"3rd:Detrimental",   icon:"↓₃",desc:"The action is detrimental to a third party",                         freq:392, hue:"#f87171"},
+      {id:"D2",label:"2nd:Detrimental",   icon:"↓₂",desc:"The action is detrimental to the addressee",                         freq:370, hue:"#ef4444"},
+      {id:"D1",label:"1st:Detrimental",   icon:"↓₁",desc:"The action is detrimental to the speaker (1st person)",               freq:349, hue:"#dc2626"},
+    ]
+  },
+  level:{
+    label:"Level", slot:"Vn", cssVar:"--p-lev", hex:"#0284c7",
+    synNote:"Comparative scale. Sky-to-deep-blue spectrum. Degree relative to standard.",
+    spatialAxis:"where on the scale relative to the comparison standard",
+    values:[
+      {id:"MIN",label:"Minimal",          icon:"▁",desc:"At the absolute minimum — barely or negligibly present",               freq:220, hue:"#bae6fd"},
+      {id:"SBE",label:"Subequative",      icon:"▂",desc:"Below the standard but not minimally so",                             freq:261, hue:"#7dd3fc"},
+      {id:"IFR",label:"Inferior",         icon:"▃",desc:"Clearly below the standard by a noticeable degree",                   freq:293, hue:"#38bdf8"},
+      {id:"DFC",label:"Deficient",        icon:"▄",desc:"Somewhat below the standard, lacking",                                freq:329, hue:"#0ea5e9"},
+      {id:"EQU",label:"Equative",         icon:"▅",desc:"Exactly equal to the standard or norm",                               freq:392, hue:"#0284c7"},
+      {id:"SUR",label:"Surpassive",       icon:"▆",desc:"Above the standard — exceeding the norm",                             freq:440, hue:"#0369a1"},
+      {id:"SPL",label:"Superlative",      icon:"▇",desc:"The greatest of its kind within a defined set",                       freq:494, hue:"#075985"},
+      {id:"SPQ",label:"Superessive",      icon:"▓",desc:"Beyond the usual superlative — the highest possible",                  freq:523, hue:"#0c4a6e"},
+      {id:"EXC",label:"Excessive",        icon:"▉",desc:"Beyond any reasonable maximum — unreasonably or absurdly much",       freq:587, hue:"#082f49"},
     ]
   },
 };
@@ -2058,6 +2118,9 @@ const PARAM_DRILLS={
   aspect:       ['asp_id','aspect_timeline','sort_asp','timeline_asp','vn_slot','aspect_val_multi','semantic_diff_free'],
   phase:        ['phase_id','phase_match','phase_vs_aspect','phase_sort','vn_slot','semantic_diff_free'],
   context:      ['context_id','context_apply','context_match','semantic_diff_free'],
+  effect:       ['effect_id','effect_match','effect_apply','vn_slot','semantic_diff_free'],
+  level:        ['level_id','level_sort','level_apply','vn_slot','semantic_diff_free'],
+  function:     ['function_id','ca_all','full_decode','vn_slot'],
   case:         ['cas_id','case_assign','case_family','case_reframe','build_case_pair','blank_canvas','case_depth','obviative_proximate','sort_cases_family','case_spec_multi','case_relational','case_affinitive','case_family_sort'],
 };
 
@@ -2084,8 +2147,8 @@ function adaptiveDrills(lm,max){
     var v=Object.values(lm[pk]||{});return s+(v.length?v.reduce(function(a,b){return a+b;},0)/v.length:0);
   },0)/Object.keys(PARAMS).length;
   if(avgMastery>0.15) ids=ids.concat(['root_vocab','root_stems','root_domain','root_by_context','compound_roots','root_proximity','root_cluster']);
-  if(avgMastery>0.3) ids=ids.concat(['semantic_diff_free','affix_shift_free','compress_free','obviative_proximate','case_depth','spec_context','affix_decode_deg','phase_vs_aspect','context_apply','case_relational','case_affinitive']);
-  if(avgMastery>0.5) ids=ids.concat(['ca_merge','semantic_nuance','form_vs_ref','strip_affixes','aspect_val_multi','case_spec_multi','sort_cases_family','speed_affix','construct_sprint','synesthetic_cfg','param_slot_visual','blank_free','zs_full_gloss','phase_sort','case_family_sort']);
+  if(avgMastery>0.3) ids=ids.concat(['semantic_diff_free','affix_shift_free','compress_free','obviative_proximate','case_depth','spec_context','affix_decode_deg','phase_vs_aspect','context_apply','case_relational','case_affinitive','effect_apply','level_apply','function_id','vv_id','cc_id','adjunct_type']);
+  if(avgMastery>0.5) ids=ids.concat(['ca_merge','semantic_nuance','form_vs_ref','strip_affixes','aspect_val_multi','case_spec_multi','sort_cases_family','speed_affix','construct_sprint','synesthetic_cfg','param_slot_visual','blank_free','zs_full_gloss','phase_sort','case_family_sort','level_sort','effect_match']);
   // Sentence exercises unlock at mid-mastery
   if(avgMastery>0.25) ids=ids.concat(['sentence_s1','sentence_s2','sentence_s3','sentence_s4','sentence_s5','sentence_s6','sentence_s7']);
   // Phonology/stress always available
@@ -3120,7 +3183,7 @@ const _q=(question,correct,wrongs,lbl=o=>o.label)=>({
 const SLOT_MAP={configuration:'Ca',affiliation:'Ca',perspective:'Ca',extension:'Ca',essence:'Ca',
   specification:'Vr',function:'Vr',mood:'Vn',validation:'Vn',aspect:'Vn',case:'Vc',bias:'Cb'};
 const EXT_ORDER=['PRX','ICP','DEL','TRM','DST','PXD'];
-const ASP_ORDER=['INC','PRG','HAB','IMM','PRS','TRM2','RTR'];
+const ASP_ORDER=['INC','PRG','ICS','HAB','IMM','CSS','TRM2','PAU','RSM','RGR','PCL','RTR','PRS','SMM','EXP'];
 const CFG_ORDER=['UNI','DPX','DCT','AGG','SEG','CPN','COH','CST','MUL'];
 
 const CFG_SCENARIOS={UNI:["a single apple","one specific instance","this particular chair","one bounded referent"],
@@ -3151,14 +3214,35 @@ const BIAS_CTX={EUP:["expressing pure delight","with elation and joy","positive 
   SKP:["openly skeptical","doubting the premise entirely","questioning the basis"],
   CYN:["with irony or cynicism","sarcastically","seeing through the pretense"],
   CTM:["with clear contempt","expressing disdain","looking down on it"],
-  EXA:["frustrated and exasperated","fed up","barely containing frustration"]};
+  EXA:["frustrated and exasperated","fed up","barely containing frustration"],
+  SGS:["gently hinting","offering a subtle suggestion","nudging without asserting"],
+  ANN:["completely baffled","utterly stupefied","at a loss to explain"],
+  REV:["having a sudden realization","as if seeing it for the first time","a flash of insight"],
+  GRT:["expressing warm gratitude","thankful and appreciative","heartfelt thanks"],
+  SOL:["beseeching or pleading","earnestly imploring","asking with urgent sincerity"],
+  STU:["struck with wonder","completely amazed","in awestruck disbelief"],
+  FOR:["pleasantly surprised by luck","delighted by an unexpected turn","noting happy coincidence"],
+  DLC:["savoring with delight","expressing delicious pleasure","relishing the experience"],
+  IPT:["impatiently urging","expressing urgent need","barely able to wait"],
+  DSP:["expressing hopelessness","in deep despair","seeing no way forward"],
+  ANT:["eagerly anticipating","looking forward with excitement","full of anticipation"],
+  OPT:["wishing it were so","expressing a heartfelt desire","longing for something"],
+  RPT:["firmly rejecting","flatly repudiating","refusing to accept"]};
 const ASP_TMP={RTR:["completed — speaker looks back","action is in the past","retrospective"],
   PRS:["anticipating a future event","prospective — yet to come","future-oriented"],
   HAB:["a recurring pattern","habitually — regularly repeating","ongoing pattern"],
   PRG:["happening right now","in progress at speech time","currently ongoing"],
   IMM:["about to begin","on the verge of starting","imminent"],
   INC:["just beginning","onset of the action","the very start"],
-  TRM2:["just ending","the very conclusion","termination of the action"]};
+  TRM2:["just ending","the very conclusion","termination of the action"],
+  CSS:["winding down","in the process of ending","gradually coming to a close"],
+  PAU:["on pause","temporarily suspended","momentarily halted"],
+  RGR:["undoing what was done","reversing the action","regressing back"],
+  PCL:["nearly completing a full cycle","in the last stage before reset","precyclical"],
+  RSM:["starting again after a break","resuming where left off","re-commenced"],
+  SMM:["the total cumulative result","summed over all occurrences","total overall effect"],
+  EXP:["has happened at least once","the experiential 'ever'","ever/never in one's experience"],
+  ICS:["without any pause","absolutely unbroken","continuous without any gap"]};
 const MOOD_IMP={FAC:"Speaker asserts this as fact.",
   SUB:"Speaker presents this as contingent or hypothetical.",
   ASM:"Speaker assumes this without full certainty.",
@@ -3627,6 +3711,86 @@ const PUZZLE_REGISTRY={
   context_match:{label:"Match Context to Frame",cat:"Param ID",module:5,phase:2,engine:'MATCH',paramKey:'context',
     generate:()=>{const vals=PARAMS.context.values;return {pairs:vals.map(v=>({left:v.label,right:v.desc,id:v.id})),question:"Match each Context to the frame it describes."};}},
 
+  // ── EFFECT ───────────────────────────────────────────────────────────────
+  effect_id:{label:"Identify Effect",cat:"Param ID",module:7,phase:2,engine:'MCQ',paramKey:'effect',
+    generate:()=>{const v=_s(PARAMS.effect.values);return _q(`Effect: "${v.desc}"`,v,_dist(v,PARAMS.effect.values));}},
+  effect_match:{label:"Match Effect Values",cat:"Param ID",module:7,phase:2,engine:'MATCH',paramKey:'effect',
+    generate:()=>{const vals=_pick(PARAMS.effect.values,4);return {pairs:vals.map(v=>({left:v.label,right:v.desc,id:v.id})),question:"Match each Effect value to its meaning."};}},
+  effect_apply:{label:"Apply Effect",cat:"Inference",module:7,phase:2,engine:'MCQ',paramKey:'effect',
+    generate:()=>{const scenarios=[
+      {q:"She accidentally hurt herself during the action",id:"DSF",note:"DSF — Self:Detrimental, reflexive harm to subject"},
+      {q:"He did it for your benefit specifically",id:"B2",note:"B2 — 2nd:Beneficial, benefits the addressee"},
+      {q:"The policy harmed the public (3rd party)",id:"D3",note:"D3 — 3rd:Detrimental, harm to third party"},
+      {q:"He baked the cake to please himself",id:"BSF",note:"BSF — Self:Beneficial, reflexive benefit to subject"},
+      {q:"I told you to help you succeed",id:"B2",note:"B2 — 2nd:Beneficial, benefits the addressee"},
+      {q:"She donated the money for the children's sake",id:"B3",note:"B3 — 3rd:Beneficial, benefits a third party"},
+      {q:"He insulted me (the speaker)",id:"D1",note:"D1 — 1st:Detrimental, harms the speaker"},
+      {q:"We did it to benefit ourselves (speaker's group)",id:"B1",note:"B1 — 1st:Beneficial, benefits the speaker"},
+      {q:"The effect is unclear or may be mixed",id:"UNK",note:"UNK — unknown or unspecified effect"},
+    ];const sc=_s(scenarios);const correct=PARAMS.effect.values.find(v=>v.id===sc.id);
+    if(!correct)return PUZZLE_REGISTRY.effect_apply.generate();
+    return _q(`"${sc.q}" — which Effect?`,correct,_dist(correct,PARAMS.effect.values),o=>o.label,sc.note);}},
+
+  // ── LEVEL ─────────────────────────────────────────────────────────────────
+  level_id:{label:"Identify Level",cat:"Param ID",module:7,phase:2,engine:'MCQ',paramKey:'level',
+    generate:()=>{const v=_s(PARAMS.level.values);return _q(`Level: "${v.desc}"`,v,_dist(v,PARAMS.level.values));}},
+  level_sort:{label:"Sort Levels by Degree",cat:"Sort",module:7,phase:2,engine:'SORT',paramKey:'level',
+    generate:()=>{const ordered=PARAMS.level.values.map(v=>({id:v.id,label:v.label}));const subset=_pick(ordered,5).sort((a,b)=>ordered.findIndex(x=>x.id===a.id)-ordered.findIndex(x=>x.id===b.id));return {items:_shuf(subset),correct:subset.map(o=>o.id),prompt:"Sort these Level values from lowest to highest degree:"};}},
+  level_apply:{label:"Apply Level",cat:"Inference",module:7,phase:2,engine:'MCQ',paramKey:'level',
+    generate:()=>{const scenarios=[
+      {q:"Her speed equals the record exactly",id:"EQU",note:"EQU — equative, equal to the standard"},
+      {q:"His performance far exceeds any reasonable expectation",id:"EXC",note:"EXC — excessive, beyond any reasonable maximum"},
+      {q:"This is the best of all in the class",id:"SPL",note:"SPL — superlative, greatest within a defined set"},
+      {q:"The result is barely noticeable",id:"MIN",note:"MIN — minimal, barely or negligibly present"},
+      {q:"Her score is somewhat below average",id:"DFC",note:"DFC — deficient, below the standard"},
+      {q:"The heat surpasses the norm noticeably",id:"SUR",note:"SUR — surpassive, above the standard"},
+      {q:"It is clearly below average but not completely lacking",id:"IFR",note:"IFR — inferior, clearly below the standard"},
+    ];const sc=_s(scenarios);const correct=PARAMS.level.values.find(v=>v.id===sc.id);
+    if(!correct)return PUZZLE_REGISTRY.level_apply.generate();
+    return _q(`"${sc.q}" — which Level?`,correct,_dist(correct,PARAMS.level.values),o=>o.label,sc.note);}},
+
+  // ── FUNCTION (STA/DYN) ───────────────────────────────────────────────────
+  function_id:{label:"Function: STA vs DYN",cat:"Param ID",module:5,phase:2,engine:'MCQ',paramKey:'function',
+    generate:()=>{const cases=[
+      {q:"'The house stands there' — stative or dynamic?",a:"STA",note:"STA — state of being, no change"},
+      {q:"'She runs toward the goal' — stative or dynamic?",a:"DYN",note:"DYN — active process, change or motion"},
+      {q:"'He believes it' — stative or dynamic?",a:"STA",note:"STA — belief is a static mental state"},
+      {q:"'The stone falls' — stative or dynamic?",a:"DYN",note:"DYN — active process of change in position"},
+      {q:"'They love each other' — stative or dynamic?",a:"STA",note:"STA — love is an ongoing state, not an active process"},
+      {q:"'She builds a wall' — stative or dynamic?",a:"DYN",note:"DYN — active construction process"},
+      {q:"'The water is cold' — stative or dynamic?",a:"STA",note:"STA — property state, no process"},
+      {q:"'The engine transforms energy' — stative or dynamic?",a:"DYN",note:"DYN — active transformation process"},
+    ];const c=_s(cases);const fn=PARAMS.function.values;const correct=fn.find(v=>v.id===c.a);if(!correct)return PUZZLE_REGISTRY.function_id.generate();
+    return _q(c.q,correct,_dist(correct,fn),o=>o.label,c.note);}},
+
+  // ── VERSION / Vv SLOT ───────────────────────────────────────────────────
+  vv_id:{label:"Version (Vv slot)",cat:"Construction",module:5,phase:2,engine:'MCQ',
+    generate:()=>{const cases=[
+      {q:"Slot II (Vv) encodes which parameters?",a:"Version and Stem number",w:["Configuration and Affiliation","Mood and Aspect","Case and Illocution"]},
+      {q:"Version PRC ('processual') implies the action is:",a:"An ongoing unresolved process",w:["A completed achievement","A habitual state","A single instant"]},
+      {q:"Version CPT ('completive') implies the action is:",a:"A completed, bounded achievement",w:["An ongoing process","A habitual pattern","An imminent event"]},
+      {q:"Stem I vs Stem II vs Stem III are encoded in which slot?",a:"Vv (Slot II)",w:["Vr (Slot IV)","Ca (Slot VI)","Vc (Slot IX)"]},
+    ];const c=_s(cases);const opts=_shuf([{id:'a',label:c.a,correct:true},...c.w.map((l,i)=>({id:`w${i}`,label:l,correct:false}))]);return {question:c.q,options:opts,answer:'a'};}},
+
+  // ── CONCATENATION / Cc SLOT ─────────────────────────────────────────────
+  cc_id:{label:"Concatenation (Cc slot)",cat:"Construction",module:9,phase:3,engine:'MCQ',
+    generate:()=>{const cases=[
+      {q:"Slot I (Cc) is present only when:",a:"The formative is the non-final member of a concatenated pair",w:["The formative uses Stem 2","The word is a verb","A bias adjunct is attached"]},
+      {q:"Type 1 concatenation (Cc = h-) signals:",a:"The formative is semantically dependent on the following one",w:["Independent clause","An adverbial modifier","A quotative frame"]},
+      {q:"Type 2 concatenation signals:",a:"The formative is an independent functional modifier",w:["A dependent nominal","A phonological gemination","An affixual adjunct"]},
+      {q:"Concatenation allows Ithkuil to express what English does with:",a:"Compound words or phrasal verbs",w:["Tense markers","Determiners like 'the'","Pronouns"]},
+    ];const c=_s(cases);const opts=_shuf([{id:'a',label:c.a,correct:true},...c.w.map((l,i)=>({id:`w${i}`,label:l,correct:false}))]);return {question:c.q,options:opts,answer:'a'};}},
+
+  // ── ADJUNCTS ─────────────────────────────────────────────────────────────
+  adjunct_type:{label:"Adjunct Type Recognition",cat:"Construction",module:9,phase:3,engine:'MCQ',
+    generate:()=>{const cases=[
+      {q:"A word that carries ONLY affixes (no root) is called:",a:"Affixual adjunct",w:["Modular adjunct","Personal-reference adjunct","Concatenated formative"]},
+      {q:"A word encoding the speaker/addressee/3rd-party reference directly is a:",a:"Personal-reference adjunct",w:["Affixual adjunct","Referential formative","Bias adjunct"]},
+      {q:"A modular adjunct encodes which category of parameters?",a:"Aspect, Phase, Effect, Level, or Valence — extending Vn",w:["Case and Illocution","Configuration and Ca values","Phonological stress"]},
+      {q:"Bias adjuncts are phonologically:",a:"A single consonantal suffix attached to the word",w:["A separate independent word","A prefix on the root","An infix within Ca"]},
+      {q:"A word that encodes only a Cs affix stack (no root, no Ca) is called:",a:"Affixual adjunct",w:["Modular adjunct","Referential formative","Personal-reference adjunct"]},
+    ];const c=_s(cases);const opts=_shuf([{id:'a',label:c.a,correct:true},...c.w.map((l,i)=>({id:`w${i}`,label:l,correct:false}))]);return {question:c.q,options:opts,answer:'a'};}},
+
   // ── EXTENDED CASE ─────────────────────────────────────────────────────────
   case_relational:{label:"Identify Relational Case",cat:"Param ID",module:6,phase:2,engine:'MCQ',paramKey:'case',
     generate:()=>{const pool=CASES.filter(c=>c.family==="Relational"&&CASE_SCN[c.id]);if(pool.length<2)return PUZZLE_REGISTRY.cas_id.generate();const v=_s(pool);const sc=_s(CASE_SCN[v.id]);return _q(`Relational Case: "${sc}"?`,v,_dist(v,pool.concat(_pick(CASES.filter(c=>c.family!=="Relational"),2))),o=>o.label);}},
@@ -3833,6 +3997,9 @@ function puzzleTipKey(defId,def){
   if(defId&&defId.startsWith('phono_'))return 'phono:consonants';
   // 3. Structural slot prefixes
   if(defId&&(defId.startsWith('vr_')||defId==='paradigm_complete'))return 'slot:Vr';
+  if(defId&&(defId.startsWith('vv_')||defId==='vv_id'))return 'slot:Vv';
+  if(defId&&(defId.startsWith('cc_')||defId==='cc_id'))return 'slot:Cc';
+  if(defId&&defId.startsWith('adjunct_'))return 'slot:Vn';
   if(defId&&(defId.startsWith('ca_')||defId==='ca_merge'))return 'slot:Ca';
   if(defId&&defId.startsWith('zs_'))return 'slot:Ca';
   if(defId&&(defId.startsWith('sentence_')))return 'slot:Vc';
