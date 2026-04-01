@@ -453,6 +453,22 @@ const PARAMS={
       {id:"D1",label:"1st:Detrimental",   icon:"↓₁",desc:"The action is detrimental to the speaker (1st person)",               freq:349, hue:"#dc2626"},
     ]
   },
+  valence:{
+    label:"Valence", slot:"Vn", cssVar:"--p-val2", hex:"#0f766e",
+    synNote:"Argument relationships. Teal spectrum. How participants interrelate.",
+    spatialAxis:"how the verbal action relates to and distributes across its participants",
+    values:[
+      {id:"MNO",label:"Monoactive",     icon:"→",  desc:"One participant acts unilaterally with no second participant",          freq:330, hue:"#0f766e"},
+      {id:"PRL",label:"Parallel",       icon:"⇉",  desc:"Two participants do the same action independently and simultaneously",  freq:370, hue:"#0d9488"},
+      {id:"CRO",label:"Corollary",      icon:"↬",  desc:"One participant's action causes or enables the other's action",         freq:415, hue:"#14b8a6"},
+      {id:"RCP",label:"Reciprocal",     icon:"⇄",  desc:"Mutual action — each participant acts on the other",                   freq:466, hue:"#2dd4bf"},
+      {id:"CPL",label:"Complementary",  icon:"⊕",  desc:"Two different complementary actions combine into a single outcome",    freq:523, hue:"#5eead4"},
+      {id:"DUP",label:"Duplicative",    icon:"⇒",  desc:"One participant's action duplicates or mirrors the other's",           freq:587, hue:"#99f6e4"},
+      {id:"DEM",label:"Demonstrative",  icon:"⊳",  desc:"One participant demonstrates or models the action for the other",      freq:659, hue:"#a7f3d0"},
+      {id:"CNG",label:"Contingent",     icon:"⊸",  desc:"One participant's action is contingent on the other's",               freq:739, hue:"#bbf7d0"},
+      {id:"PTI",label:"Participative",  icon:"∈",  desc:"One participant joins or participates in the other's ongoing action",  freq:830, hue:"#d1fae5"},
+    ]
+  },
   level:{
     label:"Level", slot:"Vn", cssVar:"--p-lev", hex:"#0284c7",
     synNote:"Comparative scale. Sky-to-deep-blue spectrum. Degree relative to standard.",
@@ -2120,6 +2136,7 @@ const PARAM_DRILLS={
   context:      ['context_id','context_apply','context_match','semantic_diff_free'],
   effect:       ['effect_id','effect_match','effect_apply','vn_slot','semantic_diff_free'],
   level:        ['level_id','level_sort','level_apply','vn_slot','semantic_diff_free'],
+  valence:      ['valence_id','valence_apply','valence_match','vn_slot','semantic_diff_free'],
   function:     ['function_id','ca_all','full_decode','vn_slot'],
   case:         ['cas_id','case_assign','case_family','case_reframe','build_case_pair','blank_canvas','case_depth','obviative_proximate','sort_cases_family','case_spec_multi','case_relational','case_affinitive','case_family_sort'],
 };
@@ -2147,12 +2164,12 @@ function adaptiveDrills(lm,max){
     var v=Object.values(lm[pk]||{});return s+(v.length?v.reduce(function(a,b){return a+b;},0)/v.length:0);
   },0)/Object.keys(PARAMS).length;
   if(avgMastery>0.15) ids=ids.concat(['root_vocab','root_stems','root_domain','root_by_context','compound_roots','root_proximity','root_cluster']);
-  if(avgMastery>0.3) ids=ids.concat(['semantic_diff_free','affix_shift_free','compress_free','obviative_proximate','case_depth','spec_context','affix_decode_deg','phase_vs_aspect','context_apply','case_relational','case_affinitive','effect_apply','level_apply','function_id','vv_id','cc_id','adjunct_type']);
-  if(avgMastery>0.5) ids=ids.concat(['ca_merge','semantic_nuance','form_vs_ref','strip_affixes','aspect_val_multi','case_spec_multi','sort_cases_family','speed_affix','construct_sprint','synesthetic_cfg','param_slot_visual','blank_free','zs_full_gloss','phase_sort','case_family_sort','level_sort','effect_match']);
+  if(avgMastery>0.3) ids=ids.concat(['semantic_diff_free','affix_shift_free','compress_free','obviative_proximate','case_depth','spec_context','affix_decode_deg','phase_vs_aspect','context_apply','case_relational','case_affinitive','effect_apply','level_apply','function_id','vv_id','cc_id','adjunct_type','valence_apply','phono_gemination','referential_id']);
+  if(avgMastery>0.5) ids=ids.concat(['ca_merge','semantic_nuance','form_vs_ref','strip_affixes','aspect_val_multi','case_spec_multi','sort_cases_family','speed_affix','construct_sprint','synesthetic_cfg','param_slot_visual','blank_free','zs_full_gloss','phase_sort','case_family_sort','level_sort','effect_match','valence_match','numeric_id','arg_count']);
   // Sentence exercises unlock at mid-mastery
   if(avgMastery>0.25) ids=ids.concat(['sentence_s1','sentence_s2','sentence_s3','sentence_s4','sentence_s5','sentence_s6','sentence_s7']);
-  // Phonology/stress always available
-  ids=ids.concat(['phono_stress','phono_sonority']);
+  // Phonology always available
+  ids=ids.concat(['phono_stress','phono_sonority','phono_gemination']);
   return [...new Set(ids)].filter(function(id){return PUZZLE_REGISTRY[id];}).slice(0,max)
     .map(function(id){return{id:id,def:PUZZLE_REGISTRY[id]};});
 }
@@ -3914,7 +3931,25 @@ const PUZZLE_REGISTRY={
     generate:()=>{const a=_s(AFFIXES);return _q(`Affix function: "${a.desc}"?`,a,_dist(a,AFFIXES));}},
   affix_stack:{label:"Affix Stacking",cat:"Compression",module:10,phase:3,engine:'MCQ',
     generate:()=>{const cases=[{q:"You want to add both an intensity modifier AND a frequency modifier to a root. What order do they apply?",a:"Intensity modifies the root first; frequency modifies the result",w:["Frequency first, intensity second","They are applied simultaneously","Order does not affect meaning"]},{q:"Can two affixes from the same type (e.g. both Degree 1–9 of the same affix) stack on one formative?",a:"Yes, in distinct Vx+Cs slots",w:["No, only one affix per type","Only in speech, not writing","Only if they have different degrees"]},{q:"Which affix position is closest to the root in a formative?",a:"The first (innermost) Vx+Cs slot after Ca",w:["The last Vx+Cs slot","The slot before Cr","The bias suffix Cb"]}];const c=_s(cases);const opts=_shuf([{id:'a',label:c.a,correct:true},...c.w.map((l,i)=>({id:`w${i}`,label:l,correct:false}))]);return {question:c.q,options:opts,answer:'a'};}},
-  valence_id:{label:"Argument Valence",cat:"Compression",module:8,phase:3,engine:'MCQ',
+  valence_id:{label:"Identify Valence",cat:"Param ID",module:7,phase:2,engine:'MCQ',paramKey:'valence',
+    generate:()=>{const v=_s(PARAMS.valence.values);return _q(`Valence: "${v.desc}"`,v,_dist(v,PARAMS.valence.values));}},
+  valence_apply:{label:"Apply Valence",cat:"Inference",module:7,phase:2,engine:'MCQ',paramKey:'valence',
+    generate:()=>{const scenarios=[
+      {q:"She sang while he played — each doing their own thing simultaneously",id:"PRL",note:"PRL — Parallel: both act independently at the same time"},
+      {q:"They hugged each other",id:"RCP",note:"RCP — Reciprocal: mutual action"},
+      {q:"She showed him how to do it",id:"DEM",note:"DEM — Demonstrative: one models for the other"},
+      {q:"His shouting caused her to flinch",id:"CRO",note:"CRO — Corollary: one action triggers the other"},
+      {q:"He writes, she edits — complementary roles combining into one book",id:"CPL",note:"CPL — Complementary: different actions combining"},
+      {q:"She started knitting, then he joined in",id:"PTI",note:"PTI — Participative: one joins the other's ongoing action"},
+      {q:"She ran alone with no interaction",id:"MNO",note:"MNO — Monoactive: single unilateral participant"},
+      {q:"He did exactly what she did, mirroring her",id:"DUP",note:"DUP — Duplicative: action mirrors the other's"},
+      {q:"He cleaned only if she cooked",id:"CNG",note:"CNG — Contingent: one action contingent on the other"},
+    ];const sc=_s(scenarios);const correct=PARAMS.valence.values.find(v=>v.id===sc.id);
+    if(!correct)return PUZZLE_REGISTRY.valence_apply.generate();
+    return _q(`"${sc.q}" — which Valence?`,correct,_dist(correct,PARAMS.valence.values),o=>o.label,sc.note);}},
+  valence_match:{label:"Match Valence Patterns",cat:"Param ID",module:7,phase:2,engine:'MATCH',paramKey:'valence',
+    generate:()=>{const vals=_pick(PARAMS.valence.values,4);return {pairs:vals.map(v=>({left:v.label,right:v.desc,id:v.id})),question:"Match each Valence pattern to how its participants relate."};}},
+  arg_count:{label:"Argument Count",cat:"Compression",module:8,phase:3,engine:'MCQ',
     generate:()=>{const cases=[{r:"ŘK",n:"Causation",v:2},{r:"KŢ",n:"Cognition",v:1},{r:"XL",n:"Motion",v:2},{r:"VŽ",n:"Social Bond",v:2},{r:"ŢR",n:"Sensation",v:1},{r:"ŢM",n:"Matter",v:1},{r:"RM",n:"Value",v:2}];const c=_s(cases);const opts=[1,2,3,4].map(n=>({id:String(n),label:String(n),correct:n===c.v}));return {question:`Root ${c.r} (${c.n}) — how many core arguments?`,options:_shuf(opts),answer:String(c.v)};}},
   dense_sentence:{label:"Dense Sentence",cat:"Compression",module:10,phase:3,engine:'MCQ',
     generate:()=>{const cases=[{q:"Which Ithkuil parameter replaces the English phrase 'I think'?",a:"Speculative Mood (SPE)",w:["Assumptive Mood (ASM)","Recollective Validation","Dubitative Bias"]},{q:"Which parameter encodes the difference between 'he ran' and 'he used to run'?",a:"Aspect — PRG vs HAB",w:["Mood — FAC vs SUB","Validation — OBS vs RCL","Configuration — UNI vs AGG"]},{q:"Which parameter replaces the phrase 'in my opinion'?",a:"Bias modifier (e.g. EUP/DUB) + Assumptive Mood",w:["Purportive Validation alone","Imaginative Validation alone","Speculative Mood alone"]}];const c=_s(cases);const opts=_shuf([{id:'a',label:c.a,correct:true},...c.w.map((l,i)=>({id:`w${i}`,label:l,correct:false}))]);return {question:c.q,options:opts,answer:'a'};}},
@@ -4000,6 +4035,9 @@ function puzzleTipKey(defId,def){
   if(defId&&(defId.startsWith('vv_')||defId==='vv_id'))return 'slot:Vv';
   if(defId&&(defId.startsWith('cc_')||defId==='cc_id'))return 'slot:Cc';
   if(defId&&defId.startsWith('adjunct_'))return 'slot:Vn';
+  if(defId==='referential_id')return 'slot:Cr';
+  if(defId==='numeric_id'||defId==='arg_count')return 'slot:Vr';
+  if(defId==='phono_gemination')return 'phono:gemination';
   if(defId&&(defId.startsWith('ca_')||defId==='ca_merge'))return 'slot:Ca';
   if(defId&&defId.startsWith('zs_'))return 'slot:Ca';
   if(defId&&(defId.startsWith('sentence_')))return 'slot:Vc';
@@ -7171,6 +7209,66 @@ Object.assign(PUZZLE_REGISTRY,{
       const wrongs=_shuf(c.w).slice(0,3).map((w,i)=>({id:'w'+i,label:w}));
       return{question:c.q,options:_shuf([{...correct,correct:true},...wrongs.map(w=>({...w,correct:false}))]),
         answer:'a',note:'Ithkuil clusters obey sonority: obstruent → nasal → liquid → glide, ascending toward the nucleus'};
+    }},
+  phono_gemination:{label:"Gemination Rules",cat:"Phonology",module:1,phase:1,engine:'MCQ',
+    generate:()=>{
+      const cases=[
+        {q:"What does gemination (consonant doubling) signal morphologically in Ithkuil?",
+         a:"A distinct grammatical boundary — typically a slot boundary in the formative",
+         w:["Pure phonological emphasis with no grammatical meaning","A foreign loanword marker","Stress on the following vowel only"]},
+        {q:"Which Ithkuil slot boundary is typically marked by a geminate consonant?",
+         a:"The Ca complex — Configuration, Affiliation, Perspective, Extension, Essence",
+         w:["The Vr slot — stem/pattern vowel","The Vc slot — case vowel","The Vn slot — mood/aspect"]},
+        {q:"If a root ends in /l/ and Ca begins with /l/, the result is:",
+         a:"Geminate /ll/ — a doubled consonant indicating the slot boundary",
+         w:["The /l/ is deleted to avoid repetition","A glottal stop is inserted between them","The vowel before the root is lengthened"]},
+        {q:"Gemination in Ithkuil is phonemically contrastive, meaning:",
+         a:"/ala/ and /alla/ are different grammatical forms with different meanings",
+         w:["Geminates only occur in loanwords","Gemination is free variation","Only voiceless consonants may geminate"]},
+      ];
+      const c=_s(cases);
+      const opts=_shuf([{id:'a',label:c.a,correct:true},...c.w.map((w,i)=>({id:`w${i}`,label:w,correct:false}))]);
+      return {question:c.q,options:opts,answer:'a',note:'Gemination marks the Ca complex slot boundary and is phonemically distinctive.'};
+    }},
+  referential_id:{label:"Referential Formatives",cat:"Construction",module:9,phase:3,engine:'MCQ',
+    generate:()=>{
+      const cases=[
+        {q:"A referential formative differs from a nominal formative in that it:",
+         a:"Directly refers to a participant (e.g. speaker, addressee, 3rd party) without a root",
+         w:["Must always carry a case affix","Has no phonological form","Cannot be modified by affixes","Requires concatenation"]},
+        {q:"The Ithkuil personal-reference adjunct encodes:",
+         a:"The speech-act participants — speaker (1st), addressee (2nd), or 3rd-party reference",
+         w:["Only the Absolutive case","Only animate 3rd-party referents","Register and illocution only","Perspective and configuration"]},
+        {q:"Which parameter distinguishes 'you (singular)' from 'you (plural)' in Ithkuil referentials?",
+         a:"Perspective — Monadic (M) vs Polyadic (P)",
+         w:["Affiliation — CSL vs ASO","Extension — PRX vs DST","Essence — NRM vs RPV"]},
+        {q:"A referential formative can carry which categories?",
+         a:"Case, Configuration, Perspective, Affiliation — same Ca parameters as any formative",
+         w:["Only Case — no Ca allowed","Only Perspective and Case","Only Bias adjuncts"]},
+      ];
+      const c=_s(cases);
+      const opts=_shuf([{id:'a',label:c.a,correct:true},...c.w.map((w,i)=>({id:`w${i}`,label:w,correct:false}))]);
+      return {question:c.q,options:opts,answer:'a'};
+    }},
+  numeric_id:{label:"Numeric System",cat:"Construction",module:9,phase:3,engine:'MCQ',
+    generate:()=>{
+      const cases=[
+        {q:"Ithkuil numerals are expressed morphologically as:",
+         a:"Formatives with special roots — numerals are full words, not a separate system",
+         w:["A separate positional notation system","Phonological tones on nearby vowels","Prefixes attached to the counted noun","Bias adjuncts encoding magnitude"]},
+        {q:"What grammatical category do Ithkuil number words primarily carry?",
+         a:"Configuration — encoding 'how many' via the Configuration parameter",
+         w:["Mood — encoding certainty of count","Validation — encoding how the count was verified","Concatenation — encoding order of elements"]},
+        {q:"The Ithkuil base of its counting system is:",
+         a:"Base 100 — built from two-digit groups",
+         w:["Base 10 (decimal)","Base 12 (duodecimal)","Base 20 (vigesimal)","Base 8 (octal)"]},
+        {q:"Ordinal numerals ('first, second, third') in Ithkuil are formed by:",
+         a:"Adding a specialized affix to the cardinal number root",
+         w:["A completely separate root vocabulary","Tone changes on the numeral","Changing the Ca complex","Using the Version parameter"]},
+      ];
+      const c=_s(cases);
+      const opts=_shuf([{id:'a',label:c.a,correct:true},...c.w.map((w,i)=>({id:`w${i}`,label:w,correct:false}))]);
+      return {question:c.q,options:opts,answer:'a'};
     }},
 
   // ── Full formative → English gloss (INPUT, hardest direction) ────────────
