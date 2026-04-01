@@ -3682,7 +3682,7 @@ const PUZZLE_REGISTRY={
   phase_id:{label:"Identify Phase",cat:"Param ID",module:7,phase:2,engine:'MCQ',paramKey:'phase',
     generate:()=>{const v=_s(PARAMS.phase.values);return _q(`Which Phase? "${v.desc}"`,v,_dist(v,PARAMS.phase.values));}},
   phase_match:{label:"Match Phase Description",cat:"Param ID",module:7,phase:2,engine:'MATCH',paramKey:'phase',
-    generate:()=>{const vals=_pick(PARAMS.phase.values,4);return {pairs:vals.map(v=>({left:v.label,right:v.desc,id:v.id})),question:"Match each Phase to its temporal pattern."};}},
+    generate:()=>{const vals=_pick(PARAMS.phase.values,4);return {left:vals.map(v=>({id:v.id,label:v.label})),right:_shuf(vals.map(v=>({id:v.id,label:v.desc}))),pairs:Object.fromEntries(vals.map(v=>[v.id,v.id])),note:"Match each Phase to its temporal pattern."};}},
   phase_vs_aspect:{label:"Phase vs Aspect",cat:"Discrimination",module:7,phase:2,engine:'MCQ',paramKey:'phase',
     generate:()=>{const pairs=[
       {q:"Action happens several separate times with gaps",phase:"ITR",asp:null,note:"ITR (Iterative) — discrete separate occurrences"},
@@ -3726,13 +3726,13 @@ const PUZZLE_REGISTRY={
     if(!correct)return PUZZLE_REGISTRY.context_apply.generate();
     return _q(`"${sc.q}" — which Context?`,correct,_dist(correct,PARAMS.context.values),o=>o.label,sc.note);}},
   context_match:{label:"Match Context to Frame",cat:"Param ID",module:5,phase:2,engine:'MATCH',paramKey:'context',
-    generate:()=>{const vals=PARAMS.context.values;return {pairs:vals.map(v=>({left:v.label,right:v.desc,id:v.id})),question:"Match each Context to the frame it describes."};}},
+    generate:()=>{const vals=PARAMS.context.values;return {left:vals.map(v=>({id:v.id,label:v.label})),right:_shuf(vals.map(v=>({id:v.id,label:v.desc}))),pairs:Object.fromEntries(vals.map(v=>[v.id,v.id])),note:"Match each Context to the frame it describes."};}},
 
   // ── EFFECT ───────────────────────────────────────────────────────────────
   effect_id:{label:"Identify Effect",cat:"Param ID",module:7,phase:2,engine:'MCQ',paramKey:'effect',
     generate:()=>{const v=_s(PARAMS.effect.values);return _q(`Effect: "${v.desc}"`,v,_dist(v,PARAMS.effect.values));}},
   effect_match:{label:"Match Effect Values",cat:"Param ID",module:7,phase:2,engine:'MATCH',paramKey:'effect',
-    generate:()=>{const vals=_pick(PARAMS.effect.values,4);return {pairs:vals.map(v=>({left:v.label,right:v.desc,id:v.id})),question:"Match each Effect value to its meaning."};}},
+    generate:()=>{const vals=_pick(PARAMS.effect.values,4);return {left:vals.map(v=>({id:v.id,label:v.label})),right:_shuf(vals.map(v=>({id:v.id,label:v.desc}))),pairs:Object.fromEntries(vals.map(v=>[v.id,v.id])),note:"Match each Effect value to its benefactive/detrimental meaning."};}},
   effect_apply:{label:"Apply Effect",cat:"Inference",module:7,phase:2,engine:'MCQ',paramKey:'effect',
     generate:()=>{const scenarios=[
       {q:"She accidentally hurt herself during the action",id:"DSF",note:"DSF — Self:Detrimental, reflexive harm to subject"},
@@ -3948,7 +3948,7 @@ const PUZZLE_REGISTRY={
     if(!correct)return PUZZLE_REGISTRY.valence_apply.generate();
     return _q(`"${sc.q}" — which Valence?`,correct,_dist(correct,PARAMS.valence.values),o=>o.label,sc.note);}},
   valence_match:{label:"Match Valence Patterns",cat:"Param ID",module:7,phase:2,engine:'MATCH',paramKey:'valence',
-    generate:()=>{const vals=_pick(PARAMS.valence.values,4);return {pairs:vals.map(v=>({left:v.label,right:v.desc,id:v.id})),question:"Match each Valence pattern to how its participants relate."};}},
+    generate:()=>{const vals=_pick(PARAMS.valence.values,4);return {left:vals.map(v=>({id:v.id,label:v.label})),right:_shuf(vals.map(v=>({id:v.id,label:v.desc}))),pairs:Object.fromEntries(vals.map(v=>[v.id,v.id])),note:"Match each Valence pattern to how its participants relate."};}},
   arg_count:{label:"Argument Count",cat:"Compression",module:8,phase:3,engine:'MCQ',
     generate:()=>{const cases=[{r:"ŘK",n:"Causation",v:2},{r:"KŢ",n:"Cognition",v:1},{r:"XL",n:"Motion",v:2},{r:"VŽ",n:"Social Bond",v:2},{r:"ŢR",n:"Sensation",v:1},{r:"ŢM",n:"Matter",v:1},{r:"RM",n:"Value",v:2}];const c=_s(cases);const opts=[1,2,3,4].map(n=>({id:String(n),label:String(n),correct:n===c.v}));return {question:`Root ${c.r} (${c.n}) — how many core arguments?`,options:_shuf(opts),answer:String(c.v)};}},
   dense_sentence:{label:"Dense Sentence",cat:"Compression",module:10,phase:3,engine:'MCQ',
