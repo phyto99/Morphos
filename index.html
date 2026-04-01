@@ -3641,8 +3641,105 @@ const REG_CAT_META={
   'Input':      {icon:"✎",color:"#b45309",desc:"Free-text reasoning — describe differences, explain encodings"},
 };
 
+/* ── PUZZLE → YUORB TIP KEY ──────────────────────────────────────────────── */
+/* Maps any puzzle ID / def to the nearest TIP_MAP key so every engine can
+   show the ⓘ button pointing to the relevant yuorb chapter section.          */
+function puzzleTipKey(defId,def){
+  // 1. Explicit paramKey on the definition
+  if(def&&def.paramKey){const k='param:'+def.paramKey;if(TIP_MAP[k])return k;}
+  // 2. Phonology prefix
+  if(defId==='phono_stress'||defId==='phono_sonority')return 'phono:phonotactics';
+  if(defId&&defId.startsWith('phono_'))return 'phono:consonants';
+  // 3. Structural slot prefixes
+  if(defId&&(defId.startsWith('vr_')||defId==='paradigm_complete'))return 'slot:Vr';
+  if(defId&&(defId.startsWith('ca_')||defId==='ca_merge'))return 'slot:Ca';
+  if(defId&&defId.startsWith('zs_'))return 'slot:Ca';
+  if(defId&&(defId.startsWith('sentence_')))return 'slot:Vc';
+  if(defId&&(defId.startsWith('case_')||defId==='cas_id'||defId==='match_case'||defId==='build_case_pair'||defId==='sort_cases_family'||defId==='obviative_proximate'||defId==='case_depth'||defId==='case_spec_multi'))return 'slot:Vc';
+  if(defId&&(defId.startsWith('root_')||defId==='stem_id'||defId==='stem_reverse'||defId==='root_match'||defId==='root_infer'||defId==='root_crosslink'||defId==='compound_roots'||defId==='root_cluster'||defId==='root_proximity'||defId==='root_by_context'))return 'slot:Cr';
+  // 4. build_ / sort_ / speed_ — try to derive paramKey from suffix
+  if(defId&&defId.startsWith('build_')){
+    const pk=defId.replace('build_','');
+    if(TIP_MAP['param:'+pk])return 'param:'+pk;
+    if(pk==='case_pair')return 'slot:Vc';
+    if(pk==='mood_val')return 'param:mood';
+    return 'slot:Ca';
+  }
+  if(defId&&defId.startsWith('sort_')){
+    const pk=defId.replace('sort_','');
+    if(TIP_MAP['param:'+pk])return 'param:'+pk;
+    return 'slot:Ca';
+  }
+  if(defId&&defId.startsWith('speed_')){
+    const pk=defId.replace('speed_','');
+    if(TIP_MAP['param:'+pk])return 'param:'+pk;
+    return 'slot:Ca';
+  }
+  if(defId&&defId.startsWith('match_')){
+    const pk=defId.replace('match_','');
+    if(TIP_MAP['param:'+pk])return 'param:'+pk;
+    if(pk==='case'||pk==='stem')return pk==='case'?'slot:Vc':'slot:Cr';
+    return 'slot:Ca';
+  }
+  // 5. Specific ID overrides
+  const MAP={
+    cfg_id:'param:configuration',afl_id:'param:affiliation',per_id:'param:perspective',
+    ext_id:'param:extension',ess_id:'param:essence',spc_id:'param:specification',
+    moo_id:'param:mood',val_id:'param:validation',bia_id:'param:bias',
+    asp_id:'param:aspect',
+    vn_slot:'slot:Vn',slot_id:'slot:Ca',slot_boundary:'slot:Ca',
+    param_diff:'slot:Ca',param_family:'slot:Ca',odd_one_out:'slot:Ca',
+    semantic_diff:'param:configuration',minimal_pair:'param:configuration',
+    impossible_combo:'slot:Ca',form_param:'slot:Ca',
+    error_detect:'slot:Ca',error_find:'slot:Ca',error_identify_value:'slot:Ca',
+    discourse:'slot:Vc',discourse_resolve:'slot:Vc',connective_chain:'param:mood',
+    meta_which_puzzle:'slot:Ca',flashcard_rev:'slot:Ca',
+    affix_degree:'slot:Ca',affix_fn:'slot:Ca',affix_stack:'slot:Ca',
+    affix_decode_deg:'slot:Ca',affix_result:'slot:Ca',
+    affix_shift_free:'slot:Ca',strip_affixes:'slot:Ca',speed_affix:'slot:Ca',
+    compress_single:'slot:Ca',compress_combo:'slot:Ca',compress_free:'slot:Ca',
+    blank_canvas:'slot:Ca',blank_free:'slot:Ca',semantic_nuance:'slot:Ca',
+    semantic_diff_free:'slot:Ca',
+    mood_imply:'param:mood',val_imply:'param:validation',bias_ctx:'param:bias',
+    counterfactual:'param:mood',mood_illocution:'param:mood',
+    bias_vs_mood:'param:mood',full_decode:'slot:Ca',
+    val_bias_combo:'param:validation',aspect_val_multi:'param:aspect',
+    timeline_asp:'param:aspect',timeline_val:'param:validation',
+    cfg_shape:'param:configuration',per_depth:'param:perspective',
+    ext_reach:'param:extension',synesthetic_cfg:'param:configuration',
+    param_slot_visual:'slot:Ca',describe_diff:'slot:Ca',
+    case_reframe_desc:'slot:Vc',
+    register_id:'param:illocution',register_text:'param:illocution',
+    register_clue:'param:illocution',illocution_id:'param:illocution',
+    illocution_text:'param:illocution',
+    form_vs_ref:'slot:Cr',phon_segment:'slot:Ca',per_vs_cfg:'param:perspective',
+    philosophy_judge:'param:perspective',dense_sentence:'slot:Ca',
+    valence_id:'param:valence',discourse:'slot:Vc',
+    vr_full:'slot:Vr',vr_decode:'slot:Vr',
+    aspect_timeline:'param:aspect',
+    phono_sort:'phono:consonants',phono_vowel:'phono:vowels',phono_match:'phono:consonants',
+    zs_full_gloss:'slot:Cr',zs_stem_id:'slot:Cr',
+    zs_minimal_pair:'slot:Ca',
+    spec_context:'param:specification',
+    root_vocab:'slot:Cr',root_domain:'slot:Cr',root_stems:'slot:Cr',
+    blank_canvas:'slot:Ca',ca_base_decode:'slot:Ca',ca_per_decode:'slot:Ca',
+  };
+  if(MAP[defId])return MAP[defId];
+  // 6. Category fallback
+  const catMap={
+    'Phonology':'phono:consonants','Cases':'slot:Vc','Roots & Stems':'slot:Cr',
+    'Construction':'slot:Ca','Param ID':'slot:Ca','Discrimination':'slot:Ca',
+    'Inference':'slot:Vn','Compression':'slot:Ca','Match':'slot:Ca',
+    'Sort':'slot:Ca','Speed':'slot:Ca','Build':'slot:Ca','Multi':'slot:Ca',
+    'Visual':'slot:Ca','Input':'slot:Ca','Live Decode':'slot:Ca',
+    'Live Build':'slot:Ca','Root Knowledge':'slot:Cr','Register':'param:illocution',
+    'Generative':'slot:Ca','Sentence':'slot:Vc','Error Correction':'slot:Ca',
+  };
+  return(def&&catMap[def.cat])||null;
+}
+
 /* ── MCQ ENGINE ──────────────────────────────────────────────────────────── */
-function MCQEngine({def,onScore,synOn,lm,headerSlot}){
+function MCQEngine({def,onScore,synOn,lm,headerSlot,tipKey}){
   // Difficulty tiering: high mastery → show all options; low mastery → show 3 (easier)
   const paramKeys=Object.entries(PARAM_DRILLS).filter(([,ids])=>def.id&&ids.includes(def.id)).map(([pk])=>pk);
   const mastery=paramKeys.length?Math.max(...paramKeys.map(pk=>masteryLevel(lm||{},pk))):0.5;
@@ -3671,7 +3768,10 @@ function MCQEngine({def,onScore,synOn,lm,headerSlot}){
     <div className="anim-fade">
       {headerSlot}
       <div className="card mb10">
-        <p style={{fontSize:13,color:'var(--bright)',lineHeight:1.7,marginBottom:14,whiteSpace:'pre-line'}}>{q.question}</p>
+        <div style={{display:'flex',alignItems:'flex-start',gap:6,marginBottom:14}}>
+          <p style={{fontSize:13,color:'var(--bright)',lineHeight:1.7,marginBottom:0,whiteSpace:'pre-line',flex:1}}>{q.question}</p>
+          {tipKey&&<YuorbTip tipKey={tipKey}/>}
+        </div>
         <div style={{display:'flex',flexDirection:'column',gap:6}}>
           {visibleOpts.map(o=>{
             let bg='transparent',border='var(--border)',col='var(--text)';
@@ -3707,7 +3807,7 @@ function MCQEngine({def,onScore,synOn,lm,headerSlot}){
 }
 
 /* ── MATCH ENGINE ────────────────────────────────────────────────────────── */
-function MatchEngine({def,onScore,headerSlot}){
+function MatchEngine({def,onScore,headerSlot,tipKey}){
   const[q,setQ]=useState(()=>def.generate());
   const[sel,setSel]=useState(null);// selected left id
   const[matched,setMatched]=useState({});// {leftId: rightId}
@@ -3728,7 +3828,10 @@ function MatchEngine({def,onScore,headerSlot}){
   return(
     <div className="anim-fade">
       {headerSlot}
-      {q.note&&<p style={{fontSize:11,color:'var(--muted)',marginBottom:8}}>{q.note}</p>}
+      <div style={{display:'flex',alignItems:'center',gap:6,marginBottom:8}}>
+        {q.note&&<p style={{fontSize:11,color:'var(--muted)',marginBottom:0,flex:1}}>{q.note}</p>}
+        {tipKey&&<YuorbTip tipKey={tipKey}/>}
+      </div>
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8,marginBottom:12}}>
         <div style={{display:'flex',flexDirection:'column',gap:5}}>
           {q.left.map(l=>{const mId=matched[l.id];const isCorrect=done&&mId&&q.pairs[l.id]===mId;const isWrong=done&&mId&&q.pairs[l.id]!==mId;return(
@@ -3758,7 +3861,7 @@ function MatchEngine({def,onScore,headerSlot}){
 }
 
 /* ── SORT ENGINE ─────────────────────────────────────────────────────────── */
-function SortEngine({def,onScore,headerSlot}){
+function SortEngine({def,onScore,headerSlot,tipKey}){
   const[q,setQ]=useState(()=>def.generate());
   const[order,setOrder]=useState(()=>def.generate().items);
   const[done,setDone]=useState(false);
@@ -3769,7 +3872,10 @@ function SortEngine({def,onScore,headerSlot}){
   return(
     <div className="anim-fade">
       {headerSlot}
-      <p style={{fontSize:12,color:'var(--muted)',marginBottom:10}}>{q.prompt}</p>
+      <div style={{display:'flex',alignItems:'flex-start',gap:6,marginBottom:10}}>
+        <p style={{fontSize:12,color:'var(--muted)',marginBottom:0,flex:1}}>{q.prompt}</p>
+        {tipKey&&<YuorbTip tipKey={tipKey}/>}
+      </div>
       <div style={{display:'flex',flexDirection:'column',gap:5,marginBottom:12}}>
         {order.map((item,i)=>{
           const pos=done?q.correct.indexOf(item.id):-1;const correct=done&&pos===i;const wrong=done&&pos!==i;
@@ -3796,7 +3902,7 @@ function SortEngine({def,onScore,headerSlot}){
 
 /* ── SPEED ENGINE ────────────────────────────────────────────────────────── */
 
-function SpeedEngine({def,onScore,headerSlot}){
+function SpeedEngine({def,onScore,headerSlot,tipKey}){
   const TOTAL_Q=6;const PER_Q=4;
   const[q,setQ]=useState(()=>def.generate());
   const[sel,setSel]=useState(null);
@@ -3866,7 +3972,10 @@ function SpeedEngine({def,onScore,headerSlot}){
         </div>
       </div>
       <div className="card mb10">
-        <p style={{fontSize:13,color:'var(--bright)',lineHeight:1.7,marginBottom:12}}>{q.question}</p>
+        <div style={{display:'flex',alignItems:'flex-start',gap:6,marginBottom:12}}>
+          <p style={{fontSize:13,color:'var(--bright)',lineHeight:1.7,marginBottom:0,flex:1}}>{q.question}</p>
+          {tipKey&&<YuorbTip tipKey={tipKey}/>}
+        </div>
         <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:6}}>
           {q.options.map(o=>{
             let bg='var(--surface)',border='var(--border)',col='var(--text)';
@@ -3881,7 +3990,7 @@ function SpeedEngine({def,onScore,headerSlot}){
 }
 
 /* ── BUILD ENGINE — user constructs a form by selecting parameters ─────── */
-function BuildEngine({def,onScore,headerSlot}){
+function BuildEngine({def,onScore,headerSlot,tipKey}){
   const[q,setQ]=useState(()=>def.generate());
   const[built,setBuilt]=useState({});
   const[done,setDone]=useState(false);
@@ -3895,7 +4004,10 @@ function BuildEngine({def,onScore,headerSlot}){
   return(
     <div className="anim-fade">{headerSlot}
       <div className="card mb10">
-        <p style={{fontSize:13,color:'var(--bright)',lineHeight:1.7,marginBottom:14,whiteSpace:'pre-line'}}>{q.prompt}</p>
+        <div style={{display:'flex',alignItems:'flex-start',gap:6,marginBottom:14}}>
+          <p style={{fontSize:13,color:'var(--bright)',lineHeight:1.7,marginBottom:0,whiteSpace:'pre-line',flex:1}}>{q.prompt}</p>
+          {tipKey&&<YuorbTip tipKey={tipKey}/>}
+        </div>
         {q.targets&&q.targets.map(t=>{
           const p=PARAMS[t.pk];if(!p)return null;
           return(
@@ -3932,7 +4044,7 @@ function BuildEngine({def,onScore,headerSlot}){
 }
 
 /* ── MULTI ENGINE — identify all N parameters simultaneously ──────────── */
-function MultiEngine({def,onScore,headerSlot}){
+function MultiEngine({def,onScore,headerSlot,tipKey}){
   const[q,setQ]=useState(()=>def.generate());
   const[sels,setSels]=useState({});// {groupId: chosenId}
   const[done,setDone]=useState(false);
@@ -3946,7 +4058,10 @@ function MultiEngine({def,onScore,headerSlot}){
   return(
     <div className="anim-fade">{headerSlot}
       <div className="card mb10">
-        <p style={{fontSize:13,color:'var(--bright)',lineHeight:1.7,marginBottom:14}}>{q.question}</p>
+        <div style={{display:'flex',alignItems:'flex-start',gap:6,marginBottom:14}}>
+          <p style={{fontSize:13,color:'var(--bright)',lineHeight:1.7,marginBottom:0,flex:1}}>{q.question}</p>
+          {tipKey&&<YuorbTip tipKey={tipKey}/>}
+        </div>
         {q.groups&&q.groups.map(g=>(
           <div key={g.id} style={{marginBottom:12}}>
             <div style={{fontSize:10,fontWeight:700,color:'var(--muted)',textTransform:'uppercase',letterSpacing:'.08em',marginBottom:5}}>{g.label}</div>
@@ -3977,7 +4092,7 @@ function MultiEngine({def,onScore,headerSlot}){
 }
 
 /* ── VISUAL ENGINE — timeline / diagram matching ─────────────────────── */
-function VisualEngine({def,onScore,headerSlot}){
+function VisualEngine({def,onScore,headerSlot,tipKey}){
   const[q,setQ]=useState(()=>def.generate());
   const[sels,setSels]=useState({});// slot→id
   const[done,setDone]=useState(false);
@@ -3993,7 +4108,10 @@ function VisualEngine({def,onScore,headerSlot}){
   return(
     <div className="anim-fade">{headerSlot}
       <div className="card mb10">
-        <p style={{fontSize:13,color:'var(--bright)',lineHeight:1.7,marginBottom:12}}>{q.prompt}</p>
+        <div style={{display:'flex',alignItems:'flex-start',gap:6,marginBottom:12}}>
+          <p style={{fontSize:13,color:'var(--bright)',lineHeight:1.7,marginBottom:0,flex:1}}>{q.prompt}</p>
+          {tipKey&&<YuorbTip tipKey={tipKey}/>}
+        </div>
         {/* visual axis */}
         {q.axis&&<div style={{display:'flex',alignItems:'center',gap:4,marginBottom:14,padding:'8px 10px',borderRadius:6,background:'var(--surface)',border:'1px solid var(--border)'}}>
           {q.axis.map((a,i)=><React.Fragment key={i}>
@@ -4031,7 +4149,7 @@ function VisualEngine({def,onScore,headerSlot}){
 }
 
 /* ── INPUT ENGINE — free-text open answer ─────────────────────────────── */
-function InputEngine({def,onScore,headerSlot}){
+function InputEngine({def,onScore,headerSlot,tipKey}){
   const[q,setQ]=useState(()=>def.generate());
   const[val,setVal]=useState('');
   const[done,setDone]=useState(false);
@@ -4046,7 +4164,10 @@ function InputEngine({def,onScore,headerSlot}){
   return(
     <div className="anim-fade">{headerSlot}
       <div className="card mb10">
-        <p style={{fontSize:13,color:'var(--bright)',lineHeight:1.7,marginBottom:14,whiteSpace:'pre-line'}}>{q.question}</p>
+        <div style={{display:'flex',alignItems:'flex-start',gap:6,marginBottom:14}}>
+          <p style={{fontSize:13,color:'var(--bright)',lineHeight:1.7,marginBottom:0,whiteSpace:'pre-line',flex:1}}>{q.question}</p>
+          {tipKey&&<YuorbTip tipKey={tipKey}/>}
+        </div>
         {q.hint&&<p style={{fontSize:11,color:'var(--muted)',marginBottom:10,fontStyle:'italic'}}>{q.hint}</p>}
         <textarea value={val} onChange={e=>setVal(e.target.value)} disabled={done}
           placeholder="Type your answer…" rows={3}
@@ -4151,14 +4272,15 @@ function UniversalRunner({defId,def,onBack,synOn,onLmUpdate,lm}){
       <InfoPill label="Score" value={`${score.correct}/${score.total}`} color="#22c55e"/>
     </div>
   );
-  if(def.engine==='MCQ')   return <MCQEngine    def={def} onScore={handleScore} synOn={synOn} lm={lm} headerSlot={header}/>;
-  if(def.engine==='MATCH') return <MatchEngine   def={def} onScore={handleScore} headerSlot={header}/>;
-  if(def.engine==='SORT')  return <SortEngine    def={def} onScore={handleScore} headerSlot={header}/>;
-  if(def.engine==='SPEED') return <SpeedEngine   def={def} onScore={handleScore} synOn={synOn} lm={lm} headerSlot={header}/>;
-  if(def.engine==='BUILD') return <BuildEngine   def={def} onScore={handleScore} headerSlot={header}/>;
-  if(def.engine==='MULTI') return <MultiEngine   def={def} onScore={handleScore} headerSlot={header}/>;
-  if(def.engine==='VISUAL')return <VisualEngine  def={def} onScore={handleScore} headerSlot={header}/>;
-  if(def.engine==='INPUT')   return <InputEngine   def={def} onScore={handleScore} headerSlot={header}/>;
+  const tipKey=puzzleTipKey(defId,def);
+  if(def.engine==='MCQ')   return <MCQEngine    def={def} onScore={handleScore} synOn={synOn} lm={lm} headerSlot={header} tipKey={tipKey}/>;
+  if(def.engine==='MATCH') return <MatchEngine   def={def} onScore={handleScore} headerSlot={header} tipKey={tipKey}/>;
+  if(def.engine==='SORT')  return <SortEngine    def={def} onScore={handleScore} headerSlot={header} tipKey={tipKey}/>;
+  if(def.engine==='SPEED') return <SpeedEngine   def={def} onScore={handleScore} synOn={synOn} lm={lm} headerSlot={header} tipKey={tipKey}/>;
+  if(def.engine==='BUILD') return <BuildEngine   def={def} onScore={handleScore} headerSlot={header} tipKey={tipKey}/>;
+  if(def.engine==='MULTI') return <MultiEngine   def={def} onScore={handleScore} headerSlot={header} tipKey={tipKey}/>;
+  if(def.engine==='VISUAL')return <VisualEngine  def={def} onScore={handleScore} headerSlot={header} tipKey={tipKey}/>;
+  if(def.engine==='INPUT') return <InputEngine   def={def} onScore={handleScore} headerSlot={header} tipKey={tipKey}/>;
   if(def.engine==='SENTENCE'){
     const ex=SENTENCE_EX.find(s=>s.id===def.sentenceId);
     if(!ex)return <div>{header}<p style={{color:'var(--muted)',fontSize:12}}>Exercise not found.</p></div>;
