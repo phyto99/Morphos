@@ -383,6 +383,32 @@ const PARAMS={
       {id:"TRM2",label:"Terminative",  icon:"⊣",desc:"Just ending",                            freq:293.7,hue:"#f3e8ff"},
     ]
   },
+  phase:{
+    label:"Phase", slot:"Vn", cssVar:"--p-phs", hex:"#0369a1",
+    synNote:"Rhythmic patterns. Blue spectrum. Temporal distribution.",
+    spatialAxis:"how many times and how an action is distributed over time",
+    values:[
+      {id:"PCT",label:"Punctual",      icon:"•",  desc:"A single instantaneous occurrence — no duration",                 freq:440,  hue:"#0369a1"},
+      {id:"ITR",label:"Iterative",     icon:"•••",desc:"Several discrete separate occurrences",                          freq:494,  hue:"#0284c7"},
+      {id:"REP",label:"Repetitive",    icon:"↻↻", desc:"Multiple identical consecutive occurrences",                     freq:523,  hue:"#0ea5e9"},
+      {id:"ITM",label:"Intermittent",  icon:"•·•",desc:"Recurring with gaps — on and off",                               freq:554,  hue:"#38bdf8"},
+      {id:"RCT",label:"Recurrent",     icon:"⟳",  desc:"Happening again and again at irregular intervals",               freq:587,  hue:"#7dd3fc"},
+      {id:"FRQ",label:"Frequentative", icon:"⣿",  desc:"Occurring very frequently, at high density",                    freq:622,  hue:"#bae6fd"},
+      {id:"FRG",label:"Fragmentative", icon:"⌇",  desc:"Fragmented or interrupted — incomplete discrete bursts",         freq:659,  hue:"#dbeafe"},
+      {id:"OSC",label:"Oscillative",   icon:"~",  desc:"Alternating rhythmically between two states",                   freq:698,  hue:"#eff6ff"},
+    ]
+  },
+  context:{
+    label:"Context", slot:"Vr", cssVar:"--p-ctx", hex:"#b45309",
+    synNote:"Situational frame. Amber-warm spectrum. Conceptual focus.",
+    spatialAxis:"in what sense / what role / what frame the root applies",
+    values:[
+      {id:"EXS",label:"Existential",      icon:"◉",desc:"The referent as a specific concrete existing thing",            freq:330,  hue:"#b45309"},
+      {id:"FNC",label:"Functional",       icon:"⚙",desc:"The referent in its primary functional or purposive role",      freq:392,  hue:"#d97706"},
+      {id:"RPS",label:"Representational", icon:"□",desc:"As a representative example or symbol of its type",            freq:440,  hue:"#f59e0b"},
+      {id:"AMG",label:"Amalgamative",     icon:"∪",desc:"As an undifferentiated member of a broader category or mass",  freq:494,  hue:"#fbbf24"},
+    ]
+  },
 };
 
 const ROOTS=[
@@ -1302,6 +1328,46 @@ const CASES=[
   {id:"TFM",family:"Adverbial",   color:"#b45309",label:"Transformative",desc:"What something becomes or is transformed into"},
   {id:"RSL",family:"Adverbial",   color:"#92400e",label:"Resultative",  desc:"The result or outcome of an action"},
   {id:"CSN",family:"Adverbial",   color:"#92400e",label:"Consumptive",  desc:"Entity consumed or expended in action"},
+  // ── Transrelative (missing) ──────────────────────────────────────────
+  {id:"STM",family:"Transrelative",color:"#b91c1c",label:"Stimulative",  desc:"Entity evoking a non-volitional psychic or sensory state"},
+  {id:"EFF",family:"Transrelative",color:"#b91c1c",label:"Effectuative", desc:"Entity enabling another to assume or fulfill a role"},
+  {id:"IND",family:"Transrelative",color:"#991b1b",label:"Inducive",     desc:"Entity functioning as an ultimate instigating force"},
+  // ── Appositive (missing) ─────────────────────────────────────────────
+  {id:"POS",family:"Appositive",  color:"#c2410c",label:"Possessive",    desc:"Entity in a direct ownership or possession relationship"},
+  {id:"PDC",family:"Appositive",  color:"#c2410c",label:"Productive",    desc:"Entity that produced, generated, or created the head"},
+  {id:"ITP",family:"Appositive",  color:"#9a3412",label:"Interpretative",desc:"Entity interpreted or understood as being the head"},
+  {id:"IDP",family:"Appositive",  color:"#9a3412",label:"Interdependent",desc:"Entity in a mutual or reciprocally dependent relationship"},
+  // ── Associative (missing) ────────────────────────────────────────────
+  {id:"TRA",family:"Associative", color:"#0f766e",label:"Transmissive",  desc:"Medium or channel through which something passes"},
+  {id:"DFR",family:"Associative", color:"#0f766e",label:"Deferential",   desc:"Entity to which deference, respect or authority is given"},
+  {id:"CRS",family:"Associative", color:"#0d9488",label:"Contrastive",   desc:"Entity serving as a contrasting or opposing foil"},
+  {id:"TSP",family:"Associative", color:"#0d9488",label:"Transpositive", desc:"Entity exchanged for or substituted in place of another"},
+  {id:"CMM",family:"Associative", color:"#0f766e",label:"Commutative",   desc:"Entity jointly acting or participating alongside another"},
+  // ── Adverbial (missing) ──────────────────────────────────────────────
+  {id:"CLA",family:"Adverbial",   color:"#b45309",label:"Classificative",desc:"Category or class to which the head belongs"},
+  {id:"CON",family:"Adverbial",   color:"#b45309",label:"Concessive",    desc:"Conceded circumstance notwithstanding which something holds"},
+  {id:"AVR",family:"Adverbial",   color:"#92400e",label:"Aversive",      desc:"Entity avoided, shunned, or kept away from"},
+  {id:"CVS",family:"Adverbial",   color:"#92400e",label:"Conversive",    desc:"Entity that is the converse or mirror-role counterpart"},
+  {id:"SIT",family:"Adverbial",   color:"#b45309",label:"Situative",     desc:"The surrounding conditions or circumstances in which something occurs"},
+  // ── Relational (all new) ─────────────────────────────────────────────
+  {id:"PRN",family:"Relational",  color:"#065f46",label:"Pertinential",  desc:"Entity to which something is relevant or pertinent"},
+  {id:"DSP",family:"Relational",  color:"#065f46",label:"Descriptive",   desc:"Attribute or property being described or predicated"},
+  {id:"COR",family:"Relational",  color:"#064e3b",label:"Correlative",   desc:"Entity co-varying or in systematic correspondence"},
+  {id:"CPS",family:"Relational",  color:"#064e3b",label:"Compositive",   desc:"Material or substance of which something is composed"},
+  {id:"COM",family:"Relational",  color:"#047857",label:"Comitative",    desc:"Accompanying co-participant in an event"},
+  {id:"UTL",family:"Relational",  color:"#047857",label:"Utilitative",   desc:"Entity employed as a resource or tool by the agent"},
+  {id:"PRD",family:"Relational",  color:"#059669",label:"Predicative",   desc:"Entity about which a predication is being made"},
+  {id:"RLT",family:"Relational",  color:"#059669",label:"Relative",      desc:"Referential backdrop providing the relativized context"},
+  // ── Affinitive (all new) ─────────────────────────────────────────────
+  {id:"ACT",family:"Affinitive",  color:"#1e3a5f",label:"Activative",    desc:"Entity that takes on or is activated into a new role"},
+  {id:"ASI",family:"Affinitive",  color:"#1e3a5f",label:"Assimilative",  desc:"Entity in whose manner or mode something acts"},
+  {id:"ESS",family:"Affinitive",  color:"#1e40af",label:"Essive",        desc:"Entity whose state or identity the head temporarily assumes"},
+  {id:"TRM",family:"Affinitive",  color:"#1e40af",label:"Terminative",   desc:"Terminal state or identity that the head transforms into"},
+  {id:"SEL",family:"Affinitive",  color:"#1d4ed8",label:"Selective",     desc:"Set or group from which the head entity is selected"},
+  {id:"CFM",family:"Affinitive",  color:"#1d4ed8",label:"Conformative",  desc:"Model or pattern in conformance with which something acts"},
+  {id:"DEP",family:"Affinitive",  color:"#2563eb",label:"Dependent",     desc:"Entity upon which the head is contingent or reliant"},
+  {id:"VOC",family:"Affinitive",  color:"#2563eb",label:"Vocative",      desc:"Entity directly addressed or called upon"},
+  // ── Temporal ─────────────────────────────────────────────────────────
   {id:"TMP",family:"Temporal",    color:"#1d4ed8",label:"Temporal",     desc:"When an event takes place"},
   {id:"EVT",family:"Temporal",    color:"#1d4ed8",label:"Eventual",     desc:"Upon the occurrence of an event"},
   {id:"PCV",family:"Temporal",    color:"#1e40af",label:"Postcursive",  desc:"Subsequent to an event"},
@@ -1990,7 +2056,9 @@ const PARAM_DRILLS={
   validation:   ['val_id','val_imply','match_val','timeline_val','build_mood_val','vn_slot','blank_canvas','aspect_val_multi','semantic_nuance','semantic_diff_free','compress_free','blank_free','zs_full_gloss'],
   bias:         ['bia_id','bias_ctx','match_bias','sort_bias','bias_vs_mood','blank_canvas','semantic_nuance','compress_free','semantic_diff_free'],
   aspect:       ['asp_id','aspect_timeline','sort_asp','timeline_asp','vn_slot','aspect_val_multi','semantic_diff_free'],
-  case:         ['cas_id','case_assign','case_family','case_reframe','build_case_pair','blank_canvas','case_depth','obviative_proximate','sort_cases_family','case_spec_multi'],
+  phase:        ['phase_id','phase_match','phase_vs_aspect','phase_sort','vn_slot','semantic_diff_free'],
+  context:      ['context_id','context_apply','context_match','semantic_diff_free'],
+  case:         ['cas_id','case_assign','case_family','case_reframe','build_case_pair','blank_canvas','case_depth','obviative_proximate','sort_cases_family','case_spec_multi','case_relational','case_affinitive','case_family_sort'],
 };
 
 function adaptiveDrills(lm,max){
@@ -2016,8 +2084,8 @@ function adaptiveDrills(lm,max){
     var v=Object.values(lm[pk]||{});return s+(v.length?v.reduce(function(a,b){return a+b;},0)/v.length:0);
   },0)/Object.keys(PARAMS).length;
   if(avgMastery>0.15) ids=ids.concat(['root_vocab','root_stems','root_domain','root_by_context','compound_roots','root_proximity','root_cluster']);
-  if(avgMastery>0.3) ids=ids.concat(['semantic_diff_free','affix_shift_free','compress_free','obviative_proximate','case_depth','spec_context','affix_decode_deg']);
-  if(avgMastery>0.5) ids=ids.concat(['ca_merge','semantic_nuance','form_vs_ref','strip_affixes','aspect_val_multi','case_spec_multi','sort_cases_family','speed_affix','construct_sprint','synesthetic_cfg','param_slot_visual','blank_free','zs_full_gloss']);
+  if(avgMastery>0.3) ids=ids.concat(['semantic_diff_free','affix_shift_free','compress_free','obviative_proximate','case_depth','spec_context','affix_decode_deg','phase_vs_aspect','context_apply','case_relational','case_affinitive']);
+  if(avgMastery>0.5) ids=ids.concat(['ca_merge','semantic_nuance','form_vs_ref','strip_affixes','aspect_val_multi','case_spec_multi','sort_cases_family','speed_affix','construct_sprint','synesthetic_cfg','param_slot_visual','blank_free','zs_full_gloss','phase_sort','case_family_sort']);
   // Sentence exercises unlock at mid-mastery
   if(avgMastery>0.25) ids=ids.concat(['sentence_s1','sentence_s2','sentence_s3','sentence_s4','sentence_s5','sentence_s6','sentence_s7']);
   // Phonology/stress always available
@@ -3097,18 +3165,73 @@ const MOOD_IMP={FAC:"Speaker asserts this as fact.",
   SPE:"Speaker is speculating — may or may not be true.",
   CNT:"Speaker knows this is contrary to actual fact.",
   IPT:"Speaker is issuing a directive or command."};
-const CASE_SCN={THM:["primary patient of the action","thing whose state changes","acted upon"],
+const CASE_SCN={
+  // Transrelative
+  THM:["primary patient of the action","thing whose state changes","acted upon"],
   INS:["tool used to accomplish it","the means by which","instrument enabling the action"],
   ABS:["simply exists/is present","whose existence is asserted","entity merely present"],
   ERG:["volitional agent causing change","deliberately initiated it","willful initiator"],
   DAT:["recipient or beneficiary","who receives the result","the one who gets it"],
   AFF:["experiencer of a sensation","who undergoes the stimulus","feels the effect"],
+  STM:["entity evoking the inner state","what triggered the psychological response","the stimulus causing the sensation"],
+  EFF:["what enabled the agent to act","the enabling precondition","what allowed the role to be performed"],
+  IND:["the ultimate instigating force","what set the chain of events in motion","the deep causal origin"],
+  // Appositive
   GEN:["loosely associated with","general possessive","owner or associator"],
+  POS:["the entity that is owned","directly possessed","the object of possession"],
+  PDC:["the entity that produced it","what created or generated the result","the maker or generator"],
+  ITP:["interpreted as being","understood to function as","what it is taken to represent"],
+  IDP:["in a mutually dependent relationship","reciprocally tied to the other","standing in interdependence"],
+  // Associative
+  APP:["on whose behalf","in the interest of","the entity benefiting"],
+  PUR:["goal or purpose","what motivates the action","the reason why"],
+  TRA:["the medium or channel","what it was transmitted through","path of conveyance"],
+  DFR:["in deference to","with respect or acknowledgment toward","the authority deferred to"],
+  CRS:["serving as a contrasting foil","standing in contrast to","the opposing comparison"],
+  TSP:["swapped or substituted for","exchanged in place of","the entity transposed with"],
+  CMM:["jointly engaged alongside","co-participating with","acting in concert with"],
+  CMP:["the standard of comparison","measured against which","what it is compared to"],
+  CNS:["the criterion of judgment","evaluated by which standard","the basis for judgment"],
+  // Adverbial
+  FNC:["how it functions","what role it plays","in its capacity as"],
+  TFM:["what it becomes","what it is transformed into","the result of transformation"],
+  RSL:["the result or outcome","what came of the action","the resultant state"],
+  CSN:["what was consumed or expended","the entity used up","what was spent in the process"],
+  CLA:["the category it belongs to","classified under which type","the class it falls within"],
+  CON:["despite which","notwithstanding this factor","the conceded circumstance"],
+  AVR:["what is avoided or shunned","the entity kept away from","what is being evaded"],
+  CVS:["the converse role","the mirror-image counterpart","functioning as the reverse of"],
+  SIT:["the surrounding circumstances","the situational context","given these conditions"],
+  // Relational
+  PRN:["relevant or pertinent to","the domain it concerns","what it pertains to"],
+  DSP:["described as being","characterizes or attributes","the descriptive property applied"],
+  COR:["co-varying with","in systematic correspondence to","correlated alongside"],
+  CPS:["made out of","the constituent material","what it is composed from"],
+  COM:["in the company of","together with as a companion","the co-participant present"],
+  UTL:["employed as a resource by","used as a tool for","serving in the capacity of"],
+  PRD:["about which a predication is made","asserted about","the subject of the predication"],
+  RLT:["providing the relative backdrop","the referential context","the relativized frame"],
+  // Affinitive
+  ACT:["taking on the role of","activated into functioning as","assuming the function"],
+  ASI:["in the manner of","functioning like or as","assimilated to the mode of"],
+  ESS:["in the state of being","temporarily identical to","in the guise of"],
+  TRM:["ending up as","the terminal state resulting from","transformed into"],
+  SEL:["selected from among","chosen out of which set","the group from which it is drawn"],
+  CFM:["in conformance with","structured according to the pattern of","following the model of"],
+  DEP:["dependent on","contingent upon for existence","relying upon"],
+  VOC:["directly addressed","the one being called","the direct addressee"],
+  // Spatio-temporal
   LOC:["where it takes place","spatial location","the place of the event"],
   TMP:["when it happens","temporal placement","the time of the event"],
   ALL:["destination of movement","where it's heading","goal of motion"],
   ABL:["origin of movement","where it started from","source of motion"],
-  PUR:["goal or purpose","what motivates the action","the reason why"]};
+  ORT:["direction faced toward","what it is oriented to","the orientation target"],
+  INT:["within which / throughout","situated inside the space","enclosed within"],
+  NAV:["along a path toward","traversing toward a goal","navigating through"],
+  EVT:["upon the occurrence of","contingent on which event","when this event happens"],
+  PCV:["subsequent to which","after which event","following which occurrence"],
+  PCR:["prior to which","before which event","in anticipation of which"],
+};
 const REGISTERS={DSV:{label:"Discursive",desc:"Narrative or expository prose"},
   PTH:{label:"Pathos",desc:"Emotional or poetic expression"},
   MAT:{label:"Mathematical",desc:"Formal precision/technical mode"},
@@ -3453,6 +3576,64 @@ const PUZZLE_REGISTRY={
     generate:()=>{const v=_s(PARAMS.aspect.values);return _q(`Which Aspect: "${_s(ASP_TMP[v.id]||[v.desc])}"?`,v,_dist(v,PARAMS.aspect.values));}},
   cas_id:{label:"Identify Case",cat:"Param ID",module:6,phase:2,engine:'MCQ',paramKey:'case',
     generate:()=>{const v=_s(CASES.filter(c=>CASE_SCN[c.id]));const sc=_s(CASE_SCN[v.id]);return _q(`Which Case: "${sc}"?`,v,_dist(v,CASES),o=>o.label);}},
+
+  // ── PHASE ─────────────────────────────────────────────────────────────────
+  phase_id:{label:"Identify Phase",cat:"Param ID",module:7,phase:2,engine:'MCQ',paramKey:'phase',
+    generate:()=>{const v=_s(PARAMS.phase.values);return _q(`Which Phase? "${v.desc}"`,v,_dist(v,PARAMS.phase.values));}},
+  phase_match:{label:"Match Phase Description",cat:"Param ID",module:7,phase:2,engine:'MATCH',paramKey:'phase',
+    generate:()=>{const vals=_pick(PARAMS.phase.values,4);return {pairs:vals.map(v=>({left:v.label,right:v.desc,id:v.id})),question:"Match each Phase to its temporal pattern."};}},
+  phase_vs_aspect:{label:"Phase vs Aspect",cat:"Discrimination",module:7,phase:2,engine:'MCQ',paramKey:'phase',
+    generate:()=>{const pairs=[
+      {q:"Action happens several separate times with gaps",phase:"ITR",asp:null,note:"ITR (Iterative) — discrete separate occurrences"},
+      {q:"Action is currently in progress",phase:null,asp:"PRG",note:"PRG (Progressive Aspect) — ongoing at speech time"},
+      {q:"Action recurs irregularly over a long span",phase:"RCT",asp:null,note:"RCT (Recurrent Phase) — irregular long-term recurrence"},
+      {q:"Action is viewed as complete from speech time",phase:null,asp:"RTR",note:"RTR (Retrospective Aspect) — completed, viewed from after"},
+      {q:"Action happens rhythmically back and forth",phase:"OSC",asp:null,note:"OSC (Oscillative Phase) — rhythmic alternation"},
+      {q:"Action is about to begin",phase:null,asp:"IMM",note:"IMM (Imminent Aspect) — impending onset"},
+      {q:"Action occurs in fragmented bursts",phase:"FRG",asp:null,note:"FRG (Fragmentative Phase) — broken incomplete bursts"},
+      {q:"Action is just ending now",phase:null,asp:"TRM2",note:"TRM2 (Terminative Aspect) — just ceasing"},
+    ];const pair=_s(pairs);const usePhase=!!pair.phase;
+    const correct=usePhase?PARAMS.phase.values.find(v=>v.id===pair.phase):PARAMS.aspect.values.find(v=>v.id===pair.asp);
+    const paramLabel=usePhase?"Phase":"Aspect";
+    if(!correct)return PUZZLE_REGISTRY.phase_vs_aspect.generate();
+    const pool=usePhase?[...PARAMS.phase.values,...PARAMS.aspect.values.slice(0,3)]:
+                        [...PARAMS.aspect.values,...PARAMS.phase.values.slice(0,3)];
+    const wrongs=_pick(pool.filter(v=>v.id!==correct.id),3);
+    return _q(`"${pair.q}" — which ${paramLabel} value applies?`,correct,wrongs,o=>o.label,pair.note);}},
+  phase_sort:{label:"Sort Phases by Density",cat:"Sort",module:7,phase:2,engine:'SORT',paramKey:'phase',
+    generate:()=>{const ordered=[
+      {id:"PCT",label:"Punctual (single instant)"},
+      {id:"ITR",label:"Iterative (several times)"},
+      {id:"RCT",label:"Recurrent (irregular recurrence)"},
+      {id:"FRQ",label:"Frequentative (very high density)"},
+    ];return {items:_shuf(ordered),correct:ordered.map(o=>o.id),prompt:"Sort these Phases from fewest to most occurrences:",note:"Punctual < Iterative < Recurrent < Frequentative"};}},
+
+  // ── CONTEXT ───────────────────────────────────────────────────────────────
+  context_id:{label:"Identify Context",cat:"Param ID",module:5,phase:2,engine:'MCQ',paramKey:'context',
+    generate:()=>{const v=_s(PARAMS.context.values);return _q(`Which Context? "${v.desc}"`,v,_dist(v,PARAMS.context.values));}},
+  context_apply:{label:"Apply Context",cat:"Discrimination",module:5,phase:2,engine:'MCQ',paramKey:'context',
+    generate:()=>{const scenarios=[
+      {q:"Referring to this specific apple sitting on the table",id:"EXS",note:"EXS — the referent as a concrete existing thing"},
+      {q:"Referring to an apple in terms of what it does (nourishes, tempts)",id:"FNC",note:"FNC — the referent in its functional/purposive role"},
+      {q:"Using 'apple' to represent the concept of apples in general",id:"RPS",note:"RPS — as a representative example or symbol of its type"},
+      {q:"Treating apples as an undifferentiated mass of apple-stuff",id:"AMG",note:"AMG — as an undifferentiated member of a broader category"},
+      {q:"The knife qua knife — defined by its purpose of cutting",id:"FNC",note:"FNC — functional/purposive role of the referent"},
+      {q:"The same knife as a token of 'knifehood' in general",id:"RPS",note:"RPS — representative example of its type"},
+      {q:"The knife as one indistinct piece of cutlery among many",id:"AMG",note:"AMG — undifferentiated member of a category"},
+      {q:"This exact knife, the one in my hand right now",id:"EXS",note:"EXS — specific concrete existing thing"},
+    ];const sc=_s(scenarios);const correct=PARAMS.context.values.find(v=>v.id===sc.id);
+    if(!correct)return PUZZLE_REGISTRY.context_apply.generate();
+    return _q(`"${sc.q}" — which Context?`,correct,_dist(correct,PARAMS.context.values),o=>o.label,sc.note);}},
+  context_match:{label:"Match Context to Frame",cat:"Param ID",module:5,phase:2,engine:'MATCH',paramKey:'context',
+    generate:()=>{const vals=PARAMS.context.values;return {pairs:vals.map(v=>({left:v.label,right:v.desc,id:v.id})),question:"Match each Context to the frame it describes."};}},
+
+  // ── EXTENDED CASE ─────────────────────────────────────────────────────────
+  case_relational:{label:"Identify Relational Case",cat:"Param ID",module:6,phase:2,engine:'MCQ',paramKey:'case',
+    generate:()=>{const pool=CASES.filter(c=>c.family==="Relational"&&CASE_SCN[c.id]);if(pool.length<2)return PUZZLE_REGISTRY.cas_id.generate();const v=_s(pool);const sc=_s(CASE_SCN[v.id]);return _q(`Relational Case: "${sc}"?`,v,_dist(v,pool.concat(_pick(CASES.filter(c=>c.family!=="Relational"),2))),o=>o.label);}},
+  case_affinitive:{label:"Identify Affinitive Case",cat:"Param ID",module:6,phase:2,engine:'MCQ',paramKey:'case',
+    generate:()=>{const pool=CASES.filter(c=>c.family==="Affinitive"&&CASE_SCN[c.id]);if(pool.length<2)return PUZZLE_REGISTRY.cas_id.generate();const v=_s(pool);const sc=_s(CASE_SCN[v.id]);return _q(`Affinitive Case: "${sc}"?`,v,_dist(v,pool.concat(_pick(CASES.filter(c=>c.family!=="Affinitive"),2))),o=>o.label);}},
+  case_family_sort:{label:"Sort Cases by Family",cat:"Sort",module:6,phase:2,engine:'SORT',paramKey:'case',
+    generate:()=>{const families=[...new Set(CASES.map(c=>c.family))];const chosen=_pick(families,4);const sample=chosen.map(f=>_s(CASES.filter(c=>c.family===f)));const shuffled=_shuf(sample);return {items:shuffled.map(c=>({id:c.id,label:`${c.label} (${c.id})`})),correct:sample.map(c=>c.id),prompt:"Sort these cases so each belongs to a distinct semantic family (one per family shown):",note:chosen.map((f,i)=>f+': '+sample[i].label).join(' | ')};}},
 
   // ── DISCRIMINATION ────────────────────────────────────────────────────────
   param_diff:{label:"Which Parameter Differs?",cat:"Discrimination",module:4,phase:2,engine:'MCQ',
