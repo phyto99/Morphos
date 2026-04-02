@@ -2425,7 +2425,7 @@ function adaptiveDrills(lm,max){
   },0)/Object.keys(PARAMS).length;
   if(avgMastery>0.15) ids=ids.concat(['root_vocab','root_stems','root_domain','root_by_context','compound_roots','root_proximity','root_cluster']);
   if(avgMastery>0.3) ids=ids.concat(['semantic_diff_free','affix_shift_free','compress_free','obviative_proximate','case_depth','spec_context','affix_decode_deg','phase_vs_aspect','context_apply','case_relational','case_affinitive','effect_apply','level_apply','function_id','vv_id','cc_id','adjunct_type','valence_apply','phono_gemination','referential_id']);
-  if(avgMastery>0.5) ids=ids.concat(['ca_merge','semantic_nuance','form_vs_ref','strip_affixes','aspect_val_multi','case_spec_multi','sort_cases_family','speed_affix','construct_sprint','synesthetic_cfg','param_slot_visual','blank_free','zs_full_gloss','phase_sort','case_family_sort','level_sort','effect_match','valence_match','numeric_id','arg_count']);
+  if(avgMastery>0.5) ids=ids.concat(['ca_merge','semantic_nuance','form_vs_ref','strip_affixes','aspect_val_multi','case_spec_multi','sort_cases_family','speed_affix','construct_sprint','synesthetic_cfg','param_slot_visual','blank_free','zs_full_gloss','phase_sort','case_family_sort','level_sort','effect_match','valence_match','numeric_id','arg_count','writing_system_id','writing_script_features','numeric_base','ligation_type','syntax_roles','referential_types','referential_match','affix_type_id','new_case_id']);
   // Sentence exercises unlock at mid-mastery
   if(avgMastery>0.25) ids=ids.concat(['sentence_s1','sentence_s2','sentence_s3','sentence_s4','sentence_s5','sentence_s6','sentence_s7']);
   // Phonology always available
@@ -4222,7 +4222,7 @@ const PUZZLE_REGISTRY={
   val_imply:{label:"Validation Source",cat:"Inference",module:7,phase:2,engine:'MCQ',
     generate:()=>{const v=_s(PARAMS.validation.values.filter(x=>VAL_SRC[x.id]));return _q(`"${_s(VAL_SRC[v.id])}" — which Validation?`,v,_dist(v,PARAMS.validation.values));}},
   counterfactual:{label:"Counterfactual Inference",cat:"Inference",module:7,phase:2,engine:'MCQ',
-    generate:()=>{const cases=[{stmt:"If it had rained, the flowers would bloom",actual:"It did not rain",w:["It did rain","The flowers bloomed","Rain is uncertain"]},{stmt:"Had she studied, she would have passed",actual:"She did not study",w:["She studied","She passed","Studying is optional"]},{stmt:"Were he here, we'd celebrate",actual:"He is not here",w:["He is here","We are celebrating","His presence is uncertain"]}];const c=_s(cases);const opts=_shuf([{id:'a',label:c.actual,correct:true},...c.w.map((l,i)=>({id:`w${i}`,label:l,correct:false}))]);return {question:`CNT mood: "${c.stmt}" — what does the speaker believe is actually true?`,options:opts,answer:'a'};}},
+    generate:()=>{const cases=[{stmt:"If it had rained, the flowers would bloom",actual:"It did not rain",w:["It did rain","The flowers bloomed","Rain is uncertain"]},{stmt:"Had she studied, she would have passed",actual:"She did not study",w:["She studied","She passed","Studying is optional"]},{stmt:"Were he here, we'd celebrate",actual:"He is not here",w:["He is here","We are celebrating","His presence is uncertain"]}];const c=_s(cases);const opts=_shuf([{id:'a',label:c.actual,correct:true},...c.w.map((l,i)=>({id:`w${i}`,label:l,correct:false}))]);return {question:`COU (Counterfactual) mood: "${c.stmt}" — what does the speaker believe is actually true?`,options:opts,answer:'a'};}},
   aspect_timeline:{label:"Aspect on Timeline",cat:"Inference",module:7,phase:2,engine:'MCQ',
     generate:()=>{const pairs=[{a:"RTR",b:"PRG",q:"Which aspect means the action is already complete?"},
       {a:"PRG",b:"IMM",q:"Which aspect means the action is ongoing right now?"},
@@ -4242,7 +4242,7 @@ const PUZZLE_REGISTRY={
   compress_single:{label:"Best Single Encoding",cat:"Compression",module:10,phase:3,engine:'MCQ',
     generate:()=>{const examples=[{en:"the specific dog I'm looking at",pk:"perspective",a:"M"},{en:"dogs as a category/type",pk:"perspective",a:"N"},{en:"a cluster of joined similar items",pk:"configuration",a:"AGG"},{en:"I directly witnessed this",pk:"validation",a:"OBS"},{en:"a machine with differentiated parts",pk:"configuration",a:"CPN"},{en:"the very beginning of the action",pk:"aspect",a:"INC"},{en:"I'm speculating — may or may not be true",pk:"mood",a:"SPC"},{en:"the material/substance of the thing",pk:"specification",a:"CTE"}];const ex=_s(examples);const p=PARAMS[ex.pk];const correct=p.values.find(v=>v.id===ex.a);if(!correct)return PUZZLE_REGISTRY.compress_single.generate();return _q(`Best Ithkuil encoding for: "${ex.en}"?`,correct,_dist(correct,p.values),o=>`${o.label}: ${o.desc}`);}},
   compress_combo:{label:"Maximum Compression",cat:"Compression",module:10,phase:3,engine:'MCQ',
-    generate:()=>{const examples=[{en:"Multiple scattered dogs I'm directly watching",best:"DCT + OBS",opts:["DCT + OBS","AGG + PUR","UNI + RCL","MUL + ASM"]},{en:"The habitual action I'm imagining hypothetically",best:"HAB + SPE",opts:["HAB + SPE","PRG + FAC","RTR + OBS","IMM + CNT"]},{en:"The normative ideal imagined type",best:"RPV + IMG",opts:["RPV + IMG","NRM + OBS","RPV + OBS","NRM + IMG"]},{en:"A unified whole whose existence is simply asserted",best:"COH + ABS",opts:["COH + ABS","COH + ERG","AGG + THM","MUL + ABS"]}];const ex=_s(examples);const opts=_shuf(ex.opts).map((o,i)=>({id:String(i),label:o,correct:o===ex.best}));return {question:`Most compressed encoding for: "${ex.en}"`,options:opts,answer:opts.find(o=>o.correct)?.id};}},
+    generate:()=>{const examples=[{en:"Multiple scattered dogs I'm directly watching",best:"DCT + OBS",opts:["DCT + OBS","AGG + PUP","UNI + REC","MUL + ASM"]},{en:"The habitual action I'm imagining hypothetically",best:"HAB + SPC",opts:["HAB + SPC","PRG + FAC","RTR + OBS","IMM + COU"]},{en:"The normative ideal imagined type",best:"RPV + IMA",opts:["RPV + IMA","NRM + OBS","RPV + OBS","NRM + IMA"]},{en:"A unified whole whose existence is simply asserted",best:"COH + ABS",opts:["COH + ABS","COH + ERG","AGG + THM","MUL + ABS"]}];const ex=_s(examples);const opts=_shuf(ex.opts).map((o,i)=>({id:String(i),label:o,correct:o===ex.best}));return {question:`Most compressed encoding for: "${ex.en}"`,options:opts,answer:opts.find(o=>o.correct)?.id};}},
   affix_degree:{label:"Affix Degree",cat:"Compression",module:10,phase:3,engine:'MCQ',
     generate:()=>{const deg=Math.floor(Math.random()*9);const correct={id:String(deg+1),label:`Degree ${deg+1}`};const all=Array.from({length:9},(_,i)=>({id:String(i+1),label:`Degree ${i+1}`}));return _q(`"${AFFIX_DEG[deg]}" — which affix degree?`,correct,_dist(correct,all));}},
   affix_fn:{label:"Affix Function",cat:"Compression",module:10,phase:3,engine:'MCQ',
@@ -4270,7 +4270,7 @@ const PUZZLE_REGISTRY={
   arg_count:{label:"Argument Count",cat:"Compression",module:8,phase:3,engine:'MCQ',
     generate:()=>{const cases=[{r:"ŘK",n:"Causation",v:2},{r:"KŢ",n:"Cognition",v:1},{r:"XL",n:"Motion",v:2},{r:"VŽ",n:"Social Bond",v:2},{r:"ŢR",n:"Sensation",v:1},{r:"ŢM",n:"Matter",v:1},{r:"RM",n:"Value",v:2}];const c=_s(cases);const opts=[1,2,3,4].map(n=>({id:String(n),label:String(n),correct:n===c.v}));return {question:`Root ${c.r} (${c.n}) — how many core arguments?`,options:_shuf(opts),answer:String(c.v)};}},
   dense_sentence:{label:"Dense Sentence",cat:"Compression",module:10,phase:3,engine:'MCQ',
-    generate:()=>{const cases=[{q:"Which Ithkuil parameter replaces the English phrase 'I think'?",a:"Speculative Mood (SPE)",w:["Assumptive Mood (ASM)","Recollective Validation","Dubitative Bias"]},{q:"Which parameter encodes the difference between 'he ran' and 'he used to run'?",a:"Aspect — PRG vs HAB",w:["Mood — FAC vs SUB","Validation — OBS vs RCL","Configuration — UNI vs AGG"]},{q:"Which parameter replaces the phrase 'in my opinion'?",a:"Bias modifier (e.g. EUP/DUB) + Assumptive Mood",w:["Purportive Validation alone","Imaginative Validation alone","Speculative Mood alone"]}];const c=_s(cases);const opts=_shuf([{id:'a',label:c.a,correct:true},...c.w.map((l,i)=>({id:`w${i}`,label:l,correct:false}))]);return {question:c.q,options:opts,answer:'a'};}},
+    generate:()=>{const cases=[{q:"Which Ithkuil parameter replaces the English phrase 'I think'?",a:"Speculative Mood (SPC)",w:["Assumptive Mood (ASM)","Recollective Validation","Dubitative Bias"]},{q:"Which parameter encodes the difference between 'he ran' and 'he used to run'?",a:"Aspect — PRG vs HAB",w:["Mood — FAC vs SUB","Validation — OBS vs REC","Configuration — UNI vs AGG"]},{q:"Which parameter replaces the phrase 'in my opinion'?",a:"Bias modifier (e.g. EUP/DUB) + Assumptive Mood",w:["Purportive Validation alone","Imaginary Validation alone","Speculative Mood alone"]}];const c=_s(cases);const opts=_shuf([{id:'a',label:c.a,correct:true},...c.w.map((l,i)=>({id:`w${i}`,label:l,correct:false}))]);return {question:c.q,options:opts,answer:'a'};}},
 
   // ── MATCH ─────────────────────────────────────────────────────────────────
   match_cfg:{label:"Config ↔ Scenario",cat:"Match",module:2,phase:1,engine:'MATCH',
@@ -4941,13 +4941,13 @@ Object.assign(PUZZLE_REGISTRY,{
 
   // ── INPUT: free-text open answers ──────────────────────────────────────
   describe_diff:{label:"Describe Parameter Difference",cat:"Input",module:5,phase:2,engine:'INPUT',
-    generate:()=>{const pairs=[{pk:'perspective',a:'M',b:'N',en:"\"this specific dog\" vs \"dogs as a category\"",accept:['perspective','monadic','noumenal','specific','category','type','instance'],expl:"Monadic (M) = specific bounded instance; Noumenal (N) = the category/type itself"},{pk:'configuration',a:'UNI',b:'AGG',en:"\"one apple\" vs \"a bunch of apples\"",accept:['configuration','uniplex','aggregative','single','cluster','joined'],expl:"Uniplex = one; Aggregative = multiple joined instances of same type"},{pk:'validation',a:'OBS',b:'PUR',en:"\"I saw it happen\" vs \"I heard it happened\"",accept:['validation','observational','purportive','witnessed','hearsay','heard'],expl:"OBS = direct witness; PUR = based on hearsay"},{pk:'mood',a:'FAC',b:'CNT',en:"\"it is raining\" vs \"if it were raining (but it isn't)\"",accept:['mood','factual','counterfactual','contrary','hypothetical','fact'],expl:"Factual asserts truth; Counterfactual asserts known falsity"}];const p=_s(pairs);return {question:`Describe in your own words the Ithkuil parameter distinction between:\n${p.en}`,hint:`Which parameter axis captures this? What does each value mean?`,accept:p.accept,explanation:p.expl};}},
+    generate:()=>{const pairs=[{pk:'perspective',a:'M',b:'N',en:"\"this specific dog\" vs \"dogs as a category\"",accept:['perspective','monadic','noumenal','specific','category','type','instance'],expl:"Monadic (M) = specific bounded instance; Noumenal (N) = the category/type itself"},{pk:'configuration',a:'UNI',b:'AGG',en:"\"one apple\" vs \"a bunch of apples\"",accept:['configuration','uniplex','aggregative','single','cluster','joined'],expl:"Uniplex = one; Aggregative = multiple joined instances of same type"},{pk:'validation',a:'OBS',b:'PUP',en:"\"I saw it happen\" vs \"I heard it happened\"",accept:['validation','observational','purportive','witnessed','hearsay','heard'],expl:"OBS = direct witness; PUP (Purportive) = based on hearsay from an unspecified source"},{pk:'mood',a:'FAC',b:'COU',en:"\"it is raining\" vs \"if it were raining (but it isn't)\"",accept:['mood','factual','counterfactual','contrary','hypothetical','fact'],expl:"Factual asserts truth; Counterfactual (COU) asserts known falsity"}];const p=_s(pairs);return {question:`Describe in your own words the Ithkuil parameter distinction between:\n${p.en}`,hint:`Which parameter axis captures this? What does each value mean?`,accept:p.accept,explanation:p.expl};}},
   affix_result:{label:"Describe Affix Combination",cat:"Input",module:10,phase:3,engine:'INPUT',
     generate:()=>{const combos=[{q:"Root: KŢ (Cognition) + Intensity Modifier at degree 7.\nDescribe the resulting meaning.",accept:['intense','high','strong','cognitive','thinking','degree'],expl:"'Very intensely thinking / cognizing' — the intensity affix scales the root's meaning upward to degree 7"},{q:"Root: ŽB (Speech) + Frequency Modifier at degree 2.\nDescribe the resulting meaning.",accept:['occasionally','rarely','infrequent','sometimes','frequency','seldom'],expl:"'Rarely speaking' — degree 2 of a frequency modifier indicates low frequency"},{q:"Root: XL (Motion) + Causative Affix + Reciprocal Affix.\nDescribe the resulting meaning.",accept:['cause','mutual','each other','reciprocal','caused motion','moving each other'],expl:"Each participant causes the other to move — reciprocal causative motion"}];const c=_s(combos);return {question:c.q,hint:'Focus on how the affix modifies the root meaning.',accept:c.accept,explanation:c.expl};}},
   case_reframe_desc:{label:"Describe Case Reframing",cat:"Input",module:6,phase:2,engine:'INPUT',
     generate:()=>{const cases=[{q:"\"She gave the book to him.\"\nIf you reframe so the book is the primary semantic participant, what Case does the book take, and what changes?",accept:['thematic','THM','patient','primary','recipient'],expl:"THM (Thematic) — the book becomes the entity whose state is altered (transferred)"},{q:"\"The hammer broke the glass.\"\nWhat Case marks the hammer, and why not Ergative?",accept:['instrumental','INS','tool','means','not volitional','no volition'],expl:"INS (Instrumental) — hammer is the means/tool, not a volitional agent. ERG requires volition."},{q:"\"The mind believes the idea.\"\nWhat case takes 'the mind'? What about 'the idea'?",accept:['affective','AFF','experiencer','thematic','THM','content','belief'],expl:"AFF for the mind (experiencer of a cognitive stimulus); THM for the idea (content/patient)"}];const c=_s(cases);return {question:c.q,hint:'Think about the semantic role — who does what to whom.',accept:c.accept,explanation:c.expl};}},
   discourse_resolve:{label:"Discourse Reference",cat:"Input",module:12,phase:4,engine:'INPUT',
-    generate:()=>{const cases=[{q:"\"The philosopher debated with the student. She left angry.\"\nIn Ithkuil, how would you mark which referent 'she' points to without ambiguity?",accept:['proximate','obviative','reference','anaphora','most recent','earlier','marking'],expl:"Ithkuil uses proximate/obviative distinction: the most recently introduced participant (student) is proximate; the earlier one (philosopher) is obviative. You'd use the appropriate nominal marker to disambiguate."},{q:"\"It rained. Therefore the flowers bloomed.\"\nWhat Ithkuil device links these two propositions causally?",accept:['connective','causal','morphology','affix','case','consequential','because'],expl:"A causal connective morpheme (or the Resultative case RSL) links the propositions, encoding the causal dependency directly in the word rather than requiring a separate conjunction."},{q:"\"I dreamed that the world ended. But it didn't.\"\nWhich two parameters together encode this contrast?",accept:['counterfactual','CNT','mood','imaginative','IMG','validation','dream'],expl:"Imaginative Validation (IMG) + Counterfactual Mood (CNT): IMG marks the dream-source, CNT marks the speaker's knowledge that it's false."}];const c=_s(cases);return {question:c.q,hint:'Think about Ithkuil grammatical devices rather than English words.',accept:c.accept,explanation:c.expl};}},
+    generate:()=>{const cases=[{q:"\"The philosopher debated with the student. She left angry.\"\nIn Ithkuil, how would you mark which referent 'she' points to without ambiguity?",accept:['proximate','obviative','reference','anaphora','most recent','earlier','marking'],expl:"Ithkuil uses proximate/obviative distinction: the most recently introduced participant (student) is proximate; the earlier one (philosopher) is obviative. You'd use the appropriate nominal marker to disambiguate."},{q:"\"It rained. Therefore the flowers bloomed.\"\nWhat Ithkuil device links these two propositions causally?",accept:['connective','causal','morphology','affix','case','consequential','because'],expl:"A causal connective morpheme (or the Resultative case RSL) links the propositions, encoding the causal dependency directly in the word rather than requiring a separate conjunction."},{q:"\"I dreamed that the world ended. But it didn't.\"\nWhich two parameters together encode this contrast?",accept:['counterfactual','COU','mood','imaginary','IMA','validation','dream'],expl:"Imaginary Validation (IMA) + Counterfactual Mood (COU): IMA marks the dream-source, COU marks the speaker's knowledge that it's false."}];const c=_s(cases);return {question:c.q,hint:'Think about Ithkuil grammatical devices rather than English words.',accept:c.accept,explanation:c.expl};}},
   connective_chain:{label:"Connective Morphology",cat:"Input",module:12,phase:4,engine:'INPUT',
     generate:()=>{const cases=[{q:"How would Ithkuil encode the logical relation between these two propositions:\n\"Because she studied, she passed.\"\nName the Ithkuil parameter or device involved.",accept:['causative','resultative','RSL','case','causal','morphology','affix','connective'],expl:"The Resultative case (RSL) on 'passing' marks it as the result; alternatively a causal connective affix links the two formatives directly without needing 'because'"},{q:"\"Either X or Y, but not both\" — how is this disjunction encoded in Ithkuil?",accept:['bias','mood','connective','disjunctive','exclusive','affix','particle'],expl:"Exclusive disjunction is encoded via a logical connective morpheme/affix, not a separate word like 'or'"},{q:"\"Not only X but also Y\" — what mechanism allows Ithkuil to pack both concession and addition into one word?",accept:['bias','affix','corrective','additive','morpheme','compound'],expl:"A Corrective bias marker (COR) combined with an additive affix can encode this — Ithkuil packs logical relations into morphology rather than separate words"}];const c=_s(cases);return {question:c.q,hint:'Remember: Ithkuil encodes in morphology what English encodes with separate words.',accept:c.accept,explanation:c.expl};}},
   meta_which_puzzle:{label:"Meta: Which Puzzle Trains This?",cat:"Input",module:11,phase:4,engine:'INPUT',
@@ -7642,8 +7642,8 @@ Object.assign(PUZZLE_REGISTRY,{
          accept:['OBS','observational','M','monadic','RTR','retrospective','DEL','delimitive','cognition'],
          expl:'OBS (direct witness) · M (monadic: one specific instance) · RTR (retrospective: just completed) · DEL (full extent). Root KŢ or similar.'},
         {en:'An imagined, speculative state: multiple scattered entities of the same type, seen as a set, with the speaker openly doubting the information source.',
-         accept:['IMG','imaginative','SPE','speculative','DCT','discrete','P','polyadic','SKP','skeptical','PUR'],
-         expl:'IMG (imaginative validation) · SPE (speculative mood) · DCT (discrete configuration) · P (polyadic perspective) · SKP (skeptical bias) or PUR (purportive: from hearsay)'},
+         accept:['IMA','imaginary','SPC','speculative','DCT','discrete','G','agglomerative','SKP','skeptical','PUP'],
+         expl:'IMA (imaginary validation) · SPC (speculative mood) · DCT (discrete configuration) · G (agglomerative perspective: the set) · SKP (skeptical bias) or PUP (purportive: from hearsay)'},
         {en:'A habitual, recurring pattern of speech witnessed by the speaker — ongoing at the time of narration.',
          accept:['HAB','habitual','OBS','observational','PRG','progressive','speech'],
          expl:'HAB (habitual aspect) · OBS (directly witnessed) · PRG (progressive: ongoing at reference time). Root for speech.'},
@@ -7840,9 +7840,9 @@ Object.assign(PUZZLE_REGISTRY,{
   semantic_diff_free:{label:"Describe Value Contrast",cat:"Input",module:5,phase:2,engine:'INPUT',
     generate:()=>{
       const pairs=[
-        {pk:'mood',a:'FAC',b:'SPE',q:'What is the epistemic difference between Factual mood (FAC) and Speculative mood (SPE)?',
+        {pk:'mood',a:'FAC',b:'SPC',q:'What is the epistemic difference between Factual mood (FAC) and Speculative mood (SPC)?',
          accept:['factual','fact','asserts','true','speculative','uncertain','may','might','possibility','unconfirmed'],
-         expl:'FAC asserts content as definitively true; SPE marks it as possible but unconfirmed — neither asserting nor denying'},
+         expl:'FAC asserts content as definitively true; SPC marks it as possible but unconfirmed — neither asserting nor denying'},
         {pk:'validation',a:'OBS',b:'RPR',q:'How does Observational validation (OBS) differ from Reportive validation (RPR)?',
          accept:['witness','direct','saw','observed','report','named','source','told','reported','secondhand'],
          expl:'OBS = speaker directly witnessed it; RPR = speaker received information from a named/identified external source'},
@@ -7852,9 +7852,9 @@ Object.assign(PUZZLE_REGISTRY,{
         {pk:'aspect',a:'PRG',b:'RTR',q:'Distinguish Progressive aspect (PRG) from Retrospective aspect (RTR).',
          accept:['ongoing','in progress','continuing','progressive','retrospective','past','completed','looking back','done','finished'],
          expl:'PRG = event viewed as ongoing from the reference point; RTR = event viewed as complete, looking backward from that point'},
-        {pk:'perspective',a:'P',b:'N',q:'What is the conceptual gap between Polyadic (P) and Noumenal (N) perspective?',
-         accept:['polyadic','set','multiple','instances','noumenal','type','category','abstract','kind','the type itself'],
-         expl:'P = the set of specific instances; N = the type/category itself as an abstraction — not any particular instance'},
+        {pk:'perspective',a:'G',b:'N',q:'What is the conceptual gap between Agglomerative (G) and Noumenal (N) perspective?',
+         accept:['agglomerative','set','multiple','instances','noumenal','type','category','abstract','kind','the type itself'],
+         expl:'G = the aggregate set of specific instances; N = the type/category itself as an abstraction — not any particular instance'},
         {pk:'bias',a:'EUP',b:'SKP',q:'How does Euphoric bias (EUP) differ from Skeptical bias (SKP) in speaker attitude?',
          accept:['euphoric','positive','elation','joy','optimistic','skeptical','doubt','distrust','questioning','disbelief'],
          expl:'EUP = speaker expresses genuine elation/joy about the content; SKP = speaker doubts or distrusts the content'},
@@ -7897,8 +7897,8 @@ Object.assign(PUZZLE_REGISTRY,{
     generate:()=>{
       const cases=[
         {q:'English: "I seem to recall, based on something I once heard, that there may have been multiple identical events of this type occurring at irregular intervals in the past."\n\nName at least three Ithkuil parameters compressing this and explain each.',
-         accept:['validation','purportive','PUR','aspect','retrospective','RTR','habitual','HAB','configuration','DCT','hearsay'],
-         expl:'PUR (hearsay validation) + RTR (past/retrospective aspect) + HAB (irregular habitual recurrence) + DCT (multiple discrete events) — four morphological markers replace ~35 English words'},
+         accept:['validation','purportive','PUP','aspect','retrospective','RTR','habitual','HAB','configuration','DCT','hearsay'],
+         expl:'PUP (purportive hearsay validation) + RTR (past/retrospective aspect) + HAB (irregular habitual recurrence) + DCT (multiple discrete events) — four morphological markers replace ~35 English words'},
         {q:'English: "The philosopher is directly witnessing, right now, the pure abstract concept of motion itself — not any particular moving thing."\n\nWhich Ithkuil parameters encode this, and what does each do?',
          accept:['validation','OBS','observational','perspective','noumenal','N','aspect','progressive','PRG','witnessed'],
          expl:'OBS (direct witness validation) + N (Noumenal perspective: the abstract type) + PRG (ongoing right now) — three parameters encode what English needed ~25 words for'},
@@ -8127,6 +8127,209 @@ Object.assign(PUZZLE_REGISTRY,{
         const wrongs=_pick(pks.filter(x=>x!==pk),3).map(x=>({id:x,label:PARAMS[x]?.label||x}));
         return _q(`"${fa}"  vs  "${fb}"\n\nWhich single Ca parameter changed between these two forms?`,correct,wrongs);
       }catch(e){return PUZZLE_REGISTRY.param_diff.generate();}
+    }},
+
+  // ─── WRITING SYSTEM (ch.12) ──────────────────────────────────────────────
+
+  writing_system_id:{label:"Writing System: Character Count",cat:"Script",module:12,phase:4,engine:'MCQ',
+    generate:()=>{
+      const cases=[
+        {q:"The Ithkuil IV script uses how many distinct character shapes as its base set?",
+         a:"Four primary character shapes, each with 9 orientations/variants — totaling 36 base glyphs",
+         w:["26 characters (one per letter of the alphabet)","22 characters arranged in a syllabary","Hundreds of logograms like Chinese","One base shape with diacritics for everything"]},
+        {q:"In the Ithkuil script, what morphological information does a character's orientation encode?",
+         a:"One of the 9 affix degrees or positional values — orientation modifies the base meaning of the shape",
+         w:["The root's semantic domain","The speaker's gender","The tense of the verb","The phonological stress pattern"]},
+        {q:"The Ithkuil script is best described as:",
+         a:"A morphophonemic writing system — characters encode both sound segments and morphological categories simultaneously",
+         w:["A pure alphabet — each character maps to one phoneme only","A syllabary — each character maps to one syllable","A logographic system — each character maps to one meaning","A featural alphabet like Hangul but purely phonological"]},
+        {q:"How does the Ithkuil script encode the Ca complex (configuration, affiliation, perspective, extension, essence)?",
+         a:"Via a dedicated block-like glyph built from superimposed strokes representing each Ca value combination",
+         w:["Using 5 separate characters placed in sequence","As a superscript diacritic above the root character","By repeating the root glyph multiple times","Through tonal markers above the vowel character"]},
+      ];
+      const c=_s(cases);
+      const opts=_shuf([{id:'a',label:c.a,correct:true},...c.w.map((w,i)=>({id:'w'+i,label:w,correct:false}))]);
+      return {question:c.q,options:opts,answer:'a'};
+    }},
+
+  writing_script_features:{label:"Script: Morphological Classes",cat:"Script",module:12,phase:4,engine:'MCQ',
+    generate:()=>{
+      const cases=[
+        {q:"In Ithkuil script, root consonants (Cr) are represented by:",
+         a:"The core consonantal glyph — the primary character shape encoding the root's semantic value",
+         w:["A diacritic placed above the vowel","A positional marker at the start of each word","A set of tone marks over the syllable nucleus","Numerical indices below the baseline"]},
+        {q:"Vowel quality in the Ithkuil script (Vr, Vn, Vc etc.) is encoded by:",
+         a:"Modified forms or diacritics of the consonantal base, showing which vowel quality applies at each slot",
+         w:["Separate standalone vowel characters placed between consonants","Only by position in the line, with no visual mark","Using the same glyph as the consonant but rotated 180°","Tone marks that apply to surrounding glyphs"]},
+        {q:"The Ithkuil writing system's design goal is best described as:",
+         a:"Maximum morphological transparency — every grammatical category should be visually identifiable from the script",
+         w:["Aesthetic beauty — the script is designed to be visually appealing first","Phonetic precision only — it records sounds without morphological marking","Historical continuity — derived from existing writing systems","Speed of writing — minimizing stroke count above all else"]},
+      ];
+      const c=_s(cases);
+      const opts=_shuf([{id:'a',label:c.a,correct:true},...c.w.map((w,i)=>({id:'w'+i,label:w,correct:false}))]);
+      return {question:c.q,options:opts,answer:'a'};
+    }},
+
+  // ─── NUMBERS (ch.13) ─────────────────────────────────────────────────────
+
+  numeric_base:{label:"Numeric System: Base and Structure",cat:"Numbers",module:13,phase:4,engine:'MCQ',
+    generate:()=>{
+      const cases=[
+        {q:"Ithkuil's numeral system is base-100. This means:",
+         a:"Numbers are grouped in pairs from 0-99 before each new positional tier — 'hundred' is the primary unit boundary",
+         w:["Every number above 10 is expressed with ten separate roots","Numbers cycle every 100 using the same 10 digits","Only even numbers have single roots; odd numbers are derived","Numerals are base-10 but with a special affix at each century mark"]},
+        {q:"The Ithkuil roots for 0–9 (the single-digit primes) include specific consonant forms. Which of these is the root for zero?",
+         a:"-LL- (ll) — a lateral sonorant cluster that encodes the null/zero quantity",
+         w:["-KS- — a stop-fricative cluster","- VR- — a fricative-resonant form","-PŠ- — a stop-fricative cluster","Zero has no root — it is expressed by omission"]},
+        {q:"The number 'one' in Ithkuil (root for the digit 1) is encoded by which consonant root?",
+         a:"-VR- — the consonant cluster marking the unit/singular digit",
+         w:["-LL-","-KS-","-Z-","-LJ-"]},
+        {q:"Ordinal and fractional numerals in Ithkuil are formed by:",
+         a:"Applying standard Type-1 or Type-2 affixes to the numeral formative — the same affix system as other roots",
+         w:["Using completely separate root vocabulary distinct from cardinals","Stacking multiple cardinal roots in sequence","Changing the word-final vowel via a special numeral vocalic","Using the Level parameter (MIN/EQU/EXC etc.) on the numeral"]},
+        {q:"The SPT (Spatiotemporal) calendar affix in Ithkuil encodes:",
+         a:"A time-reference system — specific calendar periods, days, and temporal anchors as morphological affixes",
+         w:["The geographic direction of an event","The number of participants in a spatial arrangement","The speaker's certainty about a date","The temporal aspect (PRG/RTR/HAB) via a numeral slot"]},
+      ];
+      const c=_s(cases);
+      const opts=_shuf([{id:'a',label:c.a,correct:true},...c.w.map((w,i)=>({id:'w'+i,label:w,correct:false}))]);
+      return {question:c.q,options:opts,answer:'a'};
+    }},
+
+  // ─── LIGATION / CONCATENATION (ch.10) ────────────────────────────────────
+
+  ligation_type:{label:"Ligation: Type-A vs Type-B",cat:"Ligation",module:10,phase:3,engine:'MCQ',
+    generate:()=>{
+      const cases=[
+        {q:"Type-1 concatenation in Ithkuil (using Vv slot) creates what kind of compound?",
+         a:"A concatenated formative where the first formative acts as a modifier/adjunct to the second",
+         w:["Two completely independent clauses with no grammatical link","A predicate-argument relationship where the first is the verb","A case-stacked construction encoding multiple semantic roles","A coordinative compound where both heads are equal"]},
+        {q:"The Vv slot in a concatenated formative encodes:",
+         a:"The concatenation type and format — how the two formatives relate to each other morphologically",
+         w:["The vowel quality of the root in the second position","The tonal pattern governing the compound stress","The number of additional affixes following the concatenated form","An optional euphonic connector with no grammatical meaning"]},
+        {q:"In Ithkuil, 'Format' (Vf) is best understood as:",
+         a:"The semantic role that the incorporated (dependent) formative plays relative to the main formative",
+         w:["A variant of the Case system applying only to adjuncts","A special verb mood for formal or official speech","An optional politeness marker encoding social register","The number category equivalent to plurals in other languages"]},
+        {q:"When two formatives are ligated, the dependent formative:",
+         a:"Carries no independent case — its semantic role is encoded in the Format (Vf) of the concatenated pair",
+         w:["Takes the Vocative case by default","Retains full case independence from the main formative","Must be a nominal (noun-like) root, never a verbal one","Is marked by a dedicated infix placed between the two roots"]},
+        {q:"Which statement about Ithkuil's Type-2 concatenation is correct?",
+         a:"The dependent formative acts as a case-frame participant of the main formative — more semantically integrated than Type-1",
+         w:["Type-2 is only used for numerals and quantifiers","It requires both formatives to share the same root","Type-2 generates a new register shift for the second formative","It is a quotative construction, always meaning 'the fact that…'"]},
+      ];
+      const c=_s(cases);
+      const opts=_shuf([{id:'a',label:c.a,correct:true},...c.w.map((w,i)=>({id:'w'+i,label:w,correct:false}))]);
+      return {question:c.q,options:opts,answer:'a'};
+    }},
+
+  // ─── SYNTAX (ch.11) ──────────────────────────────────────────────────────
+
+  syntax_roles:{label:"Syntax: Semantic vs Pragmatic Roles",cat:"Syntax",module:11,phase:4,engine:'MCQ',
+    generate:()=>{
+      const cases=[
+        {q:"In Ithkuil syntax, 'Topic' is best described as:",
+         a:"A pragmatic role — what the sentence is about, not necessarily the semantic agent or patient",
+         w:["The ergative argument of the main verb","The entity receiving the action — always the Theme","The first noun introduced in any sentence","The noun with the highest animacy ranking"]},
+        {q:"'Focus' in Ithkuil marks:",
+         a:"The new or most salient information in the utterance — the pragmatically highlighted constituent",
+         w:["The verb's primary argument regardless of case","The referent that holds both Proximate and Obviative status","The morphological head of the formative construction","The most recently mentioned participant in discourse"]},
+        {q:"Ithkuil's word order is best characterized as:",
+         a:"Highly free — semantic and pragmatic roles are encoded morphologically, so word order serves pragmatic rather than grammatical purposes",
+         w:["Strictly SVO — subject-verb-object with no permissible variation","SOV as the canonical order with marked fronting for topics","VSO exclusively — the verb must always lead","Only OVS for main clauses and SOV for subordinate clauses"]},
+        {q:"When a noun phrase holds the 'Frame' role in Ithkuil syntax, it:",
+         a:"Sets the domain, perspective, or interpretive context within which the rest of the clause is to be understood",
+         w:["Acts as the primary instrument of the action","Introduces a new referent not previously in discourse","Marks the end of the sentence boundary","Functions as an optional vocative aside"]},
+      ];
+      const c=_s(cases);
+      const opts=_shuf([{id:'a',label:c.a,correct:true},...c.w.map((w,i)=>({id:'w'+i,label:w,correct:false}))]);
+      return {question:c.q,options:opts,answer:'a'};
+    }},
+
+  // ─── REFERENTIALS (ch.9) ─────────────────────────────────────────────────
+
+  referential_types:{label:"Referentials: Pronoun Categories",cat:"Referentials",module:9,phase:3,engine:'MCQ',
+    generate:()=>{
+      const cases=[
+        {q:"Ithkuil referentials (pronouns) encode speaker perspective in how many distinct categories?",
+         a:"11 categories — including monadic/agglomerative/noumenal/abstract for 1st/2nd/3rd person plus collective/indefinite",
+         w:["3 categories — 1st, 2nd, 3rd person only","7 categories — 3 persons × singular/plural + reflexive","5 categories — speaker, addressee, proximate, obviative, impersonal","9 categories — matching the 9 Validation values"]},
+        {q:"The 'benactive' referential form in Ithkuil signals:",
+         a:"That the referent is beneficially affected by or acting in the interest of the proposition",
+         w:["That the referent is a non-animate entity","That the referent is the speaker's ingroup member","That the referent holds the Ergative case in the clause","That the referent is physically close to the speaker"]},
+        {q:"What grammatical information does an Ithkuil referential NOT carry that a full formative would?",
+         a:"Root-based semantic content — a referential is an anaphoric pointer, not a semantic head; it doesn't specify what type of entity it is",
+         w:["Case — referentials still carry case marking","Configuration — referentials encode how the referent is bounded","Perspective — referentials can be Monadic or Agglomerative","Validation — referentials can optionally carry evidential information"]},
+        {q:"The malefactive referential form signals:",
+         a:"That the referent is negatively affected — acting to the detriment of, or suffering harm from, what the clause describes",
+         w:["That the referent is physically absent from the scene","That the referent has been previously introduced as obviative","That the referent is an abstract entity with no physical form","That the referent was introduced more than 3 clauses ago"]},
+        {q:"Ithkuil referentials can be combined with which parameter to encode how many instances of the referent are involved?",
+         a:"Configuration — adding Configuration to a referential specifies whether the referent is a single instance, a set, a cluster, etc.",
+         w:["Phase — to encode how often the referent participates","Effect — to encode whether the referent was helped or harmed","Valence — to encode how the referent interacts with others","Aspect — to encode the temporal shape of the referent's involvement"]},
+      ];
+      const c=_s(cases);
+      const opts=_shuf([{id:'a',label:c.a,correct:true},...c.w.map((w,i)=>({id:'w'+i,label:w,correct:false}))]);
+      return {question:c.q,options:opts,answer:'a'};
+    }},
+
+  referential_match:{label:"Referentials: Match to Context",cat:"Referentials",module:9,phase:3,engine:'MATCH',
+    generate:()=>{
+      const pairs=[
+        {id:'1st_m',label:'1st person monadic',match:"I (as a specific individual)"},
+        {id:'2nd_g',label:'2nd person agglomerative',match:"You (as a group — all of you present)"},
+        {id:'3rd_n',label:'3rd person noumenal',match:"They (as a category/type of person, not specific individuals)"},
+        {id:'ben',  label:'Benactive referential',match:"He/she, acting to their own benefit"},
+        {id:'mal',  label:'Malefactive referential',match:"He/she, suffering or harmed by what occurs"},
+        {id:'indef',label:'Indefinite referential', match:"Someone (unspecified, vague, any person)"},
+      ];
+      const sub=_pick(pairs,4);
+      return {
+        left:sub.map(p=>({id:p.id,label:p.label})),
+        right:_shuf(sub.map(p=>({id:p.id,label:p.match}))),
+        pairs:Object.fromEntries(sub.map(p=>[p.id,p.id])),
+        note:"Match each referential category to the English equivalent that best illustrates it."
+      };
+    }},
+
+  // ─── AFFIXES (additional coverage) ──────────────────────────────────────
+
+  affix_type_id:{label:"Affix Type: Type-1 vs Type-2 vs Type-3",cat:"Affixes",module:10,phase:3,engine:'MCQ',
+    generate:()=>{
+      const cases=[
+        {q:"A Type-1 affix in Ithkuil occupies the Vx+Cs slot and encodes:",
+         a:"A derivational or descriptive modifier — deriving a new semantic shade from the root without creating a separate predicate",
+         w:["A full independent clause linked to the main formative","The evidential source of information","A tense or aspect shift for the main verb","A case reassignment affecting all arguments"]},
+        {q:"A Type-2 affix differs from a Type-1 affix in that it:",
+         a:"Creates a mini-predicate — the affix content describes a separate predication attributed to the referent",
+         w:["Has only 3 degrees instead of 9","Can only be used on verbal (not nominal) formatives","Applies before the root rather than after","Only applies to affixes with a spatial/locational meaning"]},
+        {q:"The 9 degrees of an Ithkuil affix represent:",
+         a:"A gradient from minimal/none (degree 1) through moderate (degree 5) to maximal/excessive (degree 9)",
+         w:["Nine distinct grammatical persons encoded by the affix","Nine possible case frames the affix can introduce","Nine phonological variants (allophones) of the same meaning","Nine sequential stages of an action from start to end"]},
+        {q:"When an affix carries degree-5 (the midpoint), it encodes:",
+         a:"The median, unmarked, or 'just right' level — neither extreme, the neutral reference point",
+         w:["Exactly half the maximum value, used for fractions","Mandatory — degree 5 is the only required degree","The same as no affix at all — degree 5 is null","The speaker's uncertainty about which exact degree applies"]},
+      ];
+      const c=_s(cases);
+      const opts=_shuf([{id:'a',label:c.a,correct:true},...c.w.map((w,i)=>({id:'w'+i,label:w,correct:false}))]);
+      return {question:c.q,options:opts,answer:'a'};
+    }},
+
+  // ─── CASE FAMILIES (new cases) ───────────────────────────────────────────
+
+  new_case_id:{label:"New Cases: Comparative & Spatio-Temporal II",cat:"Cases",module:9,phase:3,engine:'MCQ',
+    generate:()=>{
+      const entries=[
+        {id:"ATD",q:"The circumstance that merely accompanies an event without being directly involved:",a:"Attendant (ATD) — a coincidental accompanying circumstance"},
+        {id:"IRL",q:"An entity that is present but has absolutely no relation to the main event:",a:"Irrelative (IRL) — entirely unrelated to the event"},
+        {id:"INV",q:"A participant caught up in an action without any volition on their part:",a:"Involuntary (INV) — non-volitional coincidental involvement"},
+        {id:"CNR",q:"What is conceded or granted in an adversative ('even so / even though') context:",a:"Concessive (CNR) — the conceded condition"},
+        {id:"ASS",q:"The standard or benchmark against which something is evaluated for quality:",a:"Assessive (ASS) — the standard of quality comparison"},
+        {id:"ELP",q:"The period of time that has passed since a reference point:",a:"Elapsive (ELP) — elapsed duration since a reference"},
+        {id:"PLM",q:"The boundary or ceiling up to which a claim holds:",a:"Limitative (PLM) — the limiting boundary of applicability"},
+      ];
+      const e=_s(entries);
+      const wrong=_pick(entries.filter(x=>x.id!==e.id),3).map(x=>({id:x.id,label:x.a}));
+      const correct={id:e.id,label:e.a};
+      return _q(e.q,correct,wrong);
     }},
 
   // Live form with a specific stem — identify which stem is in use
