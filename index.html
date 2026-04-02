@@ -205,20 +205,26 @@ const TONE_MAP={
   // Affiliation: Perfect 4ths (warm, relational, mid register)
   CSL:330.0, ASO:440.0, VAR:550.0, COA:660.0,
   // Perspective: Octave relationships (metaphysical, high register)
-  M:220.0, P:440.0, N:880.0, A:1760.0,
+  M:220.0, G:440.0, N:880.0, A:1760.0,
   // Extension: Chromatic semitones (spatial gradation)
-  DEL:370.0, PRX:311.1, DST:415.3, PXD:466.2, ICP:277.2, TRM:391.0,
+  DEL:370.0, PRX:311.1, ICP:277.2, ATV:415.3, GRA:466.2, DPL:391.0,
   // Essence: Major vs minor (actuality contrast)
   NRM:440.0, RPV:415.3,
   // Specification: Chord tones
   BSC:261.6, CTE:329.6, CSV:392.0, OBJ:523.3,
   // Mood: Pentatonic (flowing, stance)
-  FAC:392.0, SUB:440.0, ASM:493.9, SPE:523.3, CNT:349.2, IPT:587.3,
+  FAC:392.0, SUB:440.0, ASM:493.9, SPC:523.3, COU:349.2, HYP:587.3,
   // Validation: Lydian mode (epistemic light)
-  OBS:523.3, RCL:493.9, PUR:466.2, RPR:440.0, APR:415.3, IMG:392.0,
-  // Bias: Chromatic (emotional range)
-  EUP:587.3, EUH:554.4, COR:523.3, DUB:493.9, TEN:466.2, NEG:440.0, SKP:415.3, CYN:391.0, CTM:369.9, EXA:349.2,
-  SGS:622, ANN:659, REV:698, GRT:739, SOL:783, STU:830, FOR:880, DLC:932, IPT:987, DSP:1047, ANT:1109, OPT:1175, RPT:1245,
+  OBS:523.3, REC:493.9, PUP:466.2, RPR:440.0, USP:415.3, IMA:392.0, CVN:370.0, ITU:349.2, INF:329.6,
+  // Phase: Blue scale
+  PCT:440, ITR:494, REP:523, ITM:554, RCT:587, FRE:622, FRG:659, VAC:698, FLC:740,
+  // Bias: Chromatic (emotional range) — 59 canonical values
+  ACC:349, ACH:370, ADS:392, ANN:415, ANP:440, APB:466, APH:494, ARB:523, ATE:554, CMD:587,
+  CNV:622, COI:659, CRR:698, CTP:739, CTV:783, DCC:830, DEJ:880, DES:932, DFD:987, DIS:1047,
+  DLC:1109, DOL:1175, DPB:1245, DRS:330, DUB:349, EUH:370, EUP:392, EXA:415, EXG:440, FOR:466,
+  FSC:494, GRT:523, IDG:554, IFT:587, IPL:622, IPT:659, IRO:698, ISP:739, IVD:783, MAN:830,
+  MNF:880, OPT:932, PES:987, PPT:1047, PPX:1109, PSC:1175, PSM:1245, RAC:330, RFL:349, RSG:370,
+  RPU:392, RVL:415, SAT:440, SGS:466, SKP:494, SOL:523, STU:554, TRP:587, VEX:622,
   // Effect: gradient green-to-red
   B1:587, B2:554, B3:523, BSF:494, UNK:440, DSF:415, D3:392, D2:370, D1:349,
   // Level: rising scale blue
@@ -258,26 +264,39 @@ const PARAMS={
     synNote:"C-major scale. Green spectrum. Geometric shapes.",
     spatialAxis:"horizontal arrangement",
     values:[
-      {id:"UNI",label:"Uniplex",   icon:"●",  shape:"circle",      desc:"A single undivided instance",                              freq:261.6, hue:"#16a34a"},
-      {id:"DPX",label:"Duplex",    icon:"●●", shape:"two-circles",  desc:"Exactly two instances",                                  freq:293.7, hue:"#15803d"},
-      {id:"DCT",label:"Discrete",  icon:"∷",  shape:"scattered",    desc:"Multiple separate same-type instances",                  freq:329.6, hue:"#166534"},
-      {id:"AGG",label:"Aggregative",icon:"⬡", shape:"cluster",      desc:"Multiple joined same-type instances",                    freq:349.2, hue:"#14532d"},
-      {id:"SEG",label:"Segmentative",icon:"⬡⊘",shape:"split-cluster",desc:"Joined instances partially separated",                 freq:392.0, hue:"#1a6b3c"},
-      {id:"CPN",label:"Componential",icon:"⚙",shape:"gears",        desc:"Functionally differentiated parts of a whole",          freq:440.0, hue:"#0f9548"},
-      {id:"COH",label:"Coherent",  icon:"◈",  shape:"lattice",      desc:"Unified whole from heterogeneous parts",                 freq:493.9, hue:"#22c55e"},
-      {id:"CST",label:"Compositive",icon:"⊞", shape:"mosaic",       desc:"Mixture of different types joined",                     freq:523.3, hue:"#4ade80"},
-      {id:"MUL",label:"Multiform", icon:"⁂",  shape:"cloud",        desc:"Irregular mixture with no unifying logic",               freq:587.3, hue:"#86efac"},
+      {id:"UNI",label:"Uniplex",    icon:"●",  shape:"circle",      desc:"A single undivided instance",                            freq:261.6, hue:"#16a34a",
+        hook:"One apple. Not apples in general, not a pile — this single, bounded, indivisible apple."},
+      {id:"DPX",label:"Duplex",     icon:"●●", shape:"two-circles", desc:"Exactly two instances of the same type",                 freq:293.7, hue:"#15803d",
+        hook:"A pair of shoes — exactly two, matched, one cannot exist without the other in this grouping."},
+      {id:"DCT",label:"Discrete",   icon:"∷",  shape:"scattered",   desc:"Multiple separate same-type instances with no connection",freq:329.6, hue:"#166534",
+        hook:"Coins scattered across a table — each coin separate, touching nothing, with space between."},
+      {id:"AGG",label:"Aggregative",icon:"⬡",  shape:"cluster",     desc:"Multiple same-type instances joined or clustered",       freq:349.2, hue:"#14532d",
+        hook:"A bunch of grapes — many, touching, joined, yet each grape still individually a grape."},
+      {id:"SEG",label:"Segmentative",icon:"⬡⊘",shape:"split-cluster",desc:"Joined cluster that is partially separated",           freq:392.0, hue:"#1a6b3c",
+        hook:"A bunch of grapes where someone already pulled some off — the cluster partially broken apart."},
+      {id:"CPN",label:"Componential",icon:"⚙", shape:"gears",       desc:"Functionally differentiated parts of one whole",        freq:440.0, hue:"#0f9548",
+        hook:"A bicycle — wheel, frame, chain, brake: each part distinct in function, none meaningless alone."},
+      {id:"COH",label:"Coherent",   icon:"◈",  shape:"lattice",     desc:"Unified whole from heterogeneous parts forming one thing",freq:493.9, hue:"#22c55e",
+        hook:"A mosaic — hundreds of different-colored tiles that only make sense as the face they form together."},
+      {id:"CST",label:"Compositive",icon:"⊞",  shape:"mosaic",      desc:"Mixture of different types joined without a unifying form",freq:523.3,hue:"#4ade80",
+        hook:"Trail mix — almonds, raisins, chocolate chips, peanuts: heterogeneous, joined, but no overall shape."},
+      {id:"MUL",label:"Multiform",  icon:"⁂",  shape:"cloud",       desc:"Irregular mixture with no unifying logic or form",       freq:587.3, hue:"#86efac",
+        hook:"A junk drawer — everything in it differs from everything else, united only by being uncategorized."},
     ]
   },
   affiliation:{
     label:"Affiliation", slot:"Ca", cssVar:"--p-afl", hex:"#0d9488",
     synNote:"Perfect fourths. Teal spectrum. Texture patterns.",
-    spatialAxis:"internal relational logic",
+    spatialAxis:"internal relational logic among members",
     values:[
-      {id:"CSL",label:"Consolidative",icon:"≡",desc:"Members identical in nature and function",freq:330,hue:"#0d9488"},
-      {id:"ASO",label:"Associative",  icon:"≈",desc:"Similar but functionally differentiated",freq:440,hue:"#0f766e"},
-      {id:"VAR",label:"Variative",    icon:"∼",desc:"Diverse members sharing a common purpose",freq:550,hue:"#14b8a6"},
-      {id:"COA",label:"Coalescent",   icon:"∪",desc:"Previously distinct groups now unified",  freq:660,hue:"#5eead4"},
+      {id:"CSL",label:"Natural",   icon:"≡",desc:"Members sharing the same nature and function naturally",  freq:330,hue:"#0d9488",
+        hook:"A flock of starlings — each bird identical in role, moving as one undivided kind."},
+      {id:"ASO",label:"Associative",icon:"≈",desc:"Similar members with differing functions forming a coherent group",freq:440,hue:"#0f766e",
+        hook:"A jazz quartet — four musicians, each with a distinct instrument, playing one coherent song."},
+      {id:"VAR",label:"Variative",  icon:"∼",desc:"Diverse members sharing a common purpose or context",   freq:550,hue:"#14b8a6",
+        hook:"A hospital staff — doctor, nurse, receptionist, cleaner — different roles, one shared purpose."},
+      {id:"COA",label:"Coalescent", icon:"∪",desc:"Previously separate groups that have merged into one unified entity",freq:660,hue:"#5eead4",
+        hook:"Two rival gangs that called a truce and now operate as one — their prior separateness is remembered but overcome."},
     ]
   },
   perspective:{
@@ -285,52 +304,70 @@ const PARAMS={
     synNote:"Octave series. Violet spectrum. Depth/distance.",
     spatialAxis:"existential scope — depth into abstraction",
     values:[
-      {id:"M",label:"Monadic",  icon:"◉",desc:"A specific bounded instance",                    freq:220,  hue:"#7c3aed"},
-      {id:"P",label:"Polyadic", icon:"◎",desc:"A set of instances",                              freq:440,  hue:"#6d28d9"},
-      {id:"N",label:"Noumenal", icon:"⊙",desc:"The category/type itself (Platonic)",            freq:880,  hue:"#8b5cf6"},
-      {id:"A",label:"Abstract", icon:"○",desc:"The pure abstract property or essence",          freq:1760, hue:"#a78bfa"},
+      {id:"M",label:"Monadic",     icon:"◉",desc:"A specific bounded individual instance",                     freq:220,  hue:"#7c3aed",
+        hook:"'This dog here' — the one sniffing your hand right now, not dogs in general."},
+      {id:"G",label:"Agglomerative",icon:"◎",desc:"A set or aggregate of discrete individual instances",       freq:440,  hue:"#6d28d9",
+        hook:"'These dogs' — the specific pack at the shelter, counted and bounded as a group."},
+      {id:"N",label:"Nomic",       icon:"⊙",desc:"The category or type itself — the universal, not any instance",freq:880, hue:"#8b5cf6",
+        hook:"'The dog' in 'the dog is man's best friend' — not any dog, but doghood as a natural kind."},
+      {id:"A",label:"Abstractive", icon:"○",desc:"The pure abstract property or essence, fully detached from instances",freq:1760,hue:"#a78bfa",
+        hook:"'Caninity' — the platonic form, the mathematical property of being-a-dog, with no body attached."},
     ]
   },
   extension:{
     label:"Extension", slot:"Ca", cssVar:"--p-ext", hex:"#b45309",
-    synNote:"Chromatic semitones. Amber spectrum. Spatial reach.",
-    spatialAxis:"spatial/temporal bounding",
+    synNote:"Semitone gradations. Amber-to-gold spectrum. Spatial/temporal bounding.",
+    spatialAxis:"which portion of the referent's extent is referenced",
     values:[
-      {id:"DEL",label:"Delimitive",   icon:"⟷",desc:"The full extent of the referent",          freq:370,  hue:"#b45309"},
-      {id:"PRX",label:"Proximal",     icon:"◄",desc:"The near portion only",                    freq:311.1,hue:"#92400e"},
-      {id:"DST",label:"Distal",       icon:"►",desc:"The far portion only",                     freq:415.3,hue:"#d97706"},
-      {id:"PXD",label:"Proxi-Distal", icon:"◄►",desc:"Near and far portions simultaneously",   freq:466.2,hue:"#f59e0b"},
-      {id:"ICP",label:"Inceptive",    icon:"⊢",desc:"Just the beginning portion",               freq:277.2,hue:"#fbbf24"},
-      {id:"TRM",label:"Terminative",  icon:"⊣",desc:"Just the ending portion",                  freq:391,  hue:"#fcd34d"},
+      {id:"DEL",label:"Delimitive",  icon:"⟷",desc:"The full bounded extent of the referent — all of it",     freq:370,  hue:"#b45309",
+        hook:"'The whole river from source to sea' — the complete stretch, no part excluded."},
+      {id:"PRX",label:"Proximal",    icon:"◄",desc:"The near portion — the part closest to the reference point",freq:311.1,hue:"#92400e",
+        hook:"'The near bank of the river' — just the edge you can touch from where you stand."},
+      {id:"ICP",label:"Inceptive",   icon:"⊢",desc:"The initial segment — the beginning or leading edge",      freq:277.2,hue:"#fbbf24",
+        hook:"'The first chapter' — the river's source, the opening note, the very first bite."},
+      {id:"ATV",label:"Attenuative", icon:"⊘",desc:"A lessened, attenuated, or diminished portion of the referent",freq:415.3,hue:"#d97706",
+        hook:"'A trickle of river' — the same watercourse but at diminished, barely-there extent."},
+      {id:"GRA",label:"Graduative",  icon:"⊕",desc:"The gradual or growing portion — the referent in mid-expansion",freq:466.2,hue:"#f59e0b",
+        hook:"'The river as it widens' — the middle stage where the extent is actively growing."},
+      {id:"DPL",label:"Depletive",   icon:"⊖",desc:"The depleted or tapering portion — the referent near exhaustion",freq:391,hue:"#fcd34d",
+        hook:"'The last drops' — the river bed nearly dry, the subject almost entirely spent."},
     ]
   },
   essence:{
     label:"Essence", slot:"Ca", cssVar:"--p-ess", hex:"#c2410c",
-    synNote:"Major/minor contrast. Orange spectrum. Solidity.",
-    spatialAxis:"actuality vs normativity",
+    synNote:"Major/minor contrast. Orange spectrum. Actuality vs. ideal.",
+    spatialAxis:"actuality vs. normative ideal",
     values:[
-      {id:"NRM",label:"Normal",       icon:"■",desc:"The actual thing as it concretely exists",  freq:440,  hue:"#c2410c"},
-      {id:"RPV",label:"Representative",icon:"□",desc:"Normative/representative instance",         freq:415.3,hue:"#ea580c"},
+      {id:"NRM",label:"Normal",         icon:"■",desc:"The actual concrete thing as it really exists",        freq:440,  hue:"#c2410c",
+        hook:"'This battered old chair' — scratched, worn, real; not the idealized chair but the actual one."},
+      {id:"RPV",label:"Representative", icon:"□",desc:"The normative or representative ideal of the type",    freq:415.3,hue:"#ea580c",
+        hook:"'The chair in the furniture catalogue' — the platonic chair, defined by what chairs should be."},
     ]
   },
   specification:{
     label:"Specification", slot:"Vr", cssVar:"--p-spc", hex:"#b91c1c",
-    synNote:"Chord tones. Red spectrum. Facet/angle.",
-    spatialAxis:"which conceptual facet is foregrounded",
+    synNote:"Chord tones. Red spectrum. Which facet of the concept is foregrounded.",
+    spatialAxis:"which conceptual facet of the root is active",
     values:[
-      {id:"BSC",label:"Basic",       icon:"◆",desc:"Fundamental default concept",               freq:261.6,hue:"#b91c1c"},
-      {id:"CTE",label:"Contential",  icon:"◇",desc:"Content, material, or substance of",       freq:329.6,hue:"#dc2626"},
-      {id:"CSV",label:"Constitutive",icon:"◈",desc:"Structure, form, or composition of",       freq:392.0,hue:"#ef4444"},
-      {id:"OBJ",label:"Objective",   icon:"◉",desc:"Purposive or goal-directed function of",   freq:523.3,hue:"#f87171"},
+      {id:"BSC",label:"Basic",       icon:"◆",desc:"The default holistic concept — the whole thing",          freq:261.6,hue:"#b91c1c",
+        hook:"'House' as a gestalt — everything that makes it a house, nothing foregrounded over the rest."},
+      {id:"CTE",label:"Contential",  icon:"◇",desc:"The content, material, or substance of the thing",        freq:329.6,hue:"#dc2626",
+        hook:"'House' as material — the bricks, wood, glass: what it is made of rather than what it does."},
+      {id:"CSV",label:"Constitutive",icon:"◈",desc:"The structure, form, or composition of the thing",        freq:392.0,hue:"#ef4444",
+        hook:"'House' as architecture — the floor plan, load-bearing walls, the organizational skeleton."},
+      {id:"OBJ",label:"Objective",   icon:"◉",desc:"The purposive, goal-directed, or functional role",        freq:523.3,hue:"#f87171",
+        hook:"'House' as shelter-function — what it is for, the purpose it serves, its utility."},
     ]
   },
   function:{
     label:"Function", slot:"Vr", cssVar:"--p-fn", hex:"#6d28d9",
-    synNote:"Static vs motion. Purple spectrum.",
-    spatialAxis:"stative vs dynamic",
+    synNote:"Static vs. motion. Purple spectrum. The root as state or as event.",
+    spatialAxis:"stative (state/property) vs. dynamic (action/process)",
     values:[
-      {id:"STA",label:"Stative",  icon:"—",desc:"State, property, or condition",                freq:220,  hue:"#6d28d9"},
-      {id:"DYN",label:"Dynamic",  icon:"→",desc:"Action, process, or event",                    freq:440,  hue:"#8b5cf6"},
+      {id:"STA",label:"Stative", icon:"—",desc:"A state, property, or condition — no change required",       freq:220,  hue:"#6d28d9",
+        hook:"'The water is cold' — a property holding steady in time, no actor making it happen."},
+      {id:"DYN",label:"Dynamic", icon:"→",desc:"An action, process, or event — change or agency required",   freq:440,  hue:"#8b5cf6",
+        hook:"'The water is cooling' — an active change unfolding; someone or something is making it happen."},
     ]
   },
   mood:{
@@ -338,55 +375,168 @@ const PARAMS={
     synNote:"Pentatonic. Cyan spectrum. Epistemic stance.",
     spatialAxis:"speaker's deontic/epistemic relationship to proposition",
     values:[
-      {id:"FAC",label:"Factual",       icon:"⊨",desc:"Asserted as fact",                        freq:392,  hue:"#0e7490"},
-      {id:"SUB",label:"Subjunctive",   icon:"⊃",desc:"Contingent or hypothetical",              freq:440,  hue:"#0891b2"},
-      {id:"ASM",label:"Assumptive",    icon:"≅",desc:"Assumed to be the case",                  freq:493.9,hue:"#06b6d4"},
-      {id:"SPE",label:"Speculative",   icon:"∿",desc:"Speculative or conjectural",              freq:523.3,hue:"#22d3ee"},
-      {id:"CNT",label:"Counterfactual",icon:"⊭",desc:"Known to be contrary to fact",            freq:349.2,hue:"#67e8f9"},
-      {id:"IPT",label:"Imperative",    icon:"⊢",desc:"Directive or command",                    freq:587.3,hue:"#a5f3fc"},
+      {id:"FAC",label:"Factual",       icon:"⊨",desc:"Asserted as confirmed fact",                           freq:392,  hue:"#0e7490",
+        hook:"'The train left at noon' — no hedge, no qualifier, the speaker stakes their credibility on it."},
+      {id:"SUB",label:"Subjunctive",   icon:"⊃",desc:"Contingent — depends on a stated or implied condition", freq:440,  hue:"#0891b2",
+        hook:"'If it rains, the match is cancelled' — the predicate hangs suspended until the condition resolves."},
+      {id:"ASM",label:"Assumptive",    icon:"≅",desc:"Assumed without full certainty — a confident guess",    freq:493.9,hue:"#06b6d4",
+        hook:"'She's probably at home' — a reasonable inference from habit, not from evidence in hand."},
+      {id:"SPC",label:"Speculative",   icon:"∿",desc:"Speculative — possibility acknowledged, no commitment", freq:523.3,hue:"#22d3ee",
+        hook:"'It might be a meteor' — the speaker floats an option without endorsing it as likely."},
+      {id:"COU",label:"Counterfactual",icon:"⊭",desc:"Known to be contrary to actual fact",                  freq:349.2,hue:"#67e8f9",
+        hook:"'Had she studied, she'd have passed' — the speaker knows she didn't study, and constructs the impossible branch anyway."},
+      {id:"HYP",label:"Hypothetical",  icon:"⊸",desc:"Purely hypothetical — not grounded in any actual situation",freq:587.3,hue:"#a5f3fc",
+        hook:"'If unicorns existed, they would be mammals' — an open hypothesis detached from any real case."},
     ]
   },
   validation:{
     label:"Validation", slot:"Vn", cssVar:"--p-val", hex:"#0f766e",
-    synNote:"Lydian mode. Teal-dark. Evidential light.",
-    spatialAxis:"source of speaker's epistemic access",
+    synNote:"Lydian mode. Teal-to-seafoam. Evidential light — how the speaker knows.",
+    spatialAxis:"source of speaker's epistemic access to the proposition",
     values:[
-      {id:"OBS",label:"Observational", icon:"👁",desc:"Directly witnessed by speaker",           freq:523.3,hue:"#0f766e"},
-      {id:"RCL",label:"Recollective",  icon:"◎",desc:"Remembered by speaker",                  freq:493.9,hue:"#0d9488"},
-      {id:"PUR",label:"Purportive",    icon:"~",desc:"Based on hearsay or report",              freq:466.2,hue:"#14b8a6"},
-      {id:"RPR",label:"Reportive",     icon:"»",desc:"Claimed by a named/known source",         freq:440,  hue:"#2dd4bf"},
-      {id:"APR",label:"Apprehensive",  icon:"≈",desc:"Inferred from indirect evidence",         freq:415.3,hue:"#5eead4"},
-      {id:"IMG",label:"Imaginative",   icon:"∞",desc:"Imagined or speculative",                  freq:392,  hue:"#99f6e4"},
+      {id:"OBS",label:"Observational", icon:"👁",desc:"Directly witnessed — speaker was there and saw it",    freq:523.3,hue:"#0f766e",
+        hook:"'I watched the building collapse' — the speaker's own eyes, no intermediary, no doubt."},
+      {id:"REC",label:"Recollective",  icon:"◎",desc:"Recalled from the speaker's own memory",               freq:493.9,hue:"#0d9488",
+        hook:"'I remember the sky being red that evening' — not seeing it now, pulling it from personal experience."},
+      {id:"PUP",label:"Purportive",    icon:"〜",desc:"Hearsay — heard from an unspecified or general source", freq:466.2,hue:"#14b8a6",
+        hook:"'Apparently the roads are flooded' — picked up from ambient talk, source anonymous."},
+      {id:"RPR",label:"Reportive",     icon:"»",desc:"Attributed to a specific named or known source",        freq:440,  hue:"#2dd4bf",
+        hook:"'According to the BBC, the vote passed' — a specific, citable source carries the claim."},
+      {id:"USP",label:"Unspecified",   icon:"∅",desc:"Evidence type deliberately left unspecified",           freq:420,  hue:"#34d399",
+        hook:"A weather forecast: 'rain expected' — the speaker doesn't commit to how they know, just the claim."},
+      {id:"IMA",label:"Imaginary",     icon:"∞",desc:"Imagined, fictional, or hypothetically constructed",    freq:392,  hue:"#6ee7b7",
+        hook:"'In my story, the dragon speaks Latin' — explicitly flagged as constructed, not real-world claim."},
+      {id:"CVN",label:"Conventional",  icon:"≡",desc:"Conventional or definitional truth — true by agreement", freq:370, hue:"#99f6e4",
+        hook:"'A bachelor is unmarried' — true by definition; no observation needed, it couldn't be otherwise."},
+      {id:"ITU",label:"Intuitive",     icon:"◈",desc:"Based on intuition or gut feeling without direct evidence",freq:349,hue:"#a7f3d0",
+        hook:"'Something feels wrong about this deal' — the speaker's felt sense, not a reasoned inference."},
+      {id:"INF",label:"Inferential",   icon:"⊸",desc:"Inferred from indirect evidence or reasoning",          freq:329,  hue:"#d1fae5",
+        hook:"'The footprints suggest someone was here' — a conclusion assembled from clues, not observation."},
     ]
   },
   bias:{
     label:"Bias", slot:"Cb", cssVar:"--p-bia", hex:"#be185d",
-    synNote:"Chromatic emotional range. Rose-to-crimson spectrum.",
-    spatialAxis:"speaker's attitudinal stance toward proposition",
+    synNote:"Emotional adjunct spectrum. Rose-to-crimson. Attitudinal stance adjunct.",
+    spatialAxis:"speaker's emotional/attitudinal stance toward what they are saying",
     values:[
-      {id:"EUP",label:"Euphoric",      icon:"⤴",desc:"Expressing delight or elation",           freq:587.3,hue:"#f472b6"},
-      {id:"EUH",label:"Euphemistic",   icon:"~",desc:"Softening or hedging the expression",    freq:554.4,hue:"#ec4899"},
-      {id:"COR",label:"Corrective",    icon:"↺",desc:"Correcting a prior statement",            freq:523.3,hue:"#db2777"},
-      {id:"DUB",label:"Dubitative",    icon:"?",desc:"Expressing doubt about the content",      freq:493.9,hue:"#be185d"},
-      {id:"TEN",label:"Tentative",     icon:"…",desc:"Expressing hesitation",                   freq:466.2,hue:"#9d174d"},
-      {id:"NEG",label:"Neglective",    icon:"∅",desc:"Dismissing or minimizing",                freq:440,  hue:"#831843"},
-      {id:"SKP",label:"Skeptical",     icon:"⊘",desc:"Expressing skepticism",                   freq:415.3,hue:"#701a36"},
-      {id:"CYN",label:"Cynical",       icon:"⊗",desc:"Expressing cynicism or irony",            freq:391,  hue:"#9f1239"},
-      {id:"CTM",label:"Contemptuous",  icon:"↓",desc:"Expressing contempt",                     freq:369.9,hue:"#881337"},
-      {id:"EXA",label:"Exasperative",  icon:"!",desc:"Expressing frustration or exasperation",  freq:349.2,hue:"#be123c"},
-      {id:"SGS",label:"Suggestive",    icon:"↝",desc:"Gently hinting or offering a suggestion",  freq:622,  hue:"#f9a8d4"},
-      {id:"ANN",label:"Anoetic",       icon:"⁇",desc:"Expressing utter stupefaction or bafflement",freq:659, hue:"#fbcfe8"},
-      {id:"REV",label:"Revelatory",    icon:"✦",desc:"Sudden realization or moment of revelation",freq:698, hue:"#fce7f3"},
-      {id:"GRT",label:"Gratificative", icon:"♡",desc:"Expressing gratitude or warm appreciation", freq:739, hue:"#fda4af"},
-      {id:"SOL",label:"Solicitative",  icon:"⊹",desc:"Pleading, beseeching, or earnestly imploring",freq:783,hue:"#fecdd3"},
-      {id:"STU",label:"Stupefactive",  icon:"⊛",desc:"Expressing amazement or awestruck wonder",  freq:830, hue:"#ffe4e6"},
-      {id:"FOR",label:"Fortuitous",    icon:"⋆",desc:"Expressing pleasant surprise at good fortune",freq:880,hue:"#fef9c3"},
-      {id:"DLC",label:"Delectative",   icon:"∾",desc:"Expressing delicious satisfaction or savoring",freq:932,hue:"#fef08a"},
-      {id:"IPT",label:"Impatient",     icon:"⇒",desc:"Expressing impatience or urgent need",       freq:987, hue:"#fde68a"},
-      {id:"DSP",label:"Despairing",    icon:"⊟",desc:"Expressing hopelessness or deep despair",    freq:1047,hue:"#e2e8f0"},
-      {id:"ANT",label:"Anticipative",  icon:"⟹",desc:"Expressing eager anticipation",              freq:1109,hue:"#bfdbfe"},
-      {id:"OPT",label:"Optiative",     icon:"◌",desc:"Expressing a wish or longing for something",  freq:1175,hue:"#c7d2fe"},
-      {id:"RPT",label:"Repudiative",   icon:"⊘",desc:"Firmly rejecting or repudiating something",  freq:1245,hue:"#ddd6fe"},
+      {id:"ACC",label:"Accidental",    icon:"◌",desc:"Speaker indicates the event was accidental or unintended",      freq:349,hue:"#fecdd3",
+        hook:"'Whoops, I spilled it' — the suffix that says: no one meant this to happen."},
+      {id:"ACH",label:"Archetypal",    icon:"◈",desc:"Speaker signals this is the archetypal or quintessential case", freq:370,hue:"#f9a8d4",
+        hook:"'That was the quintessential awkward party' — flagging this as the textbook example of its kind."},
+      {id:"ADS",label:"Admissive",     icon:"↳",desc:"Speaker concedes or admits something reluctantly",              freq:392,hue:"#f472b6",
+        hook:"'Fine, I'll admit I was wrong' — the suffix that marks a grudging concession."},
+      {id:"ANN",label:"Annunciative",  icon:"📣",desc:"Speaker announces or proclaims something formally",            freq:415,hue:"#ec4899",
+        hook:"'Hear ye!' energy — marking the statement as a formal announcement to an audience."},
+      {id:"ANP",label:"Anticipative",  icon:"⟹",desc:"Speaker expresses eager anticipation",                         freq:440,hue:"#db2777",
+        hook:"'I can't wait!' — the utterance is vibrating with forward-lean anticipation."},
+      {id:"APB",label:"Approbative",   icon:"✓",desc:"Speaker expresses approval or endorsement",                    freq:466,hue:"#be185d",
+        hook:"'Well done' — a warm nod of approval built into the grammatical structure itself."},
+      {id:"APH",label:"Apprehensive",  icon:"⚠",desc:"Speaker expresses apprehension or worried anticipation",       freq:494,hue:"#9d174d",
+        hook:"'I'm nervous about this…' — dread-tinged statement, hoping but fearing what comes next."},
+      {id:"ARB",label:"Arbitrary",     icon:"⁈",desc:"Speaker signals the choice was arbitrary or random",           freq:523,hue:"#881337",
+        hook:"'I just picked one at random' — deflating the significance of a decision."},
+      {id:"ATE",label:"Attentive",     icon:"◎",desc:"Speaker signals heightened attention or focus on the detail",  freq:554,hue:"#be123c",
+        hook:"'Listen carefully now' — the statement demands the listener's full presence."},
+      {id:"CMD",label:"Comedic",       icon:"😄",desc:"Speaker frames the utterance as humorous or comic",           freq:587,hue:"#f43f5e",
+        hook:"The pause before the punchline — grammatically signaling 'this is meant to be funny.'"},
+      {id:"CNV",label:"Contensive",    icon:"⊗",desc:"Speaker asserts the point contentiously or insistently",       freq:622,hue:"#e11d48",
+        hook:"'And I will keep saying it' — the suffix that marks a claim the speaker is prepared to fight for."},
+      {id:"COI",label:"Coincidental",  icon:"⋈",desc:"Speaker notes an unexpected coincidence",                     freq:659,hue:"#fb7185",
+        hook:"'What a coincidence!' — the grammatical equivalent of a raised eyebrow at a lucky accident."},
+      {id:"CRR",label:"Corrective",    icon:"↺",desc:"Speaker corrects a prior statement",                           freq:698,hue:"#fda4af",
+        hook:"'Actually, I meant…' — the revision marker built into the word itself."},
+      {id:"CTP",label:"Contemptive",   icon:"↓",desc:"Speaker expresses contempt or disdain",                       freq:739,hue:"#fecdd3",
+        hook:"The sneer you can hear — the suffix that makes 'interesting' mean 'worthless.'"},
+      {id:"CTV",label:"Contemplative", icon:"…",desc:"Speaker is musing or reflecting, not asserting firmly",       freq:783,hue:"#ffe4e6",
+        hook:"'I wonder if…' — trailing off into thought, not a claim but a musing."},
+      {id:"DCC",label:"Disconcertive", icon:"⁇",desc:"Speaker is disconcerted or unsettled by the situation",       freq:830,hue:"#fef9c3",
+        hook:"'That's… not what I expected' — unease at a reality that doesn't fit the mental model."},
+      {id:"DEJ",label:"Dejective",     icon:"⊟",desc:"Speaker expresses dejection or sad disappointment",           freq:880,hue:"#fef08a",
+        hook:"The sigh that precedes a sentence — grammaticalized resignation and low spirits."},
+      {id:"DES",label:"Desperative",   icon:"⊡",desc:"Speaker expresses desperation or urgent urgency",             freq:932,hue:"#fde68a",
+        hook:"'Please, I'm begging you' — desperation embedded at the morphological level."},
+      {id:"DFD",label:"Diffident",     icon:"∼",desc:"Speaker speaks with diffidence or lack of self-confidence",   freq:987,hue:"#d9f99d",
+        hook:"'Maybe I'm wrong but…' — diffidence sewn into the word before the claim arrives."},
+      {id:"DIS",label:"Dismissive",    icon:"∅",desc:"Dismissing or minimizing the significance of something",      freq:1047,hue:"#bbf7d0",
+        hook:"'Meh' encoded grammatically — the speaker waves away the proposition before it lands."},
+      {id:"DLC",label:"Delectative",   icon:"∾",desc:"Savoring with delight — lingering pleasure",                  freq:1109,hue:"#6ee7b7",
+        hook:"A chef tasting their own dish and nodding — slow, savoring, appreciative pleasure."},
+      {id:"DOL",label:"Dolorous",      icon:"⊘",desc:"Speaker expresses grief, sorrow, or doleful sadness",         freq:1175,hue:"#34d399",
+        hook:"The catch in the voice — grammaticalized grief that colors everything that follows it."},
+      {id:"DPB",label:"Disapprobative",icon:"✗",desc:"Speaker expresses disapproval or censure",                    freq:1245,hue:"#10b981",
+        hook:"'I am not pleased' without those words — the cold grammatical marking of disapproval."},
+      {id:"DRS",label:"Derisive",      icon:"⊛",desc:"Speaker is derisive or mockingly dismissive",                 freq:330,hue:"#059669",
+        hook:"The eye-roll in language — flagging the statement as an occasion for mockery."},
+      {id:"DUB",label:"Dubitative",    icon:"?",desc:"Expressing doubt about the content of the statement",         freq:349,hue:"#047857",
+        hook:"'Yeah, sure' in the skeptical sense — doubt welded into the morphology."},
+      {id:"EUH",label:"Euphoric",      icon:"⤴",desc:"Expressing intense delight, elation, or euphoria",           freq:370,hue:"#065f46",
+        hook:"Pure joy overflow — the suffix for when happiness cannot be contained."},
+      {id:"EUP",label:"Euphemistic",   icon:"~",desc:"Softening the expression — speaking euphemistically",         freq:392,hue:"#d1fae5",
+        hook:"'Passed away' instead of 'died' — the gentle wrapping cloth for hard truths."},
+      {id:"EXA",label:"Exasperative",  icon:"!",desc:"Expressing frustration or exasperation",                      freq:415,hue:"#a7f3d0",
+        hook:"'Again?! AGAIN?!' — barely contained exasperation at a repeated failure."},
+      {id:"EXG",label:"Exigent",       icon:"⇒",desc:"Speaker signals urgency or pressing need",                    freq:440,hue:"#6ee7b7",
+        hook:"'This is urgent' as grammar — the suffix that turns a request into an emergency."},
+      {id:"FOR",label:"Fortuitous",    icon:"⋆",desc:"Expressing pleasant surprise at good fortune",                freq:466,hue:"#5eead4",
+        hook:"'Lucky me!' — the grammatical note of happy coincidence and unearned blessing."},
+      {id:"FSC",label:"Fascinative",   icon:"✦",desc:"Speaker is fascinated or captivated by what they describe",  freq:494,hue:"#2dd4bf",
+        hook:"'Fascinating!' — genuine intellectual captivation expressed as a morphological adjunct."},
+      {id:"GRT",label:"Gratificative", icon:"♡",desc:"Expressing gratitude or warm appreciation",                   freq:523,hue:"#14b8a6",
+        hook:"'Thank you' embedded in the verb — gratitude as grammar, not just a courtesy phrase."},
+      {id:"IDG",label:"Indignative",   icon:"⊕",desc:"Speaker expresses indignation or moral outrage",             freq:554,hue:"#0d9488",
+        hook:"'How dare they' as a morphological suffix — righteous offense grammaticalized."},
+      {id:"IFT",label:"Infatuative",   icon:"◉",desc:"Speaker is infatuated or unreasonably enchanted",            freq:587,hue:"#0f766e",
+        hook:"Rose-tinted glasses sewn into the grammar — the bias that makes the ordinary extraordinary."},
+      {id:"IPL",label:"Implicative",   icon:"⊸",desc:"Speaker implies something without stating it outright",      freq:622,hue:"#134e4a",
+        hook:"The meaningful pause — flagging that more is meant than is said."},
+      {id:"IPT",label:"Impatient",     icon:"⇢",desc:"Speaker is impatient, eager to cut to the point",           freq:659,hue:"#0e7490",
+        hook:"'Get on with it!' — the grammatical tapping of the foot while waiting."},
+      {id:"IRO",label:"Ironic",        icon:"⊗",desc:"Speaker is being ironic — meaning the opposite",            freq:698,hue:"#0891b2",
+        hook:"'Oh, brilliant plan' (said of a disaster) — irony marked so the listener can't miss it."},
+      {id:"ISP",label:"Insipid",       icon:"⊡",desc:"Speaker finds the topic dull or tediously unremarkable",     freq:739,hue:"#0ea5e9",
+        hook:"The stifled yawn built into the word — flagging the speaker's complete lack of interest."},
+      {id:"IVD",label:"Invidious",     icon:"⊖",desc:"Speaker is envious or resentfully covetous",                freq:783,hue:"#38bdf8",
+        hook:"'Must be nice' with an edge — grammaticalized envy and resentment."},
+      {id:"MAN",label:"Mandatory",     icon:"⊨",desc:"Speaker insists the action is mandatory or non-negotiable",  freq:830,hue:"#7dd3fc",
+        hook:"'This is not optional' as morphology — an obligation baked into the predicate itself."},
+      {id:"MNF",label:"Manifestive",   icon:"▶",desc:"Speaker is pleased to reveal or manifest something",         freq:880,hue:"#bae6fd",
+        hook:"The magician pulling back the cloth — grammatical pride of revelation."},
+      {id:"OPT",label:"Optative",      icon:"◌",desc:"Speaker expresses a wish or longing",                        freq:932,hue:"#e0f2fe",
+        hook:"'If only…' — yearning embedded as grammar, not just a phrase."},
+      {id:"PES",label:"Pessimistic",   icon:"⊟",desc:"Speaker expects the worst outcome",                          freq:987,hue:"#f0f9ff",
+        hook:"'Knowing my luck…' — pessimism as a grammatical adjunct coloring every prediction."},
+      {id:"PPT",label:"Propitious",    icon:"⋈",desc:"Speaker notes favorable omens or auspicious conditions",    freq:1047,hue:"#fef9c3",
+        hook:"'The stars are aligned' built into the grammar — auspiciousness marked morphologically."},
+      {id:"PPX",label:"Perplexive",    icon:"⁇",desc:"Speaker is perplexed or genuinely confused",                freq:1109,hue:"#fef08a",
+        hook:"'Wait, what?' as a morpheme — puzzlement stamped onto the utterance itself."},
+      {id:"PSC",label:"Prosaic",       icon:"—",desc:"Speaker treats the topic as mundane or unremarkable",        freq:1175,hue:"#fde68a",
+        hook:"'Just another Tuesday' — the grammatical deflation of something others might find exciting."},
+      {id:"PSM",label:"Presumptive",   icon:"≅",desc:"Speaker presumes something as understood or self-evident",  freq:1245,hue:"#fcd34d",
+        hook:"'Obviously' as morphology — the suffix that treats an assumption as shared common ground."},
+      {id:"RAC",label:"Reactive",      icon:"⤵",desc:"Speaker is reacting emotionally to what just occurred",     freq:330,hue:"#fbbf24",
+        hook:"The immediate 'Whoa!' — a reflex emotional response grammaticalized in the word."},
+      {id:"RFL",label:"Reflective",    icon:"◎",desc:"Speaker is reflectively reconsidering something",           freq:349,hue:"#f59e0b",
+        hook:"'Now that I think about it…' — the suffix that signals retrospective self-examination."},
+      {id:"RSG",label:"Resignative",   icon:"⊸",desc:"Speaker is resigned or wearily accepting of the situation", freq:370,hue:"#d97706",
+        hook:"'Whatever, fine' — the grammatical sigh of someone who has stopped fighting."},
+      {id:"RPU",label:"Repulsive",     icon:"⊖",desc:"Speaker is repulsed or disgusted",                          freq:392,hue:"#b45309",
+        hook:"'Ugh' embedded in morphology — disgust that precedes the claim and colors the whole."},
+      {id:"RVL",label:"Revelative",    icon:"✦",desc:"Speaker is revealing something surprising or enlightening",  freq:415,hue:"#92400e",
+        hook:"The 'aha!' moment as grammar — marking the utterance as a disclosure that reorders understanding."},
+      {id:"SAT",label:"Satiative",     icon:"∾",desc:"Speaker is fully satisfied or contentedly fulfilled",       freq:440,hue:"#78350f",
+        hook:"'That's enough, I'm content' — satiation as a morphological mood, not a separate sentence."},
+      {id:"SGS",label:"Suggestive",    icon:"↝",desc:"Gently hinting or offering a subtle suggestion",            freq:466,hue:"#fef3c7",
+        hook:"'Perhaps you might consider…' — a nudge, not a push, grammatically distinguished."},
+      {id:"SKP",label:"Skeptical",     icon:"⊘",desc:"Expressing open skepticism about the claim",                freq:494,hue:"#fde68a",
+        hook:"'I'll believe it when I see it' as morphology — the raised eyebrow encoded in grammar."},
+      {id:"SOL",label:"Solicitative",  icon:"⊹",desc:"Earnestly beseeching or pleading",                          freq:523,hue:"#fcd34d",
+        hook:"'Please, I'm asking you' from the knees — grammaticalized supplication."},
+      {id:"STU",label:"Stupefactive",  icon:"★",desc:"Expressing awestruck wonder or amazement",                  freq:554,hue:"#fbbf24",
+        hook:"'I can't believe it' as a suffix — jaw-dropping amazement built into the utterance."},
+      {id:"TRP",label:"Trepidative",   icon:"⚡",desc:"Speaker is apprehensive with dread or trepidation",        freq:587,hue:"#f59e0b",
+        hook:"The held breath before the announcement — dread-tinged anticipation as grammar."},
+      {id:"VEX",label:"Vexative",      icon:"⊗",desc:"Speaker is vexed or irritated",                            freq:622,hue:"#d97706",
+        hook:"'This is getting on my nerves' without those words — the grammatical encoding of mild fury."},
     ]
   },
   aspect:{
@@ -394,21 +544,36 @@ const PARAMS={
     synNote:"Temporal shapes. Plum spectrum. Duration contours.",
     spatialAxis:"temporal/spatial shape of the action or state",
     values:[
-      {id:"RTR",label:"Retrospective", icon:"←",desc:"Looking back at a completed event",       freq:330,  hue:"#7e22ce"},
-      {id:"PRS",label:"Prospective",   icon:"→",desc:"Looking forward to an event",             freq:392,  hue:"#9333ea"},
-      {id:"HAB",label:"Habitual",      icon:"↻",desc:"Ongoing pattern or habit",                freq:440,  hue:"#a855f7"},
-      {id:"PRG",label:"Progressive",   icon:"▶",desc:"Ongoing process at speech time",          freq:493.9,hue:"#c084fc"},
-      {id:"IMM",label:"Imminent",      icon:"▷",desc:"About to begin",                          freq:523.3,hue:"#d8b4fe"},
-      {id:"INC",label:"Inceptive",     icon:"⊢",desc:"Just beginning",                         freq:349.2,hue:"#e9d5ff"},
-      {id:"TRM2",label:"Terminative",  icon:"⊣",desc:"Just ending",                            freq:293.7,hue:"#f3e8ff"},
-      {id:"CSS",label:"Cessative",     icon:"⊡",desc:"In the process of coming to an end",     freq:277,  hue:"#ede9fe"},
-      {id:"PAU",label:"Pausal",        icon:"⏸",desc:"Temporarily suspended or paused",        freq:261,  hue:"#ddd6fe"},
-      {id:"RGR",label:"Regressive",    icon:"⇐",desc:"Gradually reversing or undoing",         freq:246,  hue:"#c4b5fd"},
-      {id:"PCL",label:"Precyclical",   icon:"⟳",desc:"In the final phase before a cycle resets",freq:233, hue:"#a78bfa"},
-      {id:"RSM",label:"Resumptive",    icon:"▷▷",desc:"Resuming after a break or interruption", freq:220, hue:"#8b5cf6"},
-      {id:"SMM",label:"Summative",     icon:"Σ", desc:"The total cumulative effect over time",  freq:207,  hue:"#7c3aed"},
-      {id:"EXP",label:"Experiential",  icon:"◎",desc:"Occurred at least once; experiential 'ever'",freq:196,hue:"#6d28d9"},
-      {id:"ICS",label:"Incessative",   icon:"∞",desc:"Without any pause or break whatsoever",  freq:184,  hue:"#5b21b6"},
+      {id:"RTR",label:"Retrospective", icon:"←",desc:"Looking back at a completed event",       freq:330,  hue:"#7e22ce",
+        hook:"'She had left' — the action is over and the speaker surveys it from a point after its close."},
+      {id:"PRS",label:"Prospective",   icon:"→",desc:"Looking forward to an event",             freq:392,  hue:"#9333ea",
+        hook:"'The train is about to depart' — orientation forward from now; the event hasn't happened yet."},
+      {id:"HAB",label:"Habitual",      icon:"↻",desc:"Ongoing pattern or habit",                freq:440,  hue:"#a855f7",
+        hook:"'She walks to work' — not right now, not just once, but a recurring pattern that defines her."},
+      {id:"PRG",label:"Progressive",   icon:"▶",desc:"Ongoing process at speech time",          freq:493.9,hue:"#c084fc",
+        hook:"'He is cooking' — in the middle of the act right now as the words are spoken."},
+      {id:"IMM",label:"Imminent",      icon:"▷",desc:"About to begin",                          freq:523.3,hue:"#d8b4fe",
+        hook:"The diver balanced on the board — action loaded, triggered, but not yet released."},
+      {id:"INC",label:"Inceptive",     icon:"⊢",desc:"Just beginning",                         freq:349.2,hue:"#e9d5ff",
+        hook:"The first note of a symphony — the exact moment the action crosses the threshold into existence."},
+      {id:"TRM2",label:"Terminative",  icon:"⊣",desc:"Just ending",                            freq:293.7,hue:"#f3e8ff",
+        hook:"The final chord fading — the action is arriving at its conclusion, right at the boundary."},
+      {id:"CSS",label:"Cessative",     icon:"⊡",desc:"In the process of coming to an end",     freq:277,  hue:"#ede9fe",
+        hook:"The campfire dying down — still going, but visibly winding toward its end."},
+      {id:"PAU",label:"Pausal",        icon:"⏸",desc:"Temporarily suspended or paused",        freq:261,  hue:"#ddd6fe",
+        hook:"Mid-sentence ellipsis — the action is on hold; it hasn't stopped, just suspended."},
+      {id:"RGR",label:"Regressive",    icon:"⇐",desc:"Gradually reversing or undoing",         freq:246,  hue:"#c4b5fd",
+        hook:"Ice melting back to water, then re-freezing — the process working backward from its earlier state."},
+      {id:"PCL",label:"Precyclical",   icon:"⟳",desc:"In the final phase before a cycle resets",freq:233, hue:"#a78bfa",
+        hook:"The last night before a season ends — at the closing edge, about to loop around again."},
+      {id:"RSM",label:"Resumptive",    icon:"▷▷",desc:"Resuming after a break or interruption", freq:220, hue:"#8b5cf6",
+        hook:"Picking up the book where the bookmark was left — the action restarts from interruption."},
+      {id:"SMM",label:"Summative",     icon:"Σ", desc:"The total cumulative effect over time",  freq:207,  hue:"#7c3aed",
+        hook:"'A lifetime of small kindnesses' — the totality of occurrences collapsed into one cumulative fact."},
+      {id:"EXP",label:"Experiential",  icon:"◎",desc:"Occurred at least once; experiential 'ever'",freq:196,hue:"#6d28d9",
+        hook:"'Have you ever seen a comet?' — the question is whether the experience exists anywhere in one's history."},
+      {id:"ICS",label:"Incessative",   icon:"∞",desc:"Without any pause or break whatsoever",  freq:184,  hue:"#5b21b6",
+        hook:"White noise — continuous without the smallest gap, no pause, no interruption, ever."},
     ]
   },
   phase:{
@@ -416,25 +581,39 @@ const PARAMS={
     synNote:"Rhythmic patterns. Blue spectrum. Temporal distribution.",
     spatialAxis:"how many times and how an action is distributed over time",
     values:[
-      {id:"PCT",label:"Punctual",      icon:"•",  desc:"A single instantaneous occurrence — no duration",                 freq:440,  hue:"#0369a1"},
-      {id:"ITR",label:"Iterative",     icon:"•••",desc:"Several discrete separate occurrences",                          freq:494,  hue:"#0284c7"},
-      {id:"REP",label:"Repetitive",    icon:"↻↻", desc:"Multiple identical consecutive occurrences",                     freq:523,  hue:"#0ea5e9"},
-      {id:"ITM",label:"Intermittent",  icon:"•·•",desc:"Recurring with gaps — on and off",                               freq:554,  hue:"#38bdf8"},
-      {id:"RCT",label:"Recurrent",     icon:"⟳",  desc:"Happening again and again at irregular intervals",               freq:587,  hue:"#7dd3fc"},
-      {id:"FRQ",label:"Frequentative", icon:"⣿",  desc:"Occurring very frequently, at high density",                    freq:622,  hue:"#bae6fd"},
-      {id:"FRG",label:"Fragmentative", icon:"⌇",  desc:"Fragmented or interrupted — incomplete discrete bursts",         freq:659,  hue:"#dbeafe"},
-      {id:"OSC",label:"Oscillative",   icon:"~",  desc:"Alternating rhythmically between two states",                   freq:698,  hue:"#eff6ff"},
+      {id:"PCT",label:"Punctual",     icon:"•",  desc:"A single instantaneous occurrence — no duration",                freq:440, hue:"#0369a1",
+        hook:"A camera shutter — one discrete click, then silence. No before, no after, just that one moment."},
+      {id:"ITR",label:"Iterative",    icon:"•••",desc:"Several discrete separate occurrences",                          freq:494, hue:"#0284c7",
+        hook:"Knocking three times — each knock distinct, with a clear gap between them."},
+      {id:"REP",label:"Repetitive",   icon:"↻↻", desc:"Multiple identical consecutive occurrences back to back",        freq:523, hue:"#0ea5e9",
+        hook:"A machine stamping metal — identical actions stacked without a meaningful break."},
+      {id:"ITM",label:"Intermittent", icon:"•·•",desc:"Recurring with gaps — on and off at irregular intervals",        freq:554, hue:"#38bdf8",
+        hook:"A faulty traffic light — it works, then stops, then works again, never on a schedule."},
+      {id:"RCT",label:"Recurrent",    icon:"⟳",  desc:"Happening again and again at irregular long-term intervals",     freq:587, hue:"#7dd3fc",
+        hook:"A comet that returns — each pass separated by decades, yet unmistakably the same recurrence."},
+      {id:"FRE",label:"Frequentative",icon:"⣿",  desc:"Occurring very frequently, at high density — almost continuous", freq:622, hue:"#bae6fd",
+        hook:"Raindrops on a window — so frequent the individual drops blur into a drumming sheet."},
+      {id:"FRG",label:"Fragmentative",icon:"⌇",  desc:"Fragmented — incomplete bursts that don't form whole events",   freq:659, hue:"#dbeafe",
+        hook:"Trying to applaud in a thick sweater — disconnected partial attempts, none completing."},
+      {id:"VAC",label:"Vacillative",  icon:"⇌",  desc:"Vacillating — alternating back and forth between two states",   freq:698, hue:"#eff6ff",
+        hook:"A swing set — pendulum logic, each cycle the opposite of the last, rhythmically reversing."},
+      {id:"FLC",label:"Fluctuative",  icon:"〰",  desc:"Fluctuating — irregular chaotic variation with no pattern",    freq:740, hue:"#f0f9ff",
+        hook:"Stock market ticker — up, down, up-up, down, completely unpredictable from moment to moment."},
     ]
   },
   context:{
     label:"Context", slot:"Vr", cssVar:"--p-ctx", hex:"#b45309",
-    synNote:"Situational frame. Amber-warm spectrum. Conceptual focus.",
-    spatialAxis:"in what sense / what role / what frame the root applies",
+    synNote:"Situational frame. Amber-warm spectrum. In what sense the root is invoked.",
+    spatialAxis:"in what sense / role / frame the root applies",
     values:[
-      {id:"EXS",label:"Existential",      icon:"◉",desc:"The referent as a specific concrete existing thing",            freq:330,  hue:"#b45309"},
-      {id:"FNC",label:"Functional",       icon:"⚙",desc:"The referent in its primary functional or purposive role",      freq:392,  hue:"#d97706"},
-      {id:"RPS",label:"Representational", icon:"□",desc:"As a representative example or symbol of its type",            freq:440,  hue:"#f59e0b"},
-      {id:"AMG",label:"Amalgamative",     icon:"∪",desc:"As an undifferentiated member of a broader category or mass",  freq:494,  hue:"#fbbf24"},
+      {id:"EXS",label:"Existential",     icon:"◉",desc:"The referent as a specific concrete existing thing",           freq:330, hue:"#b45309",
+        hook:"'This fork' — the bent one my grandmother owned, right here, not forks in general."},
+      {id:"FNC",label:"Functional",      icon:"⚙",desc:"The referent in its primary functional or purposive role",     freq:392, hue:"#d97706",
+        hook:"'The fork qua fork' — defined by its function of piercing and lifting food, not its shape."},
+      {id:"RPS",label:"Representational",icon:"□",desc:"As a representative example or symbol of its type",           freq:440, hue:"#f59e0b",
+        hook:"'A fork in a still life painting' — standing in for forkhood, the concept, not a particular fork."},
+      {id:"AMG",label:"Amalgamative",    icon:"∪",desc:"As an undifferentiated mass member of a broader category",    freq:494, hue:"#fbbf24",
+        hook:"'Silverware' — the fork dissolved into the undifferentiated mass of utensils, no longer singled out."},
     ]
   },
   effect:{
@@ -442,15 +621,24 @@ const PARAMS={
     synNote:"Benefactive gradient. Green-to-red spectrum. Who gains or suffers.",
     spatialAxis:"who is benefited (+) or harmed (−) by the action",
     values:[
-      {id:"B1",label:"1st:Beneficial",    icon:"↑₁",desc:"The action benefits the speaker (1st person)",                        freq:587, hue:"#4ade80"},
-      {id:"B2",label:"2nd:Beneficial",    icon:"↑₂",desc:"The action benefits the addressee (2nd person)",                      freq:554, hue:"#86efac"},
-      {id:"B3",label:"3rd:Beneficial",    icon:"↑₃",desc:"The action benefits a third party",                                   freq:523, hue:"#bbf7d0"},
-      {id:"BSF",label:"Self:Beneficial",  icon:"↑ₛ",desc:"The action is reflexively beneficial to the subject itself",          freq:494, hue:"#a7f3d0"},
-      {id:"UNK",label:"Unknown Effect",   icon:"∅ₑ",desc:"The benefactive or detrimental effect is unknown or unspecified",      freq:440, hue:"#cbd5e1"},
-      {id:"DSF",label:"Self:Detrimental", icon:"↓ₛ",desc:"The action is reflexively detrimental to the subject itself",         freq:415, hue:"#fca5a5"},
-      {id:"D3",label:"3rd:Detrimental",   icon:"↓₃",desc:"The action is detrimental to a third party",                         freq:392, hue:"#f87171"},
-      {id:"D2",label:"2nd:Detrimental",   icon:"↓₂",desc:"The action is detrimental to the addressee",                         freq:370, hue:"#ef4444"},
-      {id:"D1",label:"1st:Detrimental",   icon:"↓₁",desc:"The action is detrimental to the speaker (1st person)",               freq:349, hue:"#dc2626"},
+      {id:"B1",label:"1st:Beneficial",    icon:"↑₁",desc:"The action benefits the speaker (1st person)",                        freq:587, hue:"#4ade80",
+        hook:"'I cooked dinner' — and clearly the speaker is the one who got to eat and enjoy it."},
+      {id:"B2",label:"2nd:Beneficial",    icon:"↑₂",desc:"The action benefits the addressee (2nd person)",                      freq:554, hue:"#86efac",
+        hook:"'I'm telling you this for your own good' — what is done redounds to the person being spoken to."},
+      {id:"B3",label:"3rd:Beneficial",    icon:"↑₃",desc:"The action benefits a third party",                                   freq:523, hue:"#bbf7d0",
+        hook:"The nurse who works night shifts — the action serves someone else entirely, not speaker or listener."},
+      {id:"BSF",label:"Self:Beneficial",  icon:"↑ₛ",desc:"The action is reflexively beneficial to the subject itself",          freq:494, hue:"#a7f3d0",
+        hook:"The cat that grooms itself — the actor and the beneficiary are the same entity."},
+      {id:"UNK",label:"Unknown Effect",   icon:"∅ₑ",desc:"The benefactive or detrimental effect is unknown or unspecified",      freq:440, hue:"#cbd5e1",
+        hook:"'She left early' — you simply don't know or care who was helped or hurt; the effect is bracketed."},
+      {id:"DSF",label:"Self:Detrimental", icon:"↓ₛ",desc:"The action is reflexively detrimental to the subject itself",         freq:415, hue:"#fca5a5",
+        hook:"Staying up all night to finish the work — hurting oneself in the process of acting."},
+      {id:"D3",label:"3rd:Detrimental",   icon:"↓₃",desc:"The action is detrimental to a third party",                         freq:392, hue:"#f87171",
+        hook:"The factory polluting the river — an absent third party is the one who suffers the consequence."},
+      {id:"D2",label:"2nd:Detrimental",   icon:"↓₂",desc:"The action is detrimental to the addressee",                         freq:370, hue:"#ef4444",
+        hook:"'I cancelled the appointment' — the person you're telling bears the cost of what was done."},
+      {id:"D1",label:"1st:Detrimental",   icon:"↓₁",desc:"The action is detrimental to the speaker (1st person)",               freq:349, hue:"#dc2626",
+        hook:"'I donated my last savings' — the speaker is simultaneously actor and the one who suffers the loss."},
     ]
   },
   valence:{
@@ -458,15 +646,24 @@ const PARAMS={
     synNote:"Argument relationships. Teal spectrum. How participants interrelate.",
     spatialAxis:"how the verbal action relates to and distributes across its participants",
     values:[
-      {id:"MNO",label:"Monoactive",     icon:"→",  desc:"One participant acts unilaterally with no second participant",          freq:330, hue:"#0f766e"},
-      {id:"PRL",label:"Parallel",       icon:"⇉",  desc:"Two participants do the same action independently and simultaneously",  freq:370, hue:"#0d9488"},
-      {id:"CRO",label:"Corollary",      icon:"↬",  desc:"One participant's action causes or enables the other's action",         freq:415, hue:"#14b8a6"},
-      {id:"RCP",label:"Reciprocal",     icon:"⇄",  desc:"Mutual action — each participant acts on the other",                   freq:466, hue:"#2dd4bf"},
-      {id:"CPL",label:"Complementary",  icon:"⊕",  desc:"Two different complementary actions combine into a single outcome",    freq:523, hue:"#5eead4"},
-      {id:"DUP",label:"Duplicative",    icon:"⇒",  desc:"One participant's action duplicates or mirrors the other's",           freq:587, hue:"#99f6e4"},
-      {id:"DEM",label:"Demonstrative",  icon:"⊳",  desc:"One participant demonstrates or models the action for the other",      freq:659, hue:"#a7f3d0"},
-      {id:"CNG",label:"Contingent",     icon:"⊸",  desc:"One participant's action is contingent on the other's",               freq:739, hue:"#bbf7d0"},
-      {id:"PTI",label:"Participative",  icon:"∈",  desc:"One participant joins or participates in the other's ongoing action",  freq:830, hue:"#d1fae5"},
+      {id:"MNO",label:"Monoactive",     icon:"→",  desc:"One participant acts unilaterally with no second participant",          freq:330, hue:"#0f766e",
+        hook:"A lone runner — one participant, no interactional partner, the act is self-contained."},
+      {id:"PRL",label:"Parallel",       icon:"⇉",  desc:"Two participants do the same action independently and simultaneously",  freq:370, hue:"#0d9488",
+        hook:"Two pianists in different cities practicing the same piece simultaneously — same act, no interaction."},
+      {id:"CRO",label:"Corollary",      icon:"↬",  desc:"One participant's action causes or enables the other's action",         freq:415, hue:"#14b8a6",
+        hook:"She explains; he understands — her action doesn't require his, but it triggers it."},
+      {id:"RCP",label:"Reciprocal",     icon:"⇄",  desc:"Mutual action — each participant acts on the other",                   freq:466, hue:"#2dd4bf",
+        hook:"They shook hands — each one simultaneously performs the same act on the other."},
+      {id:"CPL",label:"Complementary",  icon:"⊕",  desc:"Two different complementary actions combine into a single outcome",    freq:523, hue:"#5eead4",
+        hook:"One pushes, one steers — different roles, but together they move the boat."},
+      {id:"DUP",label:"Duplicative",    icon:"⇒",  desc:"One participant's action duplicates or mirrors the other's",           freq:587, hue:"#99f6e4",
+        hook:"The student copies the master's brushstroke exactly — mirroring, not collaborating."},
+      {id:"DEM",label:"Demonstrative",  icon:"⊳",  desc:"One participant demonstrates or models the action for the other",      freq:659, hue:"#a7f3d0",
+        hook:"The instructor does it first so the student can watch — showing, not telling."},
+      {id:"CNG",label:"Contingent",     icon:"⊸",  desc:"One participant's action is contingent on the other's",               freq:739, hue:"#bbf7d0",
+        hook:"She waits for his signal before stepping in — her act cannot begin until his does."},
+      {id:"PTI",label:"Participative",  icon:"∈",  desc:"One participant joins or participates in the other's ongoing action",  freq:830, hue:"#d1fae5",
+        hook:"He joins the dance already in progress — stepping into an action that didn't start with him."},
     ]
   },
   level:{
@@ -474,15 +671,24 @@ const PARAMS={
     synNote:"Comparative scale. Sky-to-deep-blue spectrum. Degree relative to standard.",
     spatialAxis:"where on the scale relative to the comparison standard",
     values:[
-      {id:"MIN",label:"Minimal",          icon:"▁",desc:"At the absolute minimum — barely or negligibly present",               freq:220, hue:"#bae6fd"},
-      {id:"SBE",label:"Subequative",      icon:"▂",desc:"Below the standard but not minimally so",                             freq:261, hue:"#7dd3fc"},
-      {id:"IFR",label:"Inferior",         icon:"▃",desc:"Clearly below the standard by a noticeable degree",                   freq:293, hue:"#38bdf8"},
-      {id:"DFC",label:"Deficient",        icon:"▄",desc:"Somewhat below the standard, lacking",                                freq:329, hue:"#0ea5e9"},
-      {id:"EQU",label:"Equative",         icon:"▅",desc:"Exactly equal to the standard or norm",                               freq:392, hue:"#0284c7"},
-      {id:"SUR",label:"Surpassive",       icon:"▆",desc:"Above the standard — exceeding the norm",                             freq:440, hue:"#0369a1"},
-      {id:"SPL",label:"Superlative",      icon:"▇",desc:"The greatest of its kind within a defined set",                       freq:494, hue:"#075985"},
-      {id:"SPQ",label:"Superessive",      icon:"▓",desc:"Beyond the usual superlative — the highest possible",                  freq:523, hue:"#0c4a6e"},
-      {id:"EXC",label:"Excessive",        icon:"▉",desc:"Beyond any reasonable maximum — unreasonably or absurdly much",       freq:587, hue:"#082f49"},
+      {id:"MIN",label:"Minimal",          icon:"▁",desc:"At the absolute minimum — barely or negligibly present",               freq:220, hue:"#bae6fd",
+        hook:"A trace of salt — present only in the sense that zero would be less; just barely registering."},
+      {id:"SBE",label:"Subequative",      icon:"▂",desc:"Below the standard but not minimally so",                             freq:261, hue:"#7dd3fc",
+        hook:"'Almost as tall as average' — noticeably short of the mark, but not at the floor."},
+      {id:"IFR",label:"Inferior",         icon:"▃",desc:"Clearly below the standard by a noticeable degree",                   freq:293, hue:"#38bdf8",
+        hook:"The budget hotel: functional, but clearly below what most people would call adequate."},
+      {id:"DFC",label:"Deficient",        icon:"▄",desc:"Somewhat below the standard, lacking",                                freq:329, hue:"#0ea5e9",
+        hook:"A slightly undercooked roast — not ruined, but a bit short of where it should be."},
+      {id:"EQU",label:"Equative",         icon:"▅",desc:"Exactly equal to the standard or norm",                               freq:392, hue:"#0284c7",
+        hook:"The reference weight on the scale — neither more nor less, exactly the baseline."},
+      {id:"SUR",label:"Surpassive",       icon:"▆",desc:"Above the standard — exceeding the norm",                             freq:440, hue:"#0369a1",
+        hook:"A cake that rises perfectly above the pan — more than adequate, but not extreme."},
+      {id:"SPL",label:"Superlative",      icon:"▇",desc:"The greatest of its kind within a defined set",                       freq:494, hue:"#075985",
+        hook:"The fastest runner in the race — the top of a bounded comparison class."},
+      {id:"SPQ",label:"Superessive",      icon:"▓",desc:"Beyond the usual superlative — the highest possible",                  freq:523, hue:"#0c4a6e",
+        hook:"The record that can't be beaten — not just the best but the theoretical ceiling."},
+      {id:"EXC",label:"Excessive",        icon:"▉",desc:"Beyond any reasonable maximum — unreasonably or absurdly much",       freq:587, hue:"#082f49",
+        hook:"Salt poured until the dish is inedible — past ceiling into the absurd."},
     ]
   },
 };
@@ -1454,6 +1660,16 @@ const CASES=[
   {id:"ORT",family:"Spatio-temporal",color:"#5b21b6",label:"Orientative",desc:"Direction faced/oriented toward without reaching"},
   {id:"INT",family:"Spatio-temporal",color:"#6d28d9",label:"Intrative", desc:"Within / throughout a bounded space"},
   {id:"NAV",family:"Spatio-temporal",color:"#6d28d9",label:"Navigative",desc:"Along a path with purpose"},
+  // ── Spatio-temporal II (additional) ───────────────────────────────────
+  {id:"ATD",family:"Spatio-temporal",color:"#7c3aed",label:"Attendant",  desc:"Circumstance that accompanies or attends the main event"},
+  {id:"IRL",family:"Spatio-temporal",color:"#7c3aed",label:"Irrelative", desc:"Entity or circumstance with no relation to the main event"},
+  {id:"INV",family:"Spatio-temporal",color:"#6d28d9",label:"Involuntary",desc:"Entity affected without volition — coincidentally involved"},
+  // ── Comparative ───────────────────────────────────────────────────────
+  {id:"CNR",family:"Comparative",    color:"#0c4a6e",label:"Concessive",  desc:"Entity conceded in an adversative or 'even so' sense"},
+  {id:"ASS",family:"Comparative",    color:"#0c4a6e",label:"Assessive",   desc:"Standard of comparison in terms of quality or degree"},
+  {id:"COM",family:"Comparative",    color:"#0369a1",label:"Comparative", desc:"The entity that something is compared to or contrasted with"},
+  {id:"ELP",family:"Comparative",    color:"#0369a1",label:"Elapsive",    desc:"Period of time elapsed since a reference point"},
+  {id:"PLM",family:"Comparative",    color:"#0284c7",label:"Limitative",  desc:"The limit or boundary up to which something holds"},
 ];
 
 const DOMAIN_META={
@@ -1669,9 +1885,9 @@ const IK_ROOT={KŢ:"kţ",MŘ:"mř",ŇV:"ňv",ŽB:"žb",RŇ:"rň",VŽ:"vž",KF:"k
   ŢM:"ţm",XL:"xl",ŘK:"řk",PŘ:"př",NŢ:"nţ",KV:"kv",ŽL:"žl",RM:"rm",
   ŢV:"ţv",FL:"fl",ŇM:"ňm",LK:"lk",ŢR:"ţr"};
 const IK_CFG={UNI:"UPX",DPX:"DPX",DCT:"MSS",AGG:"MSC",SEG:"MDS",CPN:"MDS",COH:"MDC",CST:"MDC",MUL:"MDF"};
-const IK_EXT={DEL:"DEL",PRX:"PRX",DST:"DST",PXD:"DPL",ICP:"ICP",TRM:"TRM"};
-const IK_MOOD={FAC:"FAC",SUB:"SUB",ASM:"ASM",SPE:"SPE",CNT:"COU",IPT:"OPT"};
-const IK_VLD={OBS:"OBS",RCL:"REC",PUR:"PUP",RPR:"RPR",APR:"IMA",IMG:"UNV"};
+const IK_EXT={DEL:"DEL",PRX:"PRX",ICP:"ICP",ATV:"ATV",GRA:"GRA",DPL:"DPL"};
+const IK_MOOD={FAC:"FAC",SUB:"SUB",ASM:"ASM",SPC:"SPC",COU:"COU",HYP:"HYP"};
+const IK_VLD={OBS:"OBS",REC:"REC",PUP:"PUP",RPR:"RPR",USP:"USP",IMA:"IMA",CVN:"CVN",ITU:"ITU",INF:"INF"};
 const IK_ASP={RTR:"RTR",PRS:"PRS",HAB:"HAB",PRG:"PRG",IMM:"IMM",INC:"INC",TRM2:"TRM"};
 
 /* buildFormLive: tries window.IK, falls back to buildForm placeholder */
@@ -1959,6 +2175,45 @@ function YuorbTip({tipKey}){
   );
 }
 
+/* HookTip — story anecdote ⊕ button, reads .hook field from a PARAMS value */
+function HookTip({hook}){
+  const[open,setOpen]=useState(false);
+  const btnRef=useRef();
+  const[pos,setPos]=useState(null);
+  if(!hook) return null;
+
+  const toggle=(e)=>{
+    e.stopPropagation();
+    if(!open&&btnRef.current){
+      const r=btnRef.current.getBoundingClientRect();
+      setPos({top:r.bottom+6,left:Math.min(r.left,window.innerWidth-300)});
+    }
+    setOpen(o=>!o);
+  };
+
+  return(
+    <span style={{position:'relative',display:'inline-block'}}>
+      <button ref={btnRef} onClick={toggle} title="Story hook"
+        style={{background:'none',border:'1px solid var(--accent2)',borderRadius:'50%',
+          width:16,height:16,fontSize:9,cursor:'pointer',color:'var(--accent2)',
+          display:'inline-flex',alignItems:'center',justifyContent:'center',
+          verticalAlign:'middle',marginLeft:3,padding:0,opacity:.8,lineHeight:1}}>
+        ⊕
+      </button>
+      {open&&<div style={{position:'fixed',zIndex:9999,top:pos?.top||40,left:pos?.left||40,
+        width:280,background:'var(--card-bg)',border:'1px solid var(--accent2)',
+        borderRadius:8,padding:'10px 12px',boxShadow:'0 4px 20px rgba(0,0,0,.4)',fontSize:11,
+        lineHeight:1.6,color:'var(--text)'}}>
+        <div style={{fontSize:9,color:'var(--accent2)',fontWeight:700,textTransform:'uppercase',
+          letterSpacing:'.07em',marginBottom:6}}>Story Hook</div>
+        <div style={{fontStyle:'italic',color:'var(--text)'}}>{hook}</div>
+        <button onClick={toggle} style={{marginTop:8,background:'none',border:'none',
+          fontSize:10,color:'var(--muted)',cursor:'pointer',padding:0}}>close</button>
+      </div>}
+    </span>
+  );
+}
+
 /* useIthkuil — subscribes to 'ithkuil-loaded' event dispatched by ESM module */
 function useIthkuil(){
   const[state,setState]=useState(function(){
@@ -1977,47 +2232,52 @@ function useIthkuil(){
 
 /* ── LAYER 3F — REGISTER & CONTEXT DATA ─────────────────────────────────
    Real text samples in each Ithkuil register for identification drills.
-   DSV=Discursive, PTH=Pathos, MAT=Mathematical, REF=Referential, ALG=Allegoric.
+   NRR=Narrative, DSV=Discursive, PNT=Punctuative, SPF=Specificative,
+   EXM=Exemplificative, COG=Cogitative, END=Endophoric.
    ─────────────────────────────────────────────────────────────────────── */
 const REGISTER_SAMPLES=[
-  {register:'DSV',label:'Discursive',
+  {register:'NRR',label:'Narrative',
    sample:"The event unfolded as follows: the first party initiated contact, and the second responded after a measurable interval.",
-   clues:"Sequential narration, causal connectives, neutral tone, factual reporting of events in order."},
-  {register:'PTH',label:'Pathos',
-   sample:"Oh, how deeply the absence weighs — as if each breath carries the memory of what cannot return.",
-   clues:"Emotional intensity, exclamatory structure, metaphor, first-person experiential framing."},
-  {register:'MAT',label:'Mathematical',
-   sample:"For all x such that x is a member of set S, there exists a unique y satisfying the relation R(x,y).",
-   clues:"Quantifiers, formal variables, logical connectives, precise relation specification."},
-  {register:'REF',label:'Referential',
-   sample:"The blue ceramic vessel. Cylindrical. Diameter: 12cm. Mass: 340g. Location: shelf B, position 3.",
-   clues:"Noun-phrase only structure, no predicates, pure denotative labeling, no speaker stance."},
-  {register:'ALG',label:'Allegoric',
-   sample:"The river does not mourn the stones it leaves behind; it simply becomes the sea.",
-   clues:"Metaphorical vehicle, abstract meaning distinct from literal, symbolic encoding of a deeper truth."},
+   clues:"Sequential narration, causal connectives, neutral tone — default prose register for telling what happened."},
   {register:'DSV',label:'Discursive',
-   sample:"Consider the following argument: premise one establishes the condition; premise two restricts the domain; the conclusion follows necessarily.",
-   clues:"Logical scaffolding, argumentative connectives ('consider', 'follows'), structural framing."},
-  {register:'PTH',label:'Pathos',
-   sample:"I could not have known then — that moment, that voice, that light — would never come again.",
-   clues:"Retrospective emotion, fragmented phrasing, sensory detail in service of loss."},
-  {register:'MAT',label:'Mathematical',
+   sample:"So anyway, I was telling her — and she just, you know, she didn't get it at all.",
+   clues:"Casual spoken pace, fillers, interactive hedges, mid-sentence pivots — natural conversation."},
+  {register:'PNT',label:'Punctuative',
+   sample:"STOP. This is the crucial point. Everything else is secondary.",
+   clues:"Emphatic brevity, imperative-like force, drawing special attention to a single point."},
+  {register:'SPF',label:'Specificative',
+   sample:"For all x such that x is a member of set S, there exists a unique y satisfying the relation R(x,y).",
+   clues:"Quantifiers, formal variables, logical connectives, technical precision — definitions and specifications."},
+  {register:'EXM',label:'Exemplificative',
+   sample:"Consider, for example, the case of water: it exists as ice, liquid, and vapour under different conditions.",
+   clues:"'For example', 'consider the case', 'such as' — illustrating a general claim with a concrete instance."},
+  {register:'COG',label:'Cogitative',
+   sample:"Let me think… if the first premise holds, then… hmm, but what about edge cases? No, wait —",
+   clues:"Thinking aloud, self-interruption, hedged tentative reasoning — internal monologue made audible."},
+  {register:'END',label:'Endophoric',
+   sample:"As stated in section two above, and as will be demonstrated below, the conclusion follows from both.",
+   clues:"References other parts of the same text — 'as stated above', 'see below', textual cross-reference."},
+  {register:'NRR',label:'Narrative',
+   sample:"She walked through the door without a word. He didn't move. The clock continued.",
+   clues:"Past-tense storytelling, neutral third-person stance, event sequencing — default narrative prose."},
+  {register:'COG',label:'Cogitative',
+   sample:"I wonder if… no. But maybe if I approach it from the other side — actually, that won't work either.",
+   clues:"Stream-of-consciousness structure, self-correction, uncertainty markers — internal processing."},
+  {register:'SPF',label:'Specificative',
    sample:"Let f be a function from domain D to codomain C such that f is both injective and surjective.",
-   clues:"Mathematical definitions, formal 'let' declarations, domain/codomain precision."},
-  {register:'REF',label:'Referential',
-   sample:"Event: solar eclipse. Date: 2024-04-08. Duration: 4m27s. Path: 43.5°N, 79.8°W.",
-   clues:"Fact-label pairs, no evaluative content, pure indexical reference to external reality."},
-  {register:'ALG',label:'Allegoric',
-   sample:"The seed does not ask whether the soil is ready. It simply offers itself to the darkness.",
-   clues:"Personification of natural process, philosophical implication, literal action as metaphor for surrender."},
+   clues:"Mathematical definitions, 'let' declarations, formal precision — technical or scientific register."},
 ];
 
 const ILLOCUTION_SAMPLES=[
-  {illocution:'ASR',label:'Assertive',sample:"The temperature outside is 4°C.",clues:"States something as true about the world."},
-  {illocution:'DIR',label:'Directive',sample:"Please close the window before you leave.",clues:"Requests or commands action from the addressee."},
-  {illocution:'DEC',label:'Declarative',sample:"I hereby declare this session open.",clues:"Brings about a state of affairs through the act of speaking."},
-  {illocution:'EXP',label:'Expressive',sample:"I'm so glad you made it — truly.",clues:"Expresses the speaker's psychological state toward something."},
-  {illocution:'PER',label:'Performative',sample:"By the authority vested in me, I pronounce you bound by this agreement.",clues:"Performs an act (commissive/declarative) constituted by the utterance itself."},
+  {illocution:'ASR',label:'Assertive',sample:"The temperature outside is 4°C.",clues:"States something as a true proposition about the world — the default illocution for information-giving."},
+  {illocution:'DIR',label:'Directive',sample:"Please close the window before you leave.",clues:"Requests or commands action from the addressee — tries to get the hearer to do something."},
+  {illocution:'IRG',label:'Interrogative',sample:"Did she actually say that?",clues:"Asks a question seeking information — requests a verbal response from the addressee."},
+  {illocution:'ADM',label:'Admonitive',sample:"Watch out — that ledge is slippery.",clues:"Warns or cautions the addressee about a potential harm or danger."},
+  {illocution:'HOR',label:'Hortative',sample:"Let's start over and approach this calmly.",clues:"'Let us…' structure — urging shared or collective action, including the speaker."},
+  {illocution:'CNJ',label:'Conjunctive',sample:"Assuming the data is correct, the result would be X.",clues:"Asserts within a subordinate or hypothetical context — dependent clause framing."},
+  {illocution:'EXP',label:'Expressive',sample:"I'm so glad you made it — truly.",clues:"Expresses the speaker's psychological or emotional state toward something or someone."},
+  {illocution:'OPT',label:'Optative',sample:"If only it had gone differently.",clues:"Expresses a wish, hope, or desire — 'would that X were true'."},
+  {illocution:'DEC',label:'Declarative',sample:"I hereby declare this session open.",clues:"Brings about a new state of affairs through the act of speaking itself — performative speech acts."},
 ];
 
 /* ── LAYER 3C — FSRS-4.5 SPACED REPETITION ──────────────────────────── */
@@ -2186,11 +2446,11 @@ const SENTENCE_EX=[
    ]},
   {id:'s2',
    english:"If it had rained, the flowers would have bloomed. But it didn't.",
-   ithkuil:"[rain-CNT] / [flowers-THM] [bloom-CNT-SUB] // [rain-NRM-FAC-NEG]",
+   ithkuil:"[rain-COU] / [flowers-THM] [bloom-COU-SUB] // [rain-NRM-FAC-DIS]",
    questions:[
-     {q:"Which Mood encodes the counterfactual conditional?",a:"CNT",opts:["CNT","SUB","SPE","ASM"],note:"Counterfactual (CNT) asserts the speaker knows the content is contrary to fact."},
-     {q:"What Validation marks 'flowers would bloom' (unwitnessed hypothetical)?",a:"IMG",opts:["IMG","OBS","PUR","RCL"],note:"Imaginative (IMG) — not witnessed, not reported, purely hypothetical."},
-     {q:"What Bias marker on the final clause underscores the speaker's certainty of negation?",a:"NEG",opts:["NEG","DUB","SKP","EUP"],note:"Neglective (NEG) — dismisses the antecedent, reinforcing 'it definitely did not rain'."},
+     {q:"Which Mood encodes the counterfactual conditional?",a:"COU",opts:["COU","SUB","SPC","ASM"],note:"Counterfactual (COU) asserts the speaker knows the content is contrary to fact."},
+     {q:"What Validation marks 'flowers would bloom' (unwitnessed hypothetical)?",a:"IMA",opts:["IMA","OBS","PUP","REC"],note:"Imaginary (IMA) — not witnessed, not reported, purely hypothetical."},
+     {q:"What Bias marker on the final clause underscores the speaker's dismissal?",a:"DIS",opts:["DIS","DUB","SKP","EUP"],note:"Dismissive (DIS) — waves away the antecedent, reinforcing 'it definitely did not rain'."},
    ]},
   {id:'s3',
    english:"She habitually observed the scattered stars, recalling her childhood.",
@@ -2198,23 +2458,23 @@ const SENTENCE_EX=[
    questions:[
      {q:"Which Configuration applies to 'the scattered stars'?",a:"DCT",opts:["DCT","AGG","UNI","COH"],note:"Discrete (DCT) — multiple separate, spatially spread instances."},
      {q:"Which Aspect encodes 'habitually observed'?",a:"HAB",opts:["HAB","PRG","RTR","INC"],note:"Habitual (HAB) — recurring pattern of action."},
-     {q:"What Validation encodes 'recalling childhood'?",a:"RCL",opts:["RCL","OBS","PUR","IMG"],note:"Recollective (RCL) — retrieved from the speaker's own memory."},
+     {q:"What Validation encodes 'recalling childhood'?",a:"REC",opts:["REC","OBS","PUP","IMA"],note:"Recollective (REC) — retrieved from the speaker's own memory."},
    ]},
   {id:'s4',
    english:"The tool caused the structure to collapse — I inferred this from the debris.",
-   ithkuil:"[tool-INS] [cause-collapse-FAC] [structure-ABS] / [infer-APR] [debris-INS]",
+   ithkuil:"[tool-INS] [cause-collapse-FAC] [structure-ABS] / [infer-INF] [debris-INS]",
    questions:[
      {q:"What Case marks 'the tool' (the means of collapse)?",a:"INS",opts:["INS","ERG","THM","ABS"],note:"Instrumental (INS) — a non-volitional means or instrument."},
-     {q:"What Validation encodes 'inferred from the debris'?",a:"APR",opts:["APR","OBS","RCL","IMG"],note:"Apprehensive (APR) — reasoned from indirect physical evidence."},
+     {q:"What Validation encodes 'inferred from the debris'?",a:"INF",opts:["INF","OBS","REC","IMA"],note:"Inferential (INF) — reasoned from indirect physical evidence."},
      {q:"What Case marks 'the structure' (entity whose state changes)?",a:"ABS",opts:["ABS","THM","ERG","INS"],note:"Absolutive (ABS) here — structure's existence/presence in collapsed state is asserted."},
    ]},
   ,{id:'s5',
    english:"The scientist assumed she had observed the phenomenon, but her colleague doubted it.",
    ithkuil:"[scientist-ERG] [observe-ASM-OBS] [phenomenon-THM] // [colleague-ERG] [doubt-FAC-DUB-bias] [this-THM]",
    questions:[
-     {q:"Which Mood encodes 'assumed she had observed'?",a:"ASM",opts:["ASM","FAC","SPE","CNT"],note:"Assumptive (ASM) — the scientist takes it as given without full certainty."},
-     {q:"Which Validation encodes 'the colleague doubted'?",a:"OBS",opts:["OBS","RCL","PUR","IMG"],note:"The colleague's doubt is based on their own direct assessment — still OBS for the doubting act itself."},
-     {q:"Which Bias encodes 'doubted'?",a:"DUB",opts:["DUB","SKP","NEG","TEN"],note:"Dubitative (DUB) — expressing genuine doubt about the truth of the content."},
+     {q:"Which Mood encodes 'assumed she had observed'?",a:"ASM",opts:["ASM","FAC","SPC","COU"],note:"Assumptive (ASM) — the scientist takes it as given without full certainty."},
+     {q:"Which Validation encodes 'the colleague doubted'?",a:"OBS",opts:["OBS","REC","PUP","IMA"],note:"The colleague's doubt is based on their own direct assessment — still OBS for the doubting act itself."},
+     {q:"Which Bias encodes 'doubted'?",a:"DUB",opts:["DUB","SKP","DIS","EXA"],note:"Dubitative (DUB) — expressing genuine doubt about the truth of the content."},
    ]},
   {id:'s6',
    english:"Every tool, without exception, was used. The entire structure collapsed as a result.",
@@ -2228,8 +2488,8 @@ const SENTENCE_EX=[
    english:"She recalled a childhood memory — not vividly, but as something hazy and partial.",
    ithkuil:"[she-M] [recall-RCL-PRG] [memory-UNI-PRX-THM] // [hazy-MAN] [partial-MAN]",
    questions:[
-     {q:"Which Validation marks 'recalled a memory'?",a:"RCL",opts:["RCL","OBS","IMG","PUR"],note:"Recollective (RCL) — retrieved from personal memory."},
-     {q:"'Not vividly, but hazy and partial' — which Extension best captures a partial memory?",a:"PRX",opts:["PRX","DEL","ICP","TRM"],note:"Proximal (PRX) — only the near/partial portion, not the full extent."},
+     {q:"Which Validation marks 'recalled a memory'?",a:"REC",opts:["REC","OBS","IMA","PUP"],note:"Recollective (REC) — retrieved from personal memory."},
+     {q:"'Not vividly, but hazy and partial' — which Extension best captures a partial memory?",a:"PRX",opts:["PRX","DEL","ICP","ATV"],note:"Proximal (PRX) — only the near/partial portion, not the full extent."},
      {q:"What Aspect encodes an ongoing act of recollection at speech time?",a:"PRG",opts:["PRG","HAB","RTR","IMM"],note:"Progressive (PRG) — the recollection is happening now, not habitually."},
    ]}
 ];
@@ -2673,9 +2933,9 @@ const CLASH_PAIRS=[
    expl:"INS: non-volitional means/instrument. ERG: volitional causal agent. Volitionality is the key distinction."},
   {id:"c6",title:"Observational vs Recollective Validation",difficulty:3,
    A:{scenario:"You report what you are directly witnessing right now with your own eyes.",target:{validation:"OBS"}},
-   B:{scenario:"You report what you clearly remember having witnessed in the past.",target:{validation:"RCL"}},
+   B:{scenario:"You report what you clearly remember having witnessed in the past.",target:{validation:"REC"}},
    diffParam:"validation",
-   expl:"OBS: current direct perception. RCL: past perception accessed through memory. Both are first-person, but one is present and one is recalled."},
+   expl:"OBS: current direct perception. REC: past perception accessed through memory. Both are first-person, but one is present and one is recalled."},
 ];
 
 /* --- 8.3 ABSTRACTION LADDER ----------------------------------------- */
@@ -2683,14 +2943,14 @@ const ABST_LADDERS=[
   {id:"al1",root:"KŢ",rootName:"Cognition",
    rungs:[
      {perspective:"M",  desc:"This specific instance of thinking happening right now in this person's mind.",      scenario:"Ahmad is currently working through a logic puzzle."},
-     {perspective:"P",  desc:"These instances of thinking — the various cognitive processes occurring in this study group.",scenario:"The study group is thinking through the problem."},
+     {perspective:"G",  desc:"These instances of thinking — the various cognitive processes occurring in this study group.",scenario:"The study group is thinking through the problem."},
      {perspective:"N",  desc:"The category 'thinking' — the type of mental activity, as a kind of thing that minds do.",   scenario:"Thinking is what distinguishes conscious beings."},
      {perspective:"A",  desc:"Cogitation as pure abstract property — the essence of what it means to think, untethered from any thinker.",scenario:"Pure cognition, as a formal structure."},
    ]},
   {id:"al2",root:"VŽ",rootName:"Social Bond",
    rungs:[
      {perspective:"M",  desc:"This specific friendship between these two people.",scenario:"Maya and Jin's friendship."},
-     {perspective:"P",  desc:"These friendships in this social network.",scenario:"The friendships in this community."},
+     {perspective:"G",  desc:"These friendships in this social network.",scenario:"The friendships in this community."},
      {perspective:"N",  desc:"Friendship as a category of social bond.",scenario:"Friendship is a form of social attachment."},
      {perspective:"A",  desc:"The pure property of inter-personal connectedness.",scenario:"Social bonding as abstract relational structure."},
    ]},
@@ -2699,13 +2959,13 @@ const ABST_LADDERS=[
 /* --- 8.4 BIAS ENCODER ----------------------------------------------- */
 const BIAS_EXERCISES=[
   {id:"b1",title:"Unexpected Success",scenario:"Your rival has just won an award you were sure they didn't deserve, and you can barely contain your surprise and mild annoyance.",
-   target:"EUP",alt:["DUB","CYN","SKP"],expl:"Euphoric: delight/elation (sarcastic here). But CYN (cynical) or DUB (dubitative) also fit. The key: euphoric encodes the surprise-mixed-with-ironic-positivity best here."},
+   target:"EUP",alt:["DUB","IRO","SKP"],expl:"Euphoric: delight/elation (sarcastic here). But IRO (ironic) or DUB (dubitative) also fit. The key: euphoric encodes the surprise-mixed-with-ironic-positivity best here."},
   {id:"b2",title:"Questionable Report",scenario:"Someone tells you that the meeting was cancelled, but you have serious doubts about whether that's true.",
-   target:"DUB",alt:["SKP","TEN","APR"],expl:"Dubitative: expressing active doubt about the specific content of this claim."},
+   target:"DUB",alt:["SKP","CTV","RFL"],expl:"Dubitative: expressing active doubt about the specific content of this claim."},
   {id:"b3",title:"Frustrated Repetition",scenario:"You are explaining something for the fourth time to someone who keeps not understanding, and your exasperation is palpable.",
-   target:"EXA",alt:["CTM","NEG","CYN"],expl:"Exasperative: frustrated/irritated iteration. CTM (contempt) would imply disdain for the person; EXA is directed at the situation."},
+   target:"EXA",alt:["CTP","DIS","VEX"],expl:"Exasperative: frustrated/irritated iteration. CTP (contemptive) would imply disdain for the person; EXA is directed at the situation."},
   {id:"b4",title:"Softened Criticism",scenario:"You need to point out someone's error but want to do so in a way that softens the impact.",
-   target:"EUH",alt:["COR","TEN","DUB"],expl:"Euphemistic: intentionally softening/hedging the expression to cushion its impact. COR (corrective) is blunter; EUH adds the softening layer."},
+   target:"EUH",alt:["CRR","DFD","DUB"],expl:"Euphemistic: intentionally softening/hedging the expression to cushion its impact. CRR (corrective) is blunter; EUH adds the softening layer."},
 ];
 
 /* --- 8.5 CASE CHAIN (narrative NP assignment) ----------------------- */
@@ -2998,15 +3258,15 @@ function PerspectiveSorter({synOn}){
     <div className="flex-col gap10">
       <div className="card" style={{borderColor:'#7c3aed44',marginBottom:4}}>
         <p style={{fontSize:11,color:'var(--muted)',lineHeight:1.7}}>
-          Each scenario below encodes a different <Term word="perspective">Perspective</Term>. Assign M (Monadic), P (Polyadic), N (<Term word="noumenal">Noumenal</Term>), or A (Abstract) to each.
-          <span style={{marginLeft:8,fontSize:10,color:'var(--muted)'}}>Monadic = one specific instance · Polyadic = a set · Noumenal = the type · Abstract = the pure property</span>
+          Each scenario below encodes a different <Term word="perspective">Perspective</Term>. Assign M (Monadic), G (Agglomerative), N (<Term word="noumenal">Noumenal</Term>), or A (Abstract) to each.
+          <span style={{marginLeft:8,fontSize:10,color:'var(--muted)'}}>Monadic = one specific instance · Agglomerative = a set · Noumenal = the type · Abstract = the pure property</span>
         </p>
       </div>
       {shuffled.map((sc,i)=>(
         <div key={i} className="card2" style={{borderColor:submitted?(assignments[i]===sc.target?'#22c55e44':'#ef444444'):'var(--border)'}}>
           <p style={{fontSize:12,lineHeight:1.7,marginBottom:8,color:'var(--text)'}}>{sc.text}</p>
           <div style={{display:'flex',gap:4,flexWrap:'wrap'}}>
-            {['M','P','N','A'].map(opt=>{
+            {['M','G','N','A'].map(opt=>{
               const correct=submitted&&opt===sc.target;
               const wrong=submitted&&assignments[i]===opt&&opt!==sc.target;
               return<button key={opt} onClick={()=>assign(i,opt)}
@@ -3034,11 +3294,13 @@ function PerspectiveSorter({synOn}){
 /* --- 8.12 VALIDATION CHAIN ------------------------------------------ */
 const VAL_SCENARIOS=[
   {stance:"You watched the fire start with your own eyes two minutes ago.",target:"OBS",hint:"Present direct perception"},
-  {stance:"You clearly remember seeing the accident last Tuesday.",target:"RCL",hint:"Past personal perception accessed through memory"},
-  {stance:"Someone who was there told you about the meeting.",target:"PUR",hint:"Hearsay — indirect, unnamed source"},
+  {stance:"You clearly remember seeing the accident last Tuesday.",target:"REC",hint:"Past personal perception accessed through memory"},
+  {stance:"Someone who was there told you about the meeting.",target:"PUP",hint:"Hearsay — indirect, unnamed source"},
   {stance:"The newspaper reported that the bill was passed.",target:"RPR",hint:"Named/known external source"},
-  {stance:"The wet streets strongly suggest it rained last night.",target:"APR",hint:"Inference from indirect evidence"},
-  {stance:"You are imagining how the conversation might have gone.",target:"IMG",hint:"Speculative or imagined content"},
+  {stance:"The wet streets strongly suggest it rained last night.",target:"INF",hint:"Inference from indirect evidence"},
+  {stance:"You are imagining how the conversation might have gone.",target:"IMA",hint:"Speculative or imagined content"},
+  {stance:"You feel in your gut that something is wrong, though you can't explain why.",target:"ITU",hint:"Intuition — felt but not reasoned"},
+  {stance:"'A bachelor is by definition unmarried' — truth by convention.",target:"CVN",hint:"Conventional or definitional truth"},
 ];
 function ValidationChain({synOn}){
   const[idx,setIdx]=useState(0);
@@ -3199,7 +3461,7 @@ const _q=(question,correct,wrongs,lbl=o=>o.label)=>({
 
 const SLOT_MAP={configuration:'Ca',affiliation:'Ca',perspective:'Ca',extension:'Ca',essence:'Ca',
   specification:'Vr',function:'Vr',mood:'Vn',validation:'Vn',aspect:'Vn',case:'Vc',bias:'Cb'};
-const EXT_ORDER=['PRX','ICP','DEL','TRM','DST','PXD'];
+const EXT_ORDER=['PRX','ICP','DEL','ATV','GRA','DPL'];
 const ASP_ORDER=['INC','PRG','ICS','HAB','IMM','CSS','TRM2','PAU','RSM','RGR','PCL','RTR','PRS','SMM','EXP'];
 const CFG_ORDER=['UNI','DPX','DCT','AGG','SEG','CPN','COH','CST','MUL'];
 
@@ -3213,38 +3475,78 @@ const CFG_SCENARIOS={UNI:["a single apple","one specific instance","this particu
   CST:["a mixture of different types joined","heterogeneous elements combined","mixed composition"],
   MUL:["a random assortment","an irregular jumble","miscellaneous collection with no unifying logic"]};
 const PER_SCENARIOS={M:["this specific dog","one particular bounded instance","that very chair"],
-  P:["these dogs (a set)","multiple specific instances","a plurality of them"],
+  G:["these dogs (a set)","multiple specific instances","a plurality of them"],
   N:["the category 'dog' itself","doghood as a type","the kind, not any instance"],
   A:["the abstract property of dog-ness","pure dogness as an abstraction","the essence, not any instantiation"]};
 const VAL_SRC={OBS:["I witnessed it directly","I saw it happen","firsthand observation"],
-  RCL:["I remember it","recalled from memory","retrieved from recollection"],
-  PUR:["I heard it was so","someone told me","based on hearsay"],
+  REC:["I remember it clearly","recalled from personal memory","retrieved from recollection"],
+  PUP:["I heard it was so","someone told me","based on hearsay from an unspecified source"],
   RPR:["a named source claimed this","explicit attribution to a known party","citing a known source"],
-  APR:["I inferred it from clues","reasoned from indirect evidence","concluded from indirect signs"],
-  IMG:["purely imagined","I'm speculating hypothetically","not grounded in any evidence"]};
-const BIAS_CTX={EUP:["expressing pure delight","with elation and joy","positive emotional overflow"],
-  EUH:["softening the statement","gently hedging","making it sound less harsh"],
-  COR:["correcting a prior statement","revising what was said","saying 'actually it was…'"],
-  DUB:["expressing serious doubt","casting doubt on the claim","questioning whether it's true"],
-  TEN:["hesitating before stating","tentatively putting forward","uncertain and hesitant"],
-  NEG:["dismissing as unimportant","minimizing significance","brushing it aside"],
-  SKP:["openly skeptical","doubting the premise entirely","questioning the basis"],
-  CYN:["with irony or cynicism","sarcastically","seeing through the pretense"],
-  CTM:["with clear contempt","expressing disdain","looking down on it"],
-  EXA:["frustrated and exasperated","fed up","barely containing frustration"],
-  SGS:["gently hinting","offering a subtle suggestion","nudging without asserting"],
-  ANN:["completely baffled","utterly stupefied","at a loss to explain"],
-  REV:["having a sudden realization","as if seeing it for the first time","a flash of insight"],
-  GRT:["expressing warm gratitude","thankful and appreciative","heartfelt thanks"],
-  SOL:["beseeching or pleading","earnestly imploring","asking with urgent sincerity"],
-  STU:["struck with wonder","completely amazed","in awestruck disbelief"],
-  FOR:["pleasantly surprised by luck","delighted by an unexpected turn","noting happy coincidence"],
-  DLC:["savoring with delight","expressing delicious pleasure","relishing the experience"],
-  IPT:["impatiently urging","expressing urgent need","barely able to wait"],
-  DSP:["expressing hopelessness","in deep despair","seeing no way forward"],
-  ANT:["eagerly anticipating","looking forward with excitement","full of anticipation"],
-  OPT:["wishing it were so","expressing a heartfelt desire","longing for something"],
-  RPT:["firmly rejecting","flatly repudiating","refusing to accept"]};
+  USP:["the evidence type is deliberately unspecified","leaving the epistemic source open","unspecified evidential basis"],
+  IMA:["purely imagined","I'm speculating hypothetically","not grounded in any evidence — fictional"],
+  CVN:["this is definitionally true","true by convention or agreement","a stipulated or conventional fact"],
+  ITU:["my gut tells me","based on intuition alone","felt rather than known"],
+  INF:["I inferred it from clues","reasoned from indirect evidence","concluded from indirect signs"]};
+const BIAS_CTX={
+  ACC:["speaker indicates this was accidental","expressing that no one meant this","noting the unintentional nature"],
+  ACH:["framing this as the archetypal case","marking it as the textbook example","treating it as quintessential"],
+  ADS:["reluctantly conceding","making a grudging admission","saying 'fine, I'll admit…'"],
+  ANN:["making a formal announcement","proclaiming to an audience","formally declaring"],
+  ANP:["eagerly anticipating","expressing forward-leaning excitement","barely able to wait"],
+  APB:["expressing approval","endorsing the statement","conveying 'well done'"],
+  APH:["with worried anticipation","nervously hoping for the best","expressing dread-tinged outlook"],
+  ARB:["noting the arbitrary choice","saying 'I just picked one'","deflating the significance of the decision"],
+  ATE:["demanding full attention","highlighting the detail","saying 'listen carefully'"],
+  CMD:["framing it as humorous","signaling comedic intent","marking the punchline"],
+  CNV:["asserting it contentiously","insisting on the point","prepared to argue for it"],
+  COI:["noting an unexpected coincidence","expressing 'what a coincidence!'","marking the lucky accident"],
+  CRR:["correcting a prior statement","saying 'actually, I meant…'","revising what was said"],
+  CTP:["expressing contempt","conveying disdain","looking down on it"],
+  CTV:["musing or contemplating","trailing off into thought","reflecting rather than asserting"],
+  DCC:["expressing being disconcerted","unsettled by reality not matching expectations","'that's not what I expected'"],
+  DEJ:["with dejection","expressing sad disappointment","grammaticalized resignation"],
+  DES:["in desperation","pleading with urgent urgency","'please, I'm begging you'"],
+  DFD:["speaking diffidently","saying 'maybe I'm wrong but…'","lacking confidence in the claim"],
+  DIS:["dismissing or minimizing","waving away significance","'meh' encoded grammatically"],
+  DLC:["savoring with delight","relishing the experience","expressing delicious pleasure"],
+  DOL:["expressing grief or sorrow","with a catch in the voice","doleful and sad"],
+  DPB:["expressing disapproval","marking censure","'I am not pleased' without those words"],
+  DRS:["being derisive","mockingly dismissive","the eye-roll in language"],
+  DUB:["expressing doubt","casting skepticism on the content","'yeah sure' in the skeptical sense"],
+  EUH:["softening the expression","speaking euphemistically","cushioning the impact"],
+  EUP:["with intense delight","expressing euphoria","pure joy overflow"],
+  EXA:["with frustration or exasperation","'again?! AGAIN?!'","barely containing irritation"],
+  EXG:["signaling urgency","turning the request into an emergency","'this is urgent' as grammar"],
+  FOR:["noting happy coincidence","'lucky me!' energy","delighted by unearned good fortune"],
+  FSC:["expressing fascination","genuine intellectual captivation","'fascinating!'"],
+  GRT:["expressing gratitude","heartfelt appreciation","'thank you' embedded in the verb"],
+  IDG:["expressing indignation","moral outrage","'how dare they' as suffix"],
+  IFT:["with infatuation","unreasonably enchanted","rose-tinted glasses sewn into grammar"],
+  IPL:["implying without stating","the meaningful pause","flagging that more is meant than said"],
+  IPT:["impatiently","eager to cut to the point","the grammatical tapping of the foot"],
+  IRO:["being ironic","meaning the opposite","'oh brilliant' said of a disaster"],
+  ISP:["finding it dull","tediously unremarkable","the stifled yawn built into the word"],
+  IVD:["with envy","resentfully covetous","'must be nice' with an edge"],
+  MAN:["insisting it is mandatory","non-negotiable","'this is not optional' as morphology"],
+  MNF:["pleased to reveal","pride of revelation","the magician pulling back the cloth"],
+  OPT:["expressing a wish","'if only…' as grammar","longing for something"],
+  PES:["pessimistically","'knowing my luck…'","expecting the worst outcome"],
+  PPT:["noting favorable omens","auspiciously","'the stars are aligned' as grammar"],
+  PPX:["perplexed or confused","'wait, what?' as morpheme","genuine puzzlement"],
+  PSC:["treating it as mundane","'just another Tuesday'","deflating what others might find exciting"],
+  PSM:["presuming it is understood","'obviously' as morphology","treating the assumption as shared ground"],
+  RAC:["reacting emotionally","immediate 'whoa!'","reflex emotional response grammaticalized"],
+  RFL:["reflectively reconsidering","'now that I think about it…'","retrospective self-examination"],
+  RSG:["resigned or wearily accepting","'whatever, fine'","the grammatical sigh of someone who stopped fighting"],
+  RPU:["with repulsion","'ugh' embedded in morphology","disgust coloring the whole utterance"],
+  RVL:["revealing something surprising","the 'aha!' moment as grammar","a disclosure that reorders understanding"],
+  SAT:["fully satisfied","contentedly fulfilled","satiation as a morphological mood"],
+  SGS:["gently hinting","offering a subtle suggestion","a nudge, not a push"],
+  SKP:["openly skeptical","'I'll believe it when I see it' as morphology","the raised eyebrow encoded in grammar"],
+  SOL:["earnestly beseeching","'please, I'm asking you' from the knees","grammaticalized supplication"],
+  STU:["in awestruck wonder","'I can't believe it' as suffix","jaw-dropping amazement"],
+  TRP:["with trepidation","the held breath before the announcement","dread-tinged anticipation"],
+  VEX:["vexed or irritated","'this is getting on my nerves' without those words","the grammatical encoding of mild fury"]};
 const ASP_TMP={RTR:["completed — speaker looks back","action is in the past","retrospective"],
   PRS:["anticipating a future event","prospective — yet to come","future-oriented"],
   HAB:["a recurring pattern","habitually — regularly repeating","ongoing pattern"],
@@ -3263,9 +3565,9 @@ const ASP_TMP={RTR:["completed — speaker looks back","action is in the past","
 const MOOD_IMP={FAC:"Speaker asserts this as fact.",
   SUB:"Speaker presents this as contingent or hypothetical.",
   ASM:"Speaker assumes this without full certainty.",
-  SPE:"Speaker is speculating — may or may not be true.",
-  CNT:"Speaker knows this is contrary to actual fact.",
-  IPT:"Speaker is issuing a directive or command."};
+  SPC:"Speaker is speculating — possibility acknowledged, no commitment.",
+  COU:"Speaker knows this is contrary to actual fact.",
+  HYP:"Speaker is reasoning in a purely hypothetical frame."};
 const CASE_SCN={
   // Transrelative
   THM:["primary patient of the action","thing whose state changes","acted upon"],
@@ -3332,17 +3634,33 @@ const CASE_SCN={
   EVT:["upon the occurrence of","contingent on which event","when this event happens"],
   PCV:["subsequent to which","after which event","following which occurrence"],
   PCR:["prior to which","before which event","in anticipation of which"],
+  // Spatio-temporal II
+  ATD:["coincidental circumstance attending the event","happening alongside without direct relation","the incidental circumstance"],
+  IRL:["entity having no relation to the event","the irrelevant bystander","something coincidentally present but uninvolved"],
+  INV:["involuntarily involved","coincidentally caught up in the action","non-volitional participant"],
+  // Comparative
+  CNR:["the conceded circumstance — 'even so'","what is granted despite the main claim","the adversative exception"],
+  ASS:["standard of quality comparison","the benchmark for assessment","what it is evaluated against"],
+  COM:["the thing being compared to","point of comparison or contrast","measured against which"],
+  ELP:["elapsed time since the reference point","how long ago / since which","the span of time passed"],
+  PLM:["the limit or ceiling of applicability","up to which point","the boundary at which it stops holding"],
 };
-const REGISTERS={DSV:{label:"Discursive",desc:"Narrative or expository prose"},
-  PTH:{label:"Pathos",desc:"Emotional or poetic expression"},
-  MAT:{label:"Mathematical",desc:"Formal precision/technical mode"},
-  REF:{label:"Referential",desc:"Pure denotative reference"},
-  ALG:{label:"Allegoric",desc:"Metaphorical or symbolic usage"}};
-const ILLOCUTIONS={ASR:{label:"Assertive",desc:"Stating something as true"},
-  DIR:{label:"Directive",desc:"Requesting or commanding action"},
-  DEC:{label:"Declarative",desc:"Bringing about a state through speech"},
-  EXP:{label:"Expressive",desc:"Expressing speaker's psychological state"},
-  PER:{label:"Performative",desc:"Performing an act through the utterance"}};
+const REGISTERS={NRR:{label:"Narrative",desc:"General default discourse — narrative prose and normal speech"},
+  DSV:{label:"Discursive",desc:"Spoken conversational register — casual, interactive discourse"},
+  PNT:{label:"Punctuative",desc:"Pointed or emphatic register — drawing special attention"},
+  SPF:{label:"Specificative",desc:"Technical/precise register — formal definitions and specifications"},
+  EXM:{label:"Exemplificative",desc:"Giving examples — illustrating a general point with a specific case"},
+  COG:{label:"Cogitative",desc:"Thinking aloud — internal monologue, stream of consciousness"},
+  END:{label:"Endophoric",desc:"Self-referential — referring to other content within the same text"}};
+const ILLOCUTIONS={ASR:{label:"Assertive",desc:"Stating something as true — the default illocution for factual claims"},
+  DIR:{label:"Directive",desc:"Requesting, commanding, or ordering the addressee to act"},
+  IRG:{label:"Interrogative",desc:"Asking a question — seeking information from the addressee"},
+  ADM:{label:"Admonitive",desc:"Warning or cautioning — alerting the addressee to potential harm"},
+  HOR:{label:"Hortative",desc:"Urging collective action — 'let us do X together'"},
+  CNJ:{label:"Conjunctive",desc:"Asserting in a subordinate or hypothetical context"},
+  EXP:{label:"Expressive",desc:"Expressing the speaker's psychological or emotional state"},
+  OPT:{label:"Optative",desc:"Expressing a wish, hope, or desire for something to occur"},
+  DEC:{label:"Declarative",desc:"Bringing about a new state of affairs through the very act of speaking"}};
 const PHON_EX=[{form:"kţalö",slots:{Cr:"kţ",Vr:"a",Ca:"l",Vc:"ö"},desc:"Uniplex thematic"},
   {form:"kţamřâ",slots:{Cr:"kţ",Vr:"a",Ca:"mř",Vc:"â"},desc:"Uniplex instrumental"},
   {form:"rmela",slots:{Cr:"rm",Vr:"e",Ca:"l",Vc:"a"},desc:"Value root thematic"},
@@ -3689,7 +4007,7 @@ const PUZZLE_REGISTRY={
       {q:"Action is currently in progress",phase:null,asp:"PRG",note:"PRG (Progressive Aspect) — ongoing at speech time"},
       {q:"Action recurs irregularly over a long span",phase:"RCT",asp:null,note:"RCT (Recurrent Phase) — irregular long-term recurrence"},
       {q:"Action is viewed as complete from speech time",phase:null,asp:"RTR",note:"RTR (Retrospective Aspect) — completed, viewed from after"},
-      {q:"Action happens rhythmically back and forth",phase:"OSC",asp:null,note:"OSC (Oscillative Phase) — rhythmic alternation"},
+      {q:"Action alternates back and forth between two states",phase:"VAC",asp:null,note:"VAC (Vacillative Phase) — rhythmic back-and-forth alternation"},
       {q:"Action is about to begin",phase:null,asp:"IMM",note:"IMM (Imminent Aspect) — impending onset"},
       {q:"Action occurs in fragmented bursts",phase:"FRG",asp:null,note:"FRG (Fragmentative Phase) — broken incomplete bursts"},
       {q:"Action is just ending now",phase:null,asp:"TRM2",note:"TRM2 (Terminative Aspect) — just ceasing"},
@@ -3706,7 +4024,7 @@ const PUZZLE_REGISTRY={
       {id:"PCT",label:"Punctual (single instant)"},
       {id:"ITR",label:"Iterative (several times)"},
       {id:"RCT",label:"Recurrent (irregular recurrence)"},
-      {id:"FRQ",label:"Frequentative (very high density)"},
+      {id:"FRE",label:"Frequentative (very high density)"},
     ];return {items:_shuf(ordered),correct:ordered.map(o=>o.id),prompt:"Sort these Phases from fewest to most occurrences:",note:"Punctual < Iterative < Recurrent < Frequentative"};}},
 
   // ── CONTEXT ───────────────────────────────────────────────────────────────
@@ -3826,9 +4144,9 @@ const PUZZLE_REGISTRY={
   minimal_pair:{label:"English Minimal Pair",cat:"Discrimination",module:5,phase:2,engine:'MCQ',
     generate:()=>{const pairs=[
       {q:"\"the dog\" vs \"dogs in general\"",pk:"perspective",a:"M",b:"N"},
-      {q:"\"these dogs\" vs \"dogkind\"",pk:"perspective",a:"P",b:"N"},
+      {q:"\"these dogs (a set)\" vs \"dogkind\"",pk:"perspective",a:"G",b:"N"},
       {q:"\"doing it\" vs \"having done it\"",pk:"aspect",a:"PRG",b:"RTR"},
-      {q:"\"I saw it\" vs \"I heard it was so\"",pk:"validation",a:"OBS",b:"PUR"},
+      {q:"\"I saw it\" vs \"I heard it was so\"",pk:"validation",a:"OBS",b:"PUP"},
       {q:"\"I assert\" vs \"I assume\"",pk:"mood",a:"FAC",b:"ASM"},
       {q:"\"a cluster\" vs \"a single one\"",pk:"configuration",a:"AGG",b:"UNI"},
       {q:"\"the actual thing\" vs \"the representative type\"",pk:"essence",a:"NRM",b:"RPV"},
@@ -3922,7 +4240,7 @@ const PUZZLE_REGISTRY={
 
   // ── COMPRESSION ───────────────────────────────────────────────────────────
   compress_single:{label:"Best Single Encoding",cat:"Compression",module:10,phase:3,engine:'MCQ',
-    generate:()=>{const examples=[{en:"the specific dog I'm looking at",pk:"perspective",a:"M"},{en:"dogs as a category/type",pk:"perspective",a:"N"},{en:"a cluster of joined similar items",pk:"configuration",a:"AGG"},{en:"I directly witnessed this",pk:"validation",a:"OBS"},{en:"a machine with differentiated parts",pk:"configuration",a:"CPN"},{en:"the very beginning of the action",pk:"aspect",a:"INC"},{en:"I'm speculating — may or may not be true",pk:"mood",a:"SPE"},{en:"the material/substance of the thing",pk:"specification",a:"CTE"}];const ex=_s(examples);const p=PARAMS[ex.pk];const correct=p.values.find(v=>v.id===ex.a);if(!correct)return PUZZLE_REGISTRY.compress_single.generate();return _q(`Best Ithkuil encoding for: "${ex.en}"?`,correct,_dist(correct,p.values),o=>`${o.label}: ${o.desc}`);}},
+    generate:()=>{const examples=[{en:"the specific dog I'm looking at",pk:"perspective",a:"M"},{en:"dogs as a category/type",pk:"perspective",a:"N"},{en:"a cluster of joined similar items",pk:"configuration",a:"AGG"},{en:"I directly witnessed this",pk:"validation",a:"OBS"},{en:"a machine with differentiated parts",pk:"configuration",a:"CPN"},{en:"the very beginning of the action",pk:"aspect",a:"INC"},{en:"I'm speculating — may or may not be true",pk:"mood",a:"SPC"},{en:"the material/substance of the thing",pk:"specification",a:"CTE"}];const ex=_s(examples);const p=PARAMS[ex.pk];const correct=p.values.find(v=>v.id===ex.a);if(!correct)return PUZZLE_REGISTRY.compress_single.generate();return _q(`Best Ithkuil encoding for: "${ex.en}"?`,correct,_dist(correct,p.values),o=>`${o.label}: ${o.desc}`);}},
   compress_combo:{label:"Maximum Compression",cat:"Compression",module:10,phase:3,engine:'MCQ',
     generate:()=>{const examples=[{en:"Multiple scattered dogs I'm directly watching",best:"DCT + OBS",opts:["DCT + OBS","AGG + PUR","UNI + RCL","MUL + ASM"]},{en:"The habitual action I'm imagining hypothetically",best:"HAB + SPE",opts:["HAB + SPE","PRG + FAC","RTR + OBS","IMM + CNT"]},{en:"The normative ideal imagined type",best:"RPV + IMG",opts:["RPV + IMG","NRM + OBS","RPV + OBS","NRM + IMG"]},{en:"A unified whole whose existence is simply asserted",best:"COH + ABS",opts:["COH + ABS","COH + ERG","AGG + THM","MUL + ABS"]}];const ex=_s(examples);const opts=_shuf(ex.opts).map((o,i)=>({id:String(i),label:o,correct:o===ex.best}));return {question:`Most compressed encoding for: "${ex.en}"`,options:opts,answer:opts.find(o=>o.correct)?.id};}},
   affix_degree:{label:"Affix Degree",cat:"Compression",module:10,phase:3,engine:'MCQ',
@@ -3978,9 +4296,9 @@ const PUZZLE_REGISTRY={
   sort_cfg:{label:"Order Configs by Complexity",cat:"Sort",module:2,phase:1,engine:'SORT',
     generate:()=>{const s=_pick(CFG_ORDER,5).sort((a,b)=>CFG_ORDER.indexOf(a)-CFG_ORDER.indexOf(b));return {items:_shuf(s).map(id=>({id,label:PARAMS.configuration.values.find(v=>v.id===id)?.label||id})),correct:s,prompt:"Order from least to most structurally complex:"};}},
   sort_per:{label:"Order Perspectives by Abstraction",cat:"Sort",module:2,phase:1,engine:'SORT',
-    generate:()=>{const s=['M','P','N','A'];return {items:_shuf(s).map(id=>({id,label:PARAMS.perspective.values.find(v=>v.id===id)?.label||id})),correct:s,prompt:"Order from most concrete/particular to most abstract:"};}},
+    generate:()=>{const s=['M','G','N','A'];return {items:_shuf(s).map(id=>({id,label:PARAMS.perspective.values.find(v=>v.id===id)?.label||id})),correct:s,prompt:"Order from most concrete/particular to most abstract:"};}},
   sort_bias:{label:"Order Bias by Positivity",cat:"Sort",module:7,phase:2,engine:'SORT',
-    generate:()=>{const s=['EUP','EUH','TEN','DUB','NEG','SKP','CYN','CTM'];const sub=_pick(s,5).sort((a,b)=>s.indexOf(a)-s.indexOf(b));return {items:_shuf(sub).map(id=>({id,label:PARAMS.bias.values.find(v=>v.id===id)?.label||id})),correct:sub,prompt:"Order from most positive/euphoric to most negative:"};}},
+    generate:()=>{const s=['EUP','EUH','APB','ANP','DUB','SKP','EXA','CTP','DPB','RPU'];const sub=_pick(s,5).sort((a,b)=>s.indexOf(a)-s.indexOf(b));return {items:_shuf(sub).map(id=>({id,label:PARAMS.bias.values.find(v=>v.id===id)?.label||id})),correct:sub,prompt:"Order from most positive/euphoric to most negative:"};}},
 
   // ── SPEED ─────────────────────────────────────────────────────────────────
   speed_any:{label:"Speed: Any Parameter",cat:"Speed",module:11,phase:4,engine:'SPEED',
@@ -4170,7 +4488,8 @@ function MCQEngine({def,onScore,synOn,lm,headerSlot,tipKey}){
                 <span style={{width:14,height:14,borderRadius:'50%',border:`2px solid ${border}`,flexShrink:0,display:'inline-flex',alignItems:'center',justifyContent:'center',fontSize:8}}>
                   {done&&o.correct?'✓':o.id===sel&&!done?'●':''}
                 </span>
-                {o.label}
+                <span style={{flex:1}}>{o.label}</span>
+                {done&&o.correct&&<HookTip hook={def.paramKey?PARAMS[def.paramKey]?.values.find(v=>v.id===o.id)?.hook:null}/>}
               </div>
             );
           })}
@@ -4409,7 +4728,7 @@ function BuildEngine({def,onScore,headerSlot,tipKey}){
                     background:isCorrect?'rgba(34,197,94,.15)':isWrong?'rgba(239,68,68,.1)':isSel?'rgba(67,56,202,.2)':'var(--surface)',
                     border:`1px solid ${isCorrect?'#22c55e66':isWrong?'#ef444466':isSel?'var(--accent)':'var(--border)'}`,
                     color:isCorrect?'#22c55e':isWrong?'#ef4444':isSel?'var(--bright)':'var(--text)'}}>
-                    {v.icon} {v.label}
+                    {v.icon} {v.label}{done&&isCorrect&&<HookTip hook={v.hook}/>}
                   </div>;
                 })}
               </div>
@@ -4602,7 +4921,7 @@ Object.assign(PUZZLE_REGISTRY,{
         {id:'essence',      label:'Essence',      answer:ess.id,options:mkOpts(PARAMS.essence,ess)},
       ],note:`Form: ${form}`};}},
   mood_illocution:{label:"Mood + Illocution Combo",cat:"Multi",module:7,phase:2,engine:'MULTI',
-    generate:()=>{const cases=[{ctx:"\"Close the door!\"",mood:'IPT',illocu:'DIR'},{ctx:"\"The sun is shining.\"",mood:'FAC',illocu:'ASR'},{ctx:"\"By the power vested in me, I now pronounce you…\"",mood:'FAC',illocu:'PER'},{ctx:"\"I'm so glad you're here!\"",mood:'FAC',illocu:'EXP'},{ctx:"\"Let us assume X is true.\"",mood:'ASM',illocu:'ASR'}];const c=_s(cases);const moodOpts=_shuf(PARAMS.mood.values.slice(0,4)).map(v=>({id:v.id,label:v.label}));const ilOpts=_shuf(Object.entries(ILLOCUTIONS).map(([id,v])=>({id,label:v.label})));return {question:`"${c.ctx}"\n\nIdentify both the Mood and the Illocution:`,groups:[{id:'mood',label:'Mood',answer:c.mood,options:moodOpts.some(o=>o.id===c.mood)?moodOpts:[...moodOpts.slice(0,3),{id:c.mood,label:PARAMS.mood.values.find(v=>v.id===c.mood)?.label||c.mood}]},{id:'illocution',label:'Illocution',answer:c.illocu,options:ilOpts.some(o=>o.id===c.illocu)?ilOpts.slice(0,4):[...ilOpts.slice(0,3),{id:c.illocu,label:ILLOCUTIONS[c.illocu]?.label||c.illocu}]}]};}},
+    generate:()=>{const cases=[{ctx:"\"Close the door!\"",mood:'FAC',illocu:'DIR'},{ctx:"\"The sun is shining.\"",mood:'FAC',illocu:'ASR'},{ctx:"\"By the power vested in me, I now pronounce you…\"",mood:'FAC',illocu:'DEC'},{ctx:"\"I'm so glad you're here!\"",mood:'FAC',illocu:'EXP'},{ctx:"\"Let us assume X is true.\"",mood:'ASM',illocu:'ASR'},{ctx:"\"Watch out — it's slippery there!\"",mood:'FAC',illocu:'ADM'},{ctx:"\"Is it raining?\"",mood:'FAC',illocu:'IRG'}];const c=_s(cases);const moodOpts=_shuf(PARAMS.mood.values.slice(0,4)).map(v=>({id:v.id,label:v.label}));const ilOpts=_shuf(Object.entries(ILLOCUTIONS).map(([id,v])=>({id,label:v.label})));return {question:`"${c.ctx}"\n\nIdentify both the Mood and the Illocution:`,groups:[{id:'mood',label:'Mood',answer:c.mood,options:moodOpts.some(o=>o.id===c.mood)?moodOpts:[...moodOpts.slice(0,3),{id:c.mood,label:PARAMS.mood.values.find(v=>v.id===c.mood)?.label||c.mood}]},{id:'illocution',label:'Illocution',answer:c.illocu,options:ilOpts.some(o=>o.id===c.illocu)?ilOpts.slice(0,4):[...ilOpts.slice(0,3),{id:c.illocu,label:ILLOCUTIONS[c.illocu]?.label||c.illocu}]}]};}},
   full_decode:{label:"Full Form Decode",cat:"Multi",module:9,phase:3,engine:'MULTI',
     generate:()=>{const root=_s(ROOTS.slice(0,8));const cfg=_s(PARAMS.configuration.values);const per=_s(PARAMS.perspective.values);const cas=_s(CASES.filter(c=>CASE_SCN[c.id]));const form=buildForm({...defaultP(),root:root.id,configuration:cfg.id,perspective:per.id,case:cas.id});const mkOpts=(vals,correct)=>_shuf([{id:correct.id,label:correct.label||correct.name},..._pick(vals.filter(v=>v.id!==correct.id),3).map(v=>({id:v.id,label:v.label||v.name}))]);return {question:`Decode "${form}" — identify all four dimensions:`,groups:[{id:'root',label:'Root',answer:root.id,options:mkOpts(ROOTS,root)},{id:'configuration',label:'Configuration',answer:cfg.id,options:mkOpts(PARAMS.configuration.values,cfg)},{id:'perspective',label:'Perspective',answer:per.id,options:mkOpts(PARAMS.perspective.values,per)},{id:'case',label:'Case',answer:cas.id,options:mkOpts(CASES,cas)}]};}},
   val_bias_combo:{label:"Validation + Bias Pair",cat:"Multi",module:7,phase:2,engine:'MULTI',
@@ -4612,13 +4931,13 @@ Object.assign(PUZZLE_REGISTRY,{
   timeline_asp:{label:"Aspect on Timeline",cat:"Visual",module:7,phase:2,engine:'VISUAL',
     generate:()=>{const seq=['INC','PRG','TRM2','RTR'];const items=seq.map(id=>({id,label:PARAMS.aspect.values.find(v=>v.id===id)?.label||id}));const slots=[{id:'onset',label:'Just starting',answer:'INC'},{id:'ongoing',label:'In progress now',answer:'PRG'},{id:'ending',label:'Just concluding',answer:'TRM2'},{id:'past',label:'Looking back',answer:'RTR'}];return {prompt:'Place each Aspect value at the correct point on the temporal axis:',axis:['Onset','→ ongoing →','Terminus','→ retrospective'],items,slots,note:'INC=start · PRG=during · TRM=end · RTR=looking back'};}},
   timeline_val:{label:"Validation Certainty Scale",cat:"Visual",module:7,phase:2,engine:'VISUAL',
-    generate:()=>{const seq=['OBS','RCL','RPR','PUR','APR','IMG'];const sub=seq.slice(0,4);const items=sub.map(id=>({id,label:PARAMS.validation.values.find(v=>v.id===id)?.label||id}));const slots=[{id:'direct',label:'Most direct / certain',answer:'OBS'},{id:'memory',label:'From memory',answer:'RCL'},{id:'report',label:'From a named source',answer:'RPR'},{id:'hearsay',label:'From hearsay',answer:'PUR'}];return {prompt:'Order these Validation values from most to least epistemically direct:',axis:['Direct witness','← certainty →','Pure hearsay'],items,slots,note:'OBS > RCL > RPR > PUR in epistemic directness'};}},
+    generate:()=>{const seq=['OBS','REC','RPR','PUP','INF','IMA'];const sub=seq.slice(0,4);const items=sub.map(id=>({id,label:PARAMS.validation.values.find(v=>v.id===id)?.label||id}));const slots=[{id:'direct',label:'Most direct / certain',answer:'OBS'},{id:'memory',label:'From memory',answer:'REC'},{id:'report',label:'From a named source',answer:'RPR'},{id:'hearsay',label:'From hearsay',answer:'PUP'}];return {prompt:'Order these Validation values from most to least epistemically direct:',axis:['Direct witness','← certainty →','Pure hearsay'],items,slots,note:'OBS > REC > RPR > PUP in epistemic directness'};}},
   cfg_shape:{label:"Config → Shape Match",cat:"Visual",module:2,phase:1,engine:'VISUAL',
     generate:()=>{const pairs=[{id:'UNI',shape:'A single dot (●)'},{id:'DPX',shape:'Two identical dots (●●)'},{id:'DCT',shape:'Scattered separate dots (∷)'},{id:'AGG',shape:'A tight cluster (⬡)'},{id:'CPN',shape:'Differently-shaped parts (⚙)'}];const sub=_pick(pairs,4);const items=sub.map(p=>({id:p.id,label:PARAMS.configuration.values.find(v=>v.id===p.id)?.label||p.id}));const slots=sub.map(p=>({id:p.id+'_slot',label:p.shape,answer:p.id}));return {prompt:'Match each Configuration value to its visual representation:',items,slots};}},
   per_depth:{label:"Perspective Depth Axis",cat:"Visual",module:2,phase:1,engine:'VISUAL',
-    generate:()=>{const items=['M','P','N','A'].map(id=>({id,label:PARAMS.perspective.values.find(v=>v.id===id)?.label||id}));const slots=[{id:'s1',label:'Most concrete / particular',answer:'M'},{id:'s2',label:'Set of particulars',answer:'P'},{id:'s3',label:'The type / category itself',answer:'N'},{id:'s4',label:'Pure abstract property',answer:'A'}];return {prompt:'Place each Perspective on the concreteness → abstraction axis:',axis:['Concrete token','← abstraction →','Pure essence'],items,slots,note:'M(onadic) → P(olyadic) → N(oumenal) → A(bstract)'};}},
+    generate:()=>{const items=['M','G','N','A'].map(id=>({id,label:PARAMS.perspective.values.find(v=>v.id===id)?.label||id}));const slots=[{id:'s1',label:'Most concrete / particular',answer:'M'},{id:'s2',label:'Set of particulars',answer:'G'},{id:'s3',label:'The type / category itself',answer:'N'},{id:'s4',label:'Pure abstract property',answer:'A'}];return {prompt:'Place each Perspective on the concreteness → abstraction axis:',axis:['Concrete token','← abstraction →','Pure essence'],items,slots,note:'M(onadic) → G(agglomerative) → N(oumenal) → A(bstract)'};}},
   ext_reach:{label:"Extension Spatial Reach",cat:"Visual",module:2,phase:1,engine:'VISUAL',
-    generate:()=>{const pairs=[{id:'PRX',label:'Near part only'},{id:'DEL',label:'Full extent'},{id:'DST',label:'Far part only'},{id:'ICP',label:'Just the start'},{id:'TRM',label:'Just the end'}];const sub=_pick(pairs,4);const items=sub.map(p=>({id:p.id,label:PARAMS.extension.values.find(v=>v.id===p.id)?.label||p.id}));const slots=sub.map(p=>({id:p.id+'_s',label:p.label,answer:p.id}));return {prompt:'Match each Extension to its spatial/temporal scope description:',items,slots};}},
+    generate:()=>{const pairs=[{id:'PRX',label:'Proximal — near/beginning portion only'},{id:'DEL',label:'Delimitive — full extent'},{id:'ICP',label:'Inceptive — just the start'},{id:'ATV',label:'Attenuative — a lessened/diminished portion'},{id:'GRA',label:'Graduative — gradual growing portion'},{id:'DPL',label:'Depletive — depleted/tapering end portion'}];const sub=_pick(pairs,4);const items=sub.map(p=>({id:p.id,label:PARAMS.extension.values.find(v=>v.id===p.id)?.label||p.id}));const slots=sub.map(p=>({id:p.id+'_s',label:p.label,answer:p.id}));return {prompt:'Match each Extension to its spatial/temporal scope description:',items,slots};}},
 
   // ── INPUT: free-text open answers ──────────────────────────────────────
   describe_diff:{label:"Describe Parameter Difference",cat:"Input",module:5,phase:2,engine:'INPUT',
@@ -6924,7 +7243,7 @@ Object.assign(PUZZLE_REGISTRY,{
 
   ca_per_decode:{label:"Decode Ca Perspective Suffix",cat:"Construction",module:4,phase:2,engine:'MCQ',
     generate:()=>{
-      const perId=_s(['M','P','N','A']);
+      const perId=_s(['M','G','N','A']);
       const suffix=CA_PER[perId];
       const correct=PARAMS.perspective.values.find(v=>v.id===perId);
       const wrongs=_dist(correct,PARAMS.perspective.values);
@@ -6992,17 +7311,17 @@ Object.assign(PUZZLE_REGISTRY,{
     generate:()=>{
       const scenarios=[
         {prompt:"Encode: 'The group of scattered stars that I'm directly observing right now'",
-         targets:[{pk:'configuration',val:'DCT'},{pk:'perspective',val:'M'},{pk:'validation',val:'OBS'},{pk:'aspect',val:'PRG'}],
-         note:"DCT=scattered separate instances · M=specific observed set · OBS=direct witness · PRG=ongoing now"},
+         targets:[{pk:'configuration',val:'DCT'},{pk:'perspective',val:'G'},{pk:'validation',val:'OBS'},{pk:'aspect',val:'PRG'}],
+         note:"DCT=scattered separate instances · G=agglomerative set · OBS=direct witness · PRG=ongoing now"},
         {prompt:"Encode: 'The abstract category of consciousness itself, imagined rather than witnessed'",
-         targets:[{pk:'perspective',val:'N'},{pk:'validation',val:'IMG'},{pk:'mood',val:'SPE'}],
-         note:"N=Noumenal type itself · IMG=imaginative · SPE=speculative"},
+         targets:[{pk:'perspective',val:'N'},{pk:'validation',val:'IMA'},{pk:'mood',val:'SPC'}],
+         note:"N=Noumenal type itself · IMA=imaginary · SPC=speculative"},
         {prompt:"Encode: 'A cluster of functionally differentiated parts forming a unified machine, completely'",
          targets:[{pk:'configuration',val:'CPN'},{pk:'extension',val:'DEL'},{pk:'affiliation',val:'CSL'}],
          note:"CPN=componential · DEL=full extent · CSL=consolidative (same function)"},
         {prompt:"Encode: 'The habitual act of recalling a past event with corrective intent'",
-         targets:[{pk:'aspect',val:'HAB'},{pk:'validation',val:'RCL'},{pk:'bias',val:'COR'}],
-         note:"HAB=habitual · RCL=recollective · COR=corrective bias"},
+         targets:[{pk:'aspect',val:'HAB'},{pk:'validation',val:'REC'},{pk:'bias',val:'CRR'}],
+         note:"HAB=habitual · REC=recollective · CRR=corrective bias"},
         {prompt:"Encode: 'A volitional agent causing change, but with skeptical speaker attitude'",
          targets:[{pk:'case',val:'ERG'},{pk:'bias',val:'SKP'},{pk:'mood',val:'FAC'}],
          note:"ERG=ergative volitional agent · SKP=skeptical bias · FAC=asserted as fact"},
@@ -7028,14 +7347,14 @@ Object.assign(PUZZLE_REGISTRY,{
   bias_vs_mood:{label:"Bias vs Mood Discrimination",cat:"Discrimination",module:7,phase:2,engine:'MCQ',
     generate:()=>{
       const cases=[
-        {stmt:"Speaker asserts something as definitively contrary to fact.",slot:"mood",val:"CNT"},
+        {stmt:"Speaker asserts something as definitively contrary to fact.",slot:"mood",val:"COU"},
         {stmt:"Speaker expresses exasperation while stating something.",slot:"bias",val:"EXA"},
         {stmt:"Speaker is assuming something without full certainty.",slot:"mood",val:"ASM"},
-        {stmt:"Speaker is dismissing or minimising the content.",slot:"bias",val:"NEG"},
-        {stmt:"Speaker is issuing a directive or command.",slot:"mood",val:"IPT"},
-        {stmt:"Speaker is openly correcting a prior statement.",slot:"bias",val:"COR"},
-        {stmt:"Speaker is speculating — may or may not be true.",slot:"mood",val:"SPE"},
-        {stmt:"Speaker expresses cynical irony about the content.",slot:"bias",val:"CYN"},
+        {stmt:"Speaker is dismissing or minimising the content.",slot:"bias",val:"DIS"},
+        {stmt:"Speaker is reasoning in a purely hypothetical frame.",slot:"mood",val:"HYP"},
+        {stmt:"Speaker is openly correcting a prior statement.",slot:"bias",val:"CRR"},
+        {stmt:"Speaker is speculating — may or may not be true.",slot:"mood",val:"SPC"},
+        {stmt:"Speaker expresses irony — meaning the opposite.",slot:"bias",val:"IRO"},
       ];
       const c=_s(cases);
       const correct={id:c.slot,label:c.slot==='mood'?`Mood (${c.val})`:`Bias (${c.val})`};
@@ -7365,9 +7684,9 @@ Object.assign(PUZZLE_REGISTRY,{
         {ctx:"Merge two words: first is Aggregative+DEL extension, second adds Representative essence. Select all three merged Ca values:",
          targets:[{pk:'configuration',val:'AGG'},{pk:'extension',val:'DEL'},{pk:'essence',val:'RPV'}],
          note:"AGG=tight cluster · DEL=full spatial extent · RPV=representative sample"},
-        {ctx:"Reframe a Dispersed+Polyadic source by adding Dilative extension. Select all Ca parameters for the result:",
-         targets:[{pk:'configuration',val:'DCT'},{pk:'perspective',val:'P'},{pk:'extension',val:'DST'}],
-         note:"DCT=scattered instances · P=as a set · DST=distal/far end"},
+        {ctx:"Reframe a Dispersed+Agglomerative source by adding Attenuative extension. Select all Ca parameters for the result:",
+         targets:[{pk:'configuration',val:'DCT'},{pk:'perspective',val:'G'},{pk:'extension',val:'ATV'}],
+         note:"DCT=scattered instances · G=agglomerative set · ATV=attenuated/lessened portion"},
         {ctx:"Compound targets: Configuration=CPN (componential) with CSL affiliation and NRM essence — select them all:",
          targets:[{pk:'configuration',val:'CPN'},{pk:'affiliation',val:'CSL'},{pk:'essence',val:'NRM'}],
          note:"CPN=componential distinct parts · CSL=unified function · NRM=normal/concrete essence"},
@@ -7398,8 +7717,8 @@ Object.assign(PUZZLE_REGISTRY,{
     generate:()=>{
       const cases=[
         {en:"The speaker vaguely recalls a rumour that something might happen imminently.",
-         targets:[{pk:'validation',val:'PUR'},{pk:'aspect',val:'IMM'},{pk:'mood',val:'SPE'}],
-         note:"PUR=hearsay · IMM=imminent/about-to-begin · SPE=speculative epistemic stance"},
+         targets:[{pk:'validation',val:'PUP'},{pk:'aspect',val:'IMM'},{pk:'mood',val:'SPC'}],
+         note:"PUP=purportive hearsay · IMM=imminent/about-to-begin · SPC=speculative epistemic stance"},
         {en:"Multiple organisms of the same species, observed directly, arranged in an ordered formation.",
          targets:[{pk:'configuration',val:'MSS'},{pk:'affiliation',val:'CSL'},{pk:'validation',val:'OBS'}],
          note:"MSS=massative ordered · CSL=same type/function · OBS=directly witnessed"},
@@ -7413,8 +7732,8 @@ Object.assign(PUZZLE_REGISTRY,{
          targets:[{pk:'mood',val:'ASM'},{pk:'configuration',val:'DCT'}],
          note:"ASM=assumptive mood · DCT=discrete scattered instances"},
         {en:"The pure abstract category of motion itself — not any particular moving thing — vividly imagined.",
-         targets:[{pk:'perspective',val:'N'},{pk:'validation',val:'IMG'},{pk:'mood',val:'SPE'}],
-         note:"N=Noumenal type itself · IMG=imaginative/hypothetical · SPE=speculative stance"},
+         targets:[{pk:'perspective',val:'N'},{pk:'validation',val:'IMA'},{pk:'mood',val:'SPC'}],
+         note:"N=Noumenal type itself · IMA=imaginary/hypothetical · SPC=speculative stance"},
       ];
       const c=_s(cases);
       return {prompt:`Select all parameters that together best encode:\n"${c.en}"`,targets:c.targets,note:c.note};
