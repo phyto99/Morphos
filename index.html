@@ -254,6 +254,37 @@ function playCaChord(cfg,afl,per){
 }
 
 /* ══════════════════════════════════════════════════════════════════
+   GLOBAL FIXED TOOLTIP — escapes all overflow:hidden ancestors
+   Used by the Synesthetic Color Matrix and any other dense grids.
+   ══════════════════════════════════════════════════════════════════ */
+let _ftEl=null;
+function _getFT(){
+  if(!_ftEl){
+    _ftEl=document.createElement('div');
+    _ftEl.style.cssText='position:fixed;z-index:9999;background:#1a1a2e;border:1px solid #252538;border-radius:6px;padding:6px 10px;font-size:11px;color:#dde0f5;max-width:260px;white-space:normal;line-height:1.5;pointer-events:none;opacity:0;transition:opacity .12s;box-shadow:0 4px 20px rgba(0,0,0,.7)';
+    document.body.appendChild(_ftEl);
+  }
+  return _ftEl;
+}
+function _showFT(text,e){
+  const el=_getFT();
+  el.textContent=text;
+  el.style.opacity='1';
+  _moveFT(el,e);
+}
+function _moveFT(el,e){
+  const W=window.innerWidth,H=window.innerHeight;
+  const w=el.offsetWidth||260,h=el.offsetHeight||36;
+  let x=e.clientX-w/2;
+  let y=e.clientY-h-12;
+  x=Math.max(8,Math.min(x,W-w-8));
+  if(y<8) y=e.clientY+18;
+  el.style.left=x+'px';
+  el.style.top=y+'px';
+}
+function _hideFT(){if(_ftEl)_ftEl.style.opacity='0';}
+
+/* ══════════════════════════════════════════════════════════════════
    LAYER 2 — LINGUISTIC DATA LAYER
    Complete parameter definitions with synesthetic metadata.
    Future: API-replace with /roots, /affixes, /cases endpoints.
@@ -1890,13 +1921,19 @@ const IK_MOOD={FAC:"FAC",SUB:"SUB",ASM:"ASM",SPC:"SPC",COU:"COU",HYP:"HYP"};
 const IK_VLD={OBS:"OBS",REC:"REC",PUP:"PUP",RPR:"RPR",USP:"USP",IMA:"IMA",CVN:"CVN",ITU:"ITU",INF:"INF"};
 const IK_ASP={RTR:"RTR",PRS:"PRS",HAB:"HAB",PRG:"PRG",IMM:"IMM",INC:"INC",TRM2:"TRM"};
 
-/* buildFormLive: tries window.IK, falls back to buildForm placeholder */
+/* buildFormLive: tries window.IK, falls back to buildForm placeholder.
+   Uses UNF/K (verbal) when mood/validation matter, UNF/C (nominal) otherwise. */
 function buildFormLive(p){
   if(window.IK&&window.IK.loaded){
     try{
       const stemNum=p.stem==='S2'?2:p.stem==='S3'?3:1;
+      const mood=p.mood&&p.mood!=='FAC'?IK_MOOD[p.mood]||'FAC':'FAC';
+      const ival=p.validation?IK_VLD[p.validation]||'OBS':'OBS';
+      const asp=p.aspect&&p.aspect!=='PRG'?IK_ASP[p.aspect]||undefined:undefined;
+      // Use UNF/K so mood + illocutionValidation + vn (aspect) are carried
       const result=window.IK.gen.formativeToIthkuil({
-        root:IK_ROOT[p.root]||'kţ',
+        type:'UNF/K',
+        root:(IK_ROOT[p.root]||p.root||'kţ').toLowerCase(),
         stem:stemNum,
         specification:p.specification||'BSC',
         function:p.function||'STA',
@@ -1907,9 +1944,12 @@ function buildFormLive(p){
           extension:IK_EXT[p.extension]||'DEL',
           essence:p.essence||'NRM',
         },
+        mood,
+        illocutionValidation:ival,
+        ...(asp?{vn:asp}:{}),
       });
       if(typeof result==='string'&&result.length>0)return result;
-    }catch(e){}
+    }catch(e){console.warn('[buildFormLive]',e&&e.message||e);}
   }
   return buildForm(p);
 }
@@ -2549,14 +2589,16 @@ function SentenceEngine({ex,onScore,onBack}){
 /* ══════════════════════════════════════════════════════════════════
    LAYER 4 — SYNESTHETIC UI PRIMITIVES
    ══════════════════════════════════════════════════════════════════ */
-function SynCell({paramKey,valId,label,icon,color,freq,selected,onClick,synOn}){
+function SynCell({paramKey,valId,label,icon,color,freq,selected,onClick,synOn,compact}){
   return(
     <div onClick={()=>{onClick&&onClick();if(synOn&&freq)playTone(freq,0.15,'sine');}}
       className="syn-cell" style={{background:selected?color+'44':color+'18',color:selected?color:'#6e709944',
-        border:`1px solid ${selected?color:color+'22'}`,borderRadius:4,padding:'5px 2px',cursor:'pointer',fontSize:9,
-        fontWeight:600,letterSpacing:'0.04em',textAlign:'center',transition:'all .15s',minWidth:44}}>
-      <div style={{fontSize:14,lineHeight:1}}>{icon}</div>
-      <div style={{marginTop:2,fontSize:8,color:selected?'var(--bright)':'var(--text)'}}>{label}</div>
+        border:`1px solid ${selected?color:color+'22'}`,borderRadius:4,
+        padding:compact?'3px 2px':'5px 2px',cursor:'pointer',fontSize:9,
+        fontWeight:600,letterSpacing:'0.04em',textAlign:'center',transition:'all .15s',
+        minWidth:compact?28:44}}>
+      <div style={{fontSize:compact?11:14,lineHeight:1}}>{icon}</div>
+      {!compact&&<div style={{marginTop:2,fontSize:8,color:selected?'var(--bright)':'var(--text)'}}>{label}</div>}
     </div>
   );
 }
@@ -2570,13 +2612,13 @@ function ParamStrip({paramKey,selectedId,onChange,synOn,compact,showLabel=true})
         <span style={{fontSize:9,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:p.hex}}>{p.label}</span>
         <span style={{fontSize:9,color:'var(--muted)'}}>{p.synNote?.split('.')[0]}</span>
       </div>}
-      <div style={{display:'flex',gap:3,flexWrap:'wrap'}}>
+      <div style={{display:'flex',gap:compact?2:3,flexWrap:'wrap'}}>
         {p.values.map(v=>(
           <SynCell key={v.id} paramKey={paramKey} valId={v.id} label={v.label}
             icon={v.icon} color={v.hue||p.hex} freq={v.freq}
             selected={selectedId===v.id}
             onClick={()=>onChange&&onChange(v.id)}
-            synOn={synOn}/>
+            synOn={synOn} compact={compact}/>
         ))}
       </div>
     </div>
@@ -2821,7 +2863,7 @@ function PSP({params,onChange,synOn}){
                         k==="perspective"?v:params.perspective
                       );
                     onChange({...params,[k]:v});
-                  }} synOn={synOn} showLabel={false}/>
+                  }} synOn={synOn} showLabel={false} compact={k==='bias'}/>
                   {params[k]&&<div style={{marginTop:4,fontSize:10,color:'var(--muted)',lineHeight:1.4}}>
                     {PARAMS[k]?.values.find(v=>v.id===params[k])?.desc}
                   </div>}
@@ -4502,7 +4544,7 @@ function MCQEngine({def,onScore,synOn,lm,headerSlot,tipKey}){
           :<>
             <button className="btn btn-primary btn-sm" onClick={next}>Next →</button>
             {/* Auto-computed FSRS quality — shown for transparency, no user action needed */}
-            <span style={{fontSize:10,padding:'2px 8px',borderRadius:10,background:ratingCol+'22',color:ratingCol,border:'1px solid '+ratingCol+'44'}}>
+            <span style={{fontSize:10,color:ratingCol,fontWeight:600}}>
               {ratingLabel} · {(elapsed/1000).toFixed(1)}s
             </span>
           </>}
@@ -5537,14 +5579,16 @@ function SynestheticTrainer({synOn,setSynOn}){
               </div>
               <div style={{display:'flex',gap:3,flexWrap:'wrap'}}>
                 {pdata.values.map(v=>(
-                  <div key={v.id} onClick={()=>{if(synOn)playTone(v.freq,0.25,'sine');}}
-                    className="tip-wrap" style={{display:'flex',flexDirection:'column',alignItems:'center',gap:2,cursor:'pointer',padding:'6px 8px',borderRadius:6,background:v.hue+'22',border:`1px solid ${v.hue}55`,transition:'all .15s',minWidth:60}}
-                    onMouseEnter={()=>{if(synOn)playTone(v.freq,0.1,'sine',0.05);}}>
+                  <div key={v.id}
+                    onClick={()=>{if(synOn)playTone(v.freq,0.25,'sine');}}
+                    style={{display:'flex',flexDirection:'column',alignItems:'center',gap:2,cursor:'pointer',padding:'6px 8px',borderRadius:6,background:v.hue+'22',border:`1px solid ${v.hue}55`,transition:'all .15s',minWidth:60}}
+                    onMouseEnter={(e)=>{if(synOn)playTone(v.freq,0.1,'sine',0.05);_showFT(v.desc,e);}}
+                    onMouseMove={(e)=>{if(_ftEl&&_ftEl.style.opacity==='1')_moveFT(_ftEl,e);}}
+                    onMouseLeave={_hideFT}>
                     <div style={{width:24,height:24,borderRadius:4,background:v.hue}}/>
                     <div style={{fontSize:9,color:v.hue,fontWeight:600}}>{v.icon}</div>
                     <div style={{fontSize:8,color:'var(--muted)',textAlign:'center'}}>{v.label}</div>
                     <div style={{fontSize:8,color:'#3a3a5a'}}>{Math.round(v.freq)}Hz</div>
-                    <div className="tip">{v.desc}</div>
                   </div>
                 ))}
               </div>
