@@ -199,20 +199,65 @@ Three mechanisms:
 
 ---
 
-## IDs TO VERIFY / POSSIBLE ERRORS IN APP
+## ID ERRORS — FIXED ✓
+
+Confirmed via chromonym/ithkapp source (grammardata.json) and zsakowitz/ithkuil source:
+
+| Was | Now | Category | Source |
+|---|---|---|---|
+| EXP (Expressive) | **VER** (Verificative) | Illocution | zsnout slot-9/illocution.ts |
+| OPT (Optative) | **POT** (Potentiative) | Illocution | chromonym grammardata.json |
+| CNJ (Conjunctive) | **CNJ** (Conjectural) | Illocution — desc updated | chromonym |
+| COG (Cogitative) | **CGT** (Cogitant) | Register | zsnout adjunct/register.ts |
+| PNT "Punctuative" | **PNT** "Parenthetical" | Register label | zsnout adjunct/register.ts |
+| END "Endophoric" | **END** "Carrier-End" | Register label | zsnout adjunct/register.ts |
+| (missing) | **CRP** (Corruptive) | Bias | zsnout adjunct/bias.ts |
+| (missing) | **PPV** (Propositive) | Bias | zsnout adjunct/bias.ts |
+
+*Note: zsnout uses VRF for Verificative; chromonym uses VER. We use VER (yuorb canonical).*
+
+## IDs STILL TO VERIFY
 
 | Suspect ID | Issue | Check against |
 |---|---|---|
 | ORT | Should be ORI (Orientative)? | Yuorb Ch.04 ST-I table |
 | INT | Canonical case? | Yuorb Ch.04 full case list |
-| COG (register) | Should be CGT (Cogitant)? | Yuorb Ch.08 register table |
-| END (register) | "Endophoric" or "Carrier-End"? | Yuorb Ch.08 |
-| PNT (register) | "Punctuative" or "Parenthetical"? | Yuorb Ch.08 |
-| EXP (illocution) | Yuorb may have VER (Verificative) here | Yuorb Ch.06 illocution table |
-| OPT (illocution) | Yuorb may have POT (Potentiative) here | Yuorb Ch.06 illocution table |
 | ABE | Transrelative case — canonical? | Yuorb Ch.04 |
 | CSM | Adverbial or Transrelative? | Yuorb Ch.04 |
 | FNC | Case or Context value? (name collision) | Yuorb Ch.03 + Ch.04 |
+
+## CONFIGURATION — MAJOR PENDING REFACTOR
+
+**Our app uses Ithkuil 2011 IDs** (UNI/DPX/DCT/AGG/SEG/CPN/COH/CST/MUL — 9 values).
+**Canonical Ithkuil IV IDs** (confirmed zsnout generate/ca/configuration.ts):
+
+| ID | Full Name |
+|---|---|
+| UPX | Uniplex |
+| DPX | Duplex |
+| DSS | Duplex Similar Separate |
+| DSC | Duplex Similar Connected |
+| DSF | Duplex Similar Fused |
+| DDS | Duplex Dissimilar Separate |
+| DDC | Duplex Dissimilar Connected |
+| DDF | Duplex Dissimilar Fused |
+| DFS | Duplex Fuzzy Separate |
+| DFC | Duplex Fuzzy Connected |
+| DFF | Duplex Fuzzy Fused |
+| MSS | Multiplex Similar Separate |
+| MSC | Multiplex Similar Connected |
+| MSF | Multiplex Similar Fused |
+| MDS | Multiplex Dissimilar Separate |
+| MDC | Multiplex Dissimilar Connected |
+| MDF | Multiplex Dissimilar Fused |
+| MFS | Multiplex Fuzzy Separate |
+| MFC | Multiplex Fuzzy Connected |
+| MFF | Multiplex Fuzzy Fused |
+
+This affects: TONE_MAP, PARAMS.configuration.values (all 9 entries), Ca morphology table (IK_CFG),
+all puzzle data referencing DCT/AGG/SEG/CPN/COH/CST/MUL, and all SVG shape visualizations.
+IK_CFG currently patches old→new for formative generation but the learning labels are still wrong.
+**This is the highest-priority remaining fix.**
 
 ---
 
