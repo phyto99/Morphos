@@ -201,7 +201,7 @@ const getAudioCtx=()=>{
 // Each param dimension is a musical "register"; values are notes within it
 const TONE_MAP={
   // Configuration: C major scale, grounding, structural (low register 200-400Hz)
-  UPX:261.6, DPX:277.2, DSS:293.7, DSC:311.1, DSF:329.6, DDS:349.2, DDC:370.0, DDF:392.0, DFS:415.3, DFC:440.0, DFF:466.2, MSS:493.9, MSC:523.3, MSF:554.4, MDS:587.3, MDC:622.3, MDF:659.3, MFS:698.5, MFC:740.0, MFF:784.0,
+  UNI:261.6, DPX:293.7, DCT:329.6, AGG:349.2, SEG:392.0, CPN:440.0, COH:493.9, CST:523.3, MUL:587.3,
   // Affiliation: Perfect 4ths (warm, relational, mid register)
   CSL:330.0, ASO:440.0, VAR:550.0, COA:660.0,
   // Perspective: Octave relationships (metaphysical, high register)
@@ -296,54 +296,24 @@ const PARAMS={
     synNote:"C-major scale. Green spectrum. Geometric shapes.",
     spatialAxis:"horizontal arrangement",
     values:[
-      // ── Uniplex ──────────────────────────────────────────────────────────
-      {id:"UPX",label:"Solitary",      icon:"●",  desc:"One single, complete, undivided instance",                                  freq:261.6,hue:"#22c55e",
-        hook:"One apple — not apples in general, not a pile — this single bounded indivisible apple."},
-      // ── Duplex: unspecified ───────────────────────────────────────────────
-      {id:"DPX",label:"Paired",        icon:"●●", desc:"Exactly two instances — similarity and separability left unspecified",       freq:293.7,hue:"#10b981",
-        hook:"Two somethings — exactly two, the speaker declining to say whether they match or touch."},
-      // ── Duplex: Similar ───────────────────────────────────────────────────
-      {id:"DSS",label:"Twins Apart",   icon:"◌◌", desc:"Two similar instances, spatially or conceptually separate",                 freq:311.1,hue:"#0d9488",
-        hook:"Two matching socks in separate drawers — alike in kind, not touching each other."},
-      {id:"DSC",label:"Twins Joined",  icon:"◎◎", desc:"Two similar instances in contact or linked together",                       freq:329.6,hue:"#0f766e",
-        hook:"A pair of socks laid together — same kind, touching, clearly a set."},
-      {id:"DSF",label:"Twins Merged",  icon:"◎",  desc:"Two similar instances fused into a single unified entity",                  freq:349.2,hue:"#134e4a",
-        hook:"Two walnut halves fused back together — similar, inseparable, now one thing."},
-      // ── Duplex: Dissimilar ────────────────────────────────────────────────
-      {id:"DDS",label:"Odd Pair",      icon:"●○", desc:"Two dissimilar instances, spatially or conceptually separate",              freq:370.0,hue:"#0369a1",
-        hook:"A spoon and fork on opposite ends of the table — different in kind, nothing connecting them."},
-      {id:"DDC",label:"Odd Couple",    icon:"●○·",desc:"Two dissimilar instances in contact or linked",                             freq:392.0,hue:"#075985",
-        hook:"A spoon and fork side by side in the cutlery drawer — different in kind, but placed together."},
-      {id:"DDF",label:"Hybrid",        icon:"◐",  desc:"Two dissimilar instances fused into one entity — difference still visible",  freq:415.3,hue:"#0c4a6e",
-        hook:"A spork — fork tines and spoon bowl fused into one object, each origin readable in the result."},
-      // ── Duplex: Fuzzy ─────────────────────────────────────────────────────
-      {id:"DFS",label:"Unknown Pair",  icon:"⊙⊙", desc:"Two instances of unclear similarity, spatially separate",                   freq:440.0,hue:"#52525b",
-        hook:"Two wrapped presents kept apart — you can't tell if they're the same thing inside."},
-      {id:"DFC",label:"Unknown Duo",   icon:"⊙⊙·",desc:"Two instances of unclear similarity, in contact",                          freq:466.2,hue:"#3f3f46",
-        hook:"Two wrapped presents touching — still unknown whether they match, but now side by side."},
-      {id:"DFF",label:"Blur of Two",   icon:"⊕",  desc:"Two instances of unclear similarity, fully merged — distinction lost",      freq:493.9,hue:"#27272a",
-        hook:"Two wet ink blots merged on paper — you can no longer tell if they were ever the same color."},
-      // ── Multiplex: Similar ────────────────────────────────────────────────
-      {id:"MSS",label:"Scattered",     icon:"∷",  desc:"Many similar instances, spatially separate from each other",                freq:523.3,hue:"#166534",
-        hook:"Coins scattered across a table — each one the same denomination, none touching."},
-      {id:"MSC",label:"Clustered",     icon:"⬡",  desc:"Many similar instances in contact or clustered together",                   freq:554.4,hue:"#15803d",
-        hook:"A bunch of grapes — many of the same kind, touching, forming a natural cluster."},
-      {id:"MSF",label:"Massed",        icon:"◼",  desc:"Many similar instances pressed into one undifferentiated mass",              freq:587.3,hue:"#14532d",
-        hook:"A snowball — many identical flakes compressed into one mass, none individually recoverable."},
-      // ── Multiplex: Dissimilar ─────────────────────────────────────────────
-      {id:"MDS",label:"Array",         icon:"⁝",  desc:"Many dissimilar instances, spatially separate",                             freq:622.3,hue:"#78350f",
-        hook:"A hardware store shelf — screws, nails, bolts, all separate, none alike, each its own thing."},
-      {id:"MDC",label:"Mixture",       icon:"⊞",  desc:"Many dissimilar instances in contact, mixed but each still distinct",       freq:659.3,hue:"#92400e",
-        hook:"Trail mix — almonds, raisins, chocolate chips touching but each still recognizable as itself."},
-      {id:"MDF",label:"Mosaic",        icon:"⁂",  desc:"Many dissimilar instances fused into one unified whole",                    freq:698.5,hue:"#7c2d12",
-        hook:"A mosaic — tiles of wildly different colors permanently fused into one face you couldn't disassemble."},
-      // ── Multiplex: Fuzzy ──────────────────────────────────────────────────
-      {id:"MFS",label:"Dispersed",     icon:"⁞",  desc:"Many instances of unclear similarity, spatially separate",                  freq:740.0,hue:"#44403c",
-        hook:"A thrift store — objects that may or may not be related, scattered about, their groupings unresolved."},
-      {id:"MFC",label:"Jumble",        icon:"⊠",  desc:"Many instances of unclear similarity, in contact",                         freq:784.0,hue:"#292524",
-        hook:"A junk drawer — things touching with no clear grouping logic, similarity between them unresolved."},
-      {id:"MFF",label:"Dissolved",     icon:"◌",  desc:"Many instances of unclear similarity, fully merged — all structure lost",   freq:830.6,hue:"#1c1917",
-        hook:"Static — signals indistinguishable from each other, their original similarity irretrievably lost."},
+      {id:"UNI",label:"Uniplex",    icon:"●",  shape:"circle",      desc:"A single undivided instance",                            freq:261.6, hue:"#16a34a",
+        hook:"One apple. Not apples in general, not a pile — this single, bounded, indivisible apple."},
+      {id:"DPX",label:"Duplex",     icon:"●●", shape:"two-circles", desc:"Exactly two instances of the same type",                 freq:293.7, hue:"#15803d",
+        hook:"A pair of shoes — exactly two, matched, one cannot exist without the other in this grouping."},
+      {id:"DCT",label:"Discrete",   icon:"∷",  shape:"scattered",   desc:"Multiple separate same-type instances with no connection",freq:329.6, hue:"#166534",
+        hook:"Coins scattered across a table — each coin separate, touching nothing, with space between."},
+      {id:"AGG",label:"Aggregative",icon:"⬡",  shape:"cluster",     desc:"Multiple same-type instances joined or clustered",       freq:349.2, hue:"#14532d",
+        hook:"A bunch of grapes — many, touching, joined, yet each grape still individually a grape."},
+      {id:"SEG",label:"Segmentative",icon:"⬡⊘",shape:"split-cluster",desc:"Joined cluster that is partially separated",           freq:392.0, hue:"#1a6b3c",
+        hook:"A bunch of grapes where someone already pulled some off — the cluster partially broken apart."},
+      {id:"CPN",label:"Componential",icon:"⚙", shape:"gears",       desc:"Functionally differentiated parts of one whole",        freq:440.0, hue:"#0f9548",
+        hook:"A bicycle — wheel, frame, chain, brake: each part distinct in function, none meaningless alone."},
+      {id:"COH",label:"Coherent",   icon:"◈",  shape:"lattice",     desc:"Unified whole from heterogeneous parts forming one thing",freq:493.9, hue:"#22c55e",
+        hook:"A mosaic — hundreds of different-colored tiles that only make sense as the face they form together."},
+      {id:"CST",label:"Compositive",icon:"⊞",  shape:"mosaic",      desc:"Mixture of different types joined without a unifying form",freq:523.3,hue:"#4ade80",
+        hook:"Trail mix — almonds, raisins, chocolate chips, peanuts: heterogeneous, joined, but no overall shape."},
+      {id:"MUL",label:"Multiform",  icon:"⁂",  shape:"cloud",       desc:"Irregular mixture with no unifying logic or form",       freq:587.3, hue:"#86efac",
+        hook:"A junk drawer — everything in it differs from everything else, united only by being uncategorized."},
     ]
   },
   affiliation:{
@@ -1784,7 +1754,7 @@ const initLM=()=>({
 
 const defaultP=()=>({
   root:"KŢ", stem:"S1", pattern:"P1",
-  configuration:"UPX", affiliation:"CSL", perspective:"M",
+  configuration:"UNI", affiliation:"CSL", perspective:"M",
   extension:"DEL", essence:"NRM", specification:"BSC", function:"STA",
   mood:"FAC", validation:"OBS", case:"THM", bias:"EUP", aspect:"PRG",
 });
@@ -1796,26 +1766,15 @@ const defaultP=()=>({
    Format: CA_BASE[cfg][afl] → string; CA_PER[per]; CA_EXT[ext]; CA_ESS[ess]
    ─────────────────────────────────────────────────────────────────────── */
 const CA_BASE={
-  UPX:{CSL:"",   ASO:"l",   VAR:"ř",   COA:"r"  },
-  DPX:{CSL:"s",  ASO:"sl",  VAR:"sř",  COA:"sr" },
-  DSS:{CSL:"c",  ASO:"cl",  VAR:"cř",  COA:"cr" },
-  DSC:{CSL:"ks", ASO:"ksl", VAR:"ksř", COA:"ksr"},
-  DSF:{CSL:"ps", ASO:"psl", VAR:"psř", COA:"psr"},
-  DDS:{CSL:"ţs", ASO:"ţsl", VAR:"ţsř", COA:"ţsr"},
-  DDC:{CSL:"fs", ASO:"fsl", VAR:"fsř", COA:"fsr"},
-  DDF:{CSL:"š",  ASO:"šl",  VAR:"šř",  COA:"šr" },
-  DFS:{CSL:"č",  ASO:"čl",  VAR:"čř",  COA:"čr" },
-  DFC:{CSL:"kš", ASO:"kšl", VAR:"kšř", COA:"kšr"},
-  DFF:{CSL:"pš", ASO:"pšl", VAR:"pšř", COA:"pšr"},
-  MSS:{CSL:"t",  ASO:"tl",  VAR:"tř",  COA:"tr" },
-  MSC:{CSL:"k",  ASO:"kl",  VAR:"kř",  COA:"kr" },
-  MSF:{CSL:"p",  ASO:"pl",  VAR:"př",  COA:"pr" },
-  MDS:{CSL:"ţ",  ASO:"ţl",  VAR:"ţř",  COA:"ţr" },
-  MDC:{CSL:"f",  ASO:"fl",  VAR:"fř",  COA:"fr" },
-  MDF:{CSL:"ç",  ASO:"çl",  VAR:"çř",  COA:"çr" },
-  MFS:{CSL:"z",  ASO:"zl",  VAR:"zř",  COA:"zr" },
-  MFC:{CSL:"ž",  ASO:"žl",  VAR:"žř",  COA:"žr" },
-  MFF:{CSL:"ż",  ASO:"żl",  VAR:"żř",  COA:"żr" },
+  UNI:{CSL:"l",  ASO:"r",   VAR:"ř",  COA:"w"  },
+  DPX:{CSL:"s",  ASO:"š",   VAR:"ž",  COA:"ç"  },
+  DCT:{CSL:"n",  ASO:"ň",   VAR:"d",  COA:"t"  },
+  AGG:{CSL:"tļ", ASO:"v",   VAR:"f",  COA:"ţ"  },
+  SEG:{CSL:"lm", ASO:"rn",  VAR:"ln", COA:"rm"  },
+  CPN:{CSL:"vr", ASO:"kš",  VAR:"gž", COA:"gz"  },
+  COH:{CSL:"zm", ASO:"žm",  VAR:"čm", COA:"jm"  },
+  CST:{CSL:"nļ", ASO:"mļ",  VAR:"fļ", COA:"vļ"  },
+  MUL:{CSL:"ňv", ASO:"ňf",  VAR:"ňţ", COA:"ňç"  },
 };
 const CA_PER={M:"",P:"l",N:"r",A:"ř"};
 const CA_EXT={DEL:"",PRX:"t",ICP:"k",TRM:"p",DST:"f",PXD:"v"};
@@ -1877,7 +1836,7 @@ function buildForm(p){
   const vrSpc=VR_SPC[p.specification||"BSC"]||"";
   const vr=vrBase+vrSpc;
   // Slot IV — Ca
-  const cfg=p.configuration||"UPX", afl=p.affiliation||"CSL";
+  const cfg=p.configuration||"UNI", afl=p.affiliation||"CSL";
   const caBase=CA_BASE[cfg]?.[afl]||"l";
   const caPer=CA_PER[p.perspective||"M"]||"";
   const caExt=CA_EXT[p.extension||"DEL"]||"";
@@ -1961,7 +1920,7 @@ function weightedDistractors(param, correctId, lm, n=3){
 const IK_ROOT={KŢ:"kţ",MŘ:"mř",ŇV:"ňv",ŽB:"žb",RŇ:"rň",VŽ:"vž",KF:"kf",
   ŢM:"ţm",XL:"xl",ŘK:"řk",PŘ:"př",NŢ:"nţ",KV:"kv",ŽL:"žl",RM:"rm",
   ŢV:"ţv",FL:"fl",ŇM:"ňm",LK:"lk",ŢR:"ţr"};
-const IK_CFG={UPX:"UPX",DPX:"DPX",DSS:"DSS",DSC:"DSC",DSF:"DSF",DDS:"DDS",DDC:"DDC",DDF:"DDF",DFS:"DFS",DFC:"DFC",DFF:"DFF",MSS:"MSS",MSC:"MSC",MSF:"MSF",MDS:"MDS",MDC:"MDC",MDF:"MDF",MFS:"MFS",MFC:"MFC",MFF:"MFF"};
+const IK_CFG={UNI:"UPX",DPX:"DPX",DCT:"MSS",AGG:"MSC",SEG:"MDS",CPN:"MDS",COH:"MDC",CST:"MDC",MUL:"MDF"};
 const IK_EXT={DEL:"DEL",PRX:"PRX",ICP:"ICP",ATV:"ATV",GRA:"GRA",DPL:"DPL"};
 const IK_MOOD={FAC:"FAC",SUB:"SUB",ASM:"ASM",SPC:"SPC",COU:"COU",HYP:"HYP"};
 const IK_VLD={OBS:"OBS",REC:"REC",PUP:"PUP",RPR:"RPR",USP:"USP",IMA:"IMA",CVN:"CVN",ITU:"ITU",INF:"INF"};
@@ -2540,9 +2499,9 @@ const SENTENCE_EX=[
    ]},
   {id:'s3',
    english:"She habitually observed the scattered stars, recalling her childhood.",
-   ithkuil:"[she-M] [observe-HAB-OBS] [stars-MSS-THM] / [recall-HAB-REC] [childhood-GEN]",
+   ithkuil:"[she-M] [observe-HAB-OBS] [stars-DCT-THM] / [recall-HAB-RCL] [childhood-GEN]",
    questions:[
-     {q:"Which Configuration applies to 'the scattered stars'?",a:"MSS",opts:["MSS","MSC","UPX","MDF"],note:"Multi·Sim·Sep (MSS) — many similar instances, spatially separate."},
+     {q:"Which Configuration applies to 'the scattered stars'?",a:"DCT",opts:["DCT","AGG","UNI","COH"],note:"Discrete (DCT) — multiple separate, spatially spread instances."},
      {q:"Which Aspect encodes 'habitually observed'?",a:"HAB",opts:["HAB","PRG","RTR","INC"],note:"Habitual (HAB) — recurring pattern of action."},
      {q:"What Validation encodes 'recalling childhood'?",a:"REC",opts:["REC","OBS","PUP","IMA"],note:"Recollective (REC) — retrieved from the speaker's own memory."},
    ]},
@@ -2564,15 +2523,15 @@ const SENTENCE_EX=[
    ]},
   {id:'s6',
    english:"Every tool, without exception, was used. The entire structure collapsed as a result.",
-   ithkuil:"[tools-MSS-DEL-ABS] [use-FAC-RTR] / [structure-UPX-DEL-ABS] [collapse-FAC-RSL]",
+   ithkuil:"[tools-DCT-DEL-ABS] [use-FAC-RTR] / [structure-UNI-DEL-ABS] [collapse-FAC-RSL]",
    questions:[
      {q:"'Every tool, without exception' — which Extension applies?",a:"DEL",opts:["DEL","PRX","ICP","DST"],note:"Delimitive (DEL) — the full extent, every instance, no portion excluded."},
-     {q:"'Multiple separate tools' — which Configuration?",a:"MSS",opts:["MSS","MSC","UPX","MDF"],note:"Multi·Sim·Sep (MSS) — many similar instances, separate, not clustered."},
+     {q:"'Multiple separate tools' — which Configuration?",a:"DCT",opts:["DCT","AGG","UNI","COH"],note:"Discrete (DCT) — separate individual instances, not joined into a cluster."},
      {q:"'The structure collapsed as a result' — which Case marks the collapse?",a:"RSL",opts:["RSL","THM","ABS","ERG"],note:"Resultative (RSL) — the outcome/result of the prior action."},
    ]},
   {id:'s7',
    english:"She recalled a childhood memory — not vividly, but as something hazy and partial.",
-   ithkuil:"[she-M] [recall-REC-PRG] [memory-UPX-PRX-THM] // [hazy-MAN] [partial-MAN]",
+   ithkuil:"[she-M] [recall-RCL-PRG] [memory-UNI-PRX-THM] // [hazy-MAN] [partial-MAN]",
    questions:[
      {q:"Which Validation marks 'recalled a memory'?",a:"REC",opts:["REC","OBS","IMA","PUP"],note:"Recollective (REC) — retrieved from personal memory."},
      {q:"'Not vividly, but hazy and partial' — which Extension best captures a partial memory?",a:"PRX",opts:["PRX","DEL","ICP","ATV"],note:"Proximal (PRX) — only the near/partial portion, not the full extent."},
@@ -2763,56 +2722,37 @@ function Term({word,children}){
    Procedurally generates visual scenarios for each Configuration.
    ══════════════════════════════════════════════════════════════════ */
 function ConfigScenario({configId,size=100}){
-  // Systematic renderer — encodes all 3 dimensions visually:
-  // Plexity (U/D/M): count of circles
-  // Similarity (S/D/F): color uniformity (same/different/mixed)
-  // Separability (S/C/F): spacing (apart/touching/overlapping)
-  const id=configId||'UPX';
-  const P=id[0]; // U D M
-  const S=id[1]||'S'; // S D F
-  const E=id[2]||'S'; // S C F
-  const g='#16a34a', tl='#0d9488', bl='#0369a1', vi='#7c3aed', li='#a3e635';
-  const colA=S==='D'?g:S==='F'?'#4ade80':g;
-  const colB=S==='D'?bl:S==='F'?'#86efac':g;
-  const colC=S==='F'?vi:S==='D'?tl:g;
-  const a='99';
-  if(P==='U') return(
-    <svg width={size} height={size} viewBox="0 0 100 100">
-      <rect width={100} height={100} fill="var(--surface)" rx={6}/>
-      <circle cx={50} cy={50} r={16} fill={g+a} stroke={g} strokeWidth={1.5}/>
-    </svg>
-  );
-  if(P==='D'){
-    const off=E==='S'?20:E==='C'?13:7;
-    const r=11;
-    const x1=50-off,x2=50+off;
-    return(
-      <svg width={size} height={size} viewBox="0 0 100 100">
-        <rect width={100} height={100} fill="var(--surface)" rx={6}/>
-        <circle cx={x1} cy={50} r={r} fill={colA+a} stroke={colA} strokeWidth={1.5}/>
-        {E==='C'&&<line x1={x1+r} y1={50} x2={x2-r} y2={50} stroke={g} strokeWidth={1}/>}
-        {E==='F'&&<line x1={x1} y1={50} x2={x2} y2={50} stroke={g+'44'} strokeWidth={3}/>}
-        <circle cx={x2} cy={50} r={r} fill={colB+a} stroke={colB} strokeWidth={1.5}/>
-      </svg>
-    );
-  }
-  // Multiplex
-  const pts=E==='S'?[[22,25],[50,20],[78,25],[22,75],[50,80],[78,75]]:
-            E==='C'?[[35,38],[50,30],[65,38],[35,62],[50,70],[65,62]]:
-                   [[38,36],[50,30],[62,36],[38,64],[50,70],[62,64],[44,50],[56,50]];
-  const colors=[colA,colB,colC];
+  const frames={
+    UNI:()=><circle cx={50} cy={50} r={14} fill="#16a34a88" stroke="#16a34a" strokeWidth={1.5}/>,
+    DPX:()=><g><circle cx={38} cy={50} r={11} fill="#15803d88" stroke="#15803d" strokeWidth={1.5}/><circle cx={62} cy={50} r={11} fill="#15803d88" stroke="#15803d" strokeWidth={1.5}/></g>,
+    DCT:()=><g>{[[22,30],[50,22],[78,30],[22,70],[50,78],[78,70]].map(([x,y],i)=><circle key={i} cx={x} cy={y} r={7} fill="#16653488" stroke="#166534" strokeWidth={1}/>)}</g>,
+    AGG:()=><g>{[[50,50],[38,42],[62,42],[38,58],[62,58],[50,36],[50,64]].map(([x,y],i)=><circle key={i} cx={x} cy={y} r={7} fill="#14532d88" stroke="#14532d" strokeWidth={1}/>)}</g>,
+    SEG:()=><g>
+      {[[26,42],[36,42],[32,54]].map(([x,y],i)=><circle key={`a${i}`} cx={x} cy={y} r={7} fill="#1a6b3c88" stroke="#1a6b3c" strokeWidth={1}/>)}
+      <line x1={46} y1={50} x2={54} y2={50} stroke="#1a6b3c44" strokeWidth={1} strokeDasharray="3,2"/>
+      {[[64,42],[74,42],[70,54]].map(([x,y],i)=><circle key={`b${i}`} cx={x} cy={y} r={7} fill="#1a6b3c88" stroke="#1a6b3c" strokeWidth={1}/>)}
+    </g>,
+    CPN:()=><g>
+      <rect x={22} y={36} width={18} height={18} rx={2} fill="#0f954888" stroke="#0f9548" strokeWidth={1}/>
+      <circle cx={50} cy={50} r={9} fill="#0f954888" stroke="#0f9548" strokeWidth={1}/>
+      <polygon points="60,36 78,36 78,54 60,54" fill="#0f954888" stroke="#0f9548" strokeWidth={1}/>
+    </g>,
+    COH:()=><g>
+      <circle cx={50} cy={50} r={28} fill="none" stroke="#22c55e66" strokeWidth={1} strokeDasharray="4,2"/>
+      {[[50,28],[30,60],[70,60],[38,38],[62,38],[38,62],[62,62]].map(([x,y],i)=><circle key={i} cx={x} cy={y} r={5} fill="#22c55e88" stroke="#22c55e" strokeWidth={1}/>)}
+    </g>,
+    CST:()=><g>
+      {[[26,38],[50,26],[74,38],[26,62],[50,74],[74,62]].map(([x,y],i)=><polygon key={i} points={`${x},${y-8} ${x+7},${y+5} ${x-7},${y+5}`} fill={i%2===0?"#4ade8088":"#86efac88"} stroke={i%2===0?"#4ade80":"#86efac"} strokeWidth={1}/>)}
+    </g>,
+    MUL:()=><g>
+      {[["●",24,32,10],["■",56,26,9],["▲",76,50,9],["◆",60,72,8],["●",32,68,10],["■",18,58,8],["▲",44,84,8],["◆",88,36,9]].map(([s,x,y,f],i)=><text key={i} x={x} y={y} fontSize={f} fill={["#4ade80","#86efac","#22c55e","#16a34a"][i%4]} textAnchor="middle" dominantBaseline="middle">{s}</text>)}
+    </g>,
+  };
+  const render=frames[configId]||frames.UNI;
   return(
     <svg width={size} height={size} viewBox="0 0 100 100">
       <rect width={100} height={100} fill="var(--surface)" rx={6}/>
-      {E==='F'&&<ellipse cx={50} cy={50} rx={30} ry={24} fill={g+'22'} stroke={g+'44'} strokeWidth={1} strokeDasharray="2,2"/>}
-      {pts.map(([x,y],i)=>{
-        const c=S==='S'?colA:colors[i%colors.length];
-        return <circle key={i} cx={x} cy={y} r={7} fill={c+a} stroke={c} strokeWidth={1}/>;
-      })}
-      {E==='C'&&pts.map(([x,y],i)=>{
-        const [nx,ny]=pts[(i+1)%pts.length];
-        return i<pts.length-1&&<line key={`l${i}`} x1={x} y1={y} x2={nx} y2={ny} stroke={g+'55'} strokeWidth={0.8}/>;
-      })}
+      {render()}
     </svg>
   );
 }
@@ -2849,7 +2789,7 @@ function MAV({params,synOn}){
      desc:`${params.stem||"S1"} · ${params.pattern||"P1"} · ${params.specification||"BSC"}`,c:"#9a3412"},
     {s:"Cs",v:"—",  desc:"No incorporated root",c:"#78350f"},
     {s:"Vx",v:"—",  desc:"No affixes",c:"#365314"},
-    {s:"Ca",v:`${(params.configuration||"UPX").slice(0,3)}`,
+    {s:"Ca",v:`${(params.configuration||"UNI").slice(0,3)}`,
      desc:`${params.configuration} · ${params.affiliation} · ${params.perspective} · ${params.extension} · ${params.essence}`,c:"#14532d"},
     {s:"Vn",v:params.mood==="FAC"?"—":(params.mood||"FAC").slice(0,3),
      desc:`Mood:${params.mood||"FAC"} · Valid:${params.validation||"OBS"}`,c:"#134e4a"},
@@ -2979,11 +2919,11 @@ function PSP({params,onChange,synOn}){
 const SIT_EXERCISES=[
   {id:"s1",title:"The Migrating Flock",difficulty:1,
    scenario:"A single unified flock of identical starlings performing a coordinated murmuration before splitting into three spatially distinct sub-groups that continue to fly independently.",
-   target:{configuration:"MSC",affiliation:"CSL",perspective:"M",extension:"DEL"},
+   target:{configuration:"SEG",affiliation:"CSL",perspective:"M",extension:"DEL"},
    expl:"Segmentative: was unified, now partially separated. Consolidative: birds identical in kind. Monadic: this specific observable group. Delimitive: full extent discussed."},
   {id:"s2",title:"Urban Transport System",difficulty:2,
    scenario:"The city's entire public transport network considered as a unified system — buses, trains, ferries each performing a distinct function contributing to a coherent whole.",
-   target:{configuration:"MDC",affiliation:"ASO",perspective:"N",specification:"OBJ"},
+   target:{configuration:"CPN",affiliation:"ASO",perspective:"N",specification:"OBJ"},
    expl:"Componential: distinct functional parts. Associative: similar purpose, different function. Noumenal: the category 'transport network', not a specific city's. Objective: foregrounding its purposive function."},
   {id:"s3",title:"Justice as Property",difficulty:3,
    scenario:"A philosopher considers justice not as any particular just act, nor as the abstract category, but as the pure formal property that all just things instantiate — untethered from any instance.",
@@ -2991,15 +2931,15 @@ const SIT_EXERCISES=[
    expl:"Abstract perspective: pure property, not instance or category. Constitutive: the structural form of justice. Stative: a property, not an action. Representative: the normative ideal."},
   {id:"s4",title:"The Knife's Identity",difficulty:2,
    scenario:"You are discussing the knife as a normative tool-type — emphasizing its purposive, functional nature — not any particular knife and not the material knife-category.",
-   target:{essence:"RPV",specification:"OBJ",perspective:"N",configuration:"UPX"},
+   target:{essence:"RPV",specification:"OBJ",perspective:"N",configuration:"UNI"},
    expl:"Representative essence: normative knife. Objective specification: purposive function foregrounded. Noumenal perspective: the type, not an instance. Uniplex: one knife-concept."},
   {id:"s5",title:"River Delta — Full System",difficulty:2,
    scenario:"The totality of a river delta — previously unified flow split into numerous identical smaller channels, covering the entire geographic extent.",
-   target:{configuration:"MSC",affiliation:"CSL",extension:"DEL",essence:"NRM"},
+   target:{configuration:"SEG",affiliation:"CSL",extension:"DEL",essence:"NRM"},
    expl:"Segmentative: unified flow now partially separated. Consolidative: channels identical in kind. Delimitive: the full geographic extent. Normal: actual physical phenomenon."},
   {id:"s6",title:"Coalition Government",difficulty:3,
    scenario:"A government formed when previously separate, politically distinct parties merged their operations into a single governing body, each retaining their distinct ideological character.",
-   target:{configuration:"MDF",affiliation:"COA",perspective:"M",essence:"NRM"},
+   target:{configuration:"COH",affiliation:"COA",perspective:"M",essence:"NRM"},
    expl:"Coherent: a unified whole from heterogeneous parts. Coalescent: previously distinct entities now merged. Monadic: this specific government. Normal: actual."},
   {id:"s7",title:"Mathematical Abstraction",difficulty:4,
    scenario:"You want to discuss the abstract relational structure underlying all instances of 'betweenness' — not a specific case, not the category of cases, but the pure formal property itself.",
@@ -3014,10 +2954,10 @@ const SIT_EXERCISES=[
 /* --- 8.2 PARAMETER CLASH (minimal pair discrimination) -------------- */
 const CLASH_PAIRS=[
   {id:"c1",title:"Aggregative vs Coherent",difficulty:2,
-   A:{scenario:"A colony of genetically identical ants moving as a unified swarm.",target:{configuration:"MSC",affiliation:"CSL"}},
-   B:{scenario:"An ant colony understood as a superorganism — a single unified entity whose parts (workers, queen, larvae) have fundamentally different functions.",target:{configuration:"MDF",affiliation:"ASO"}},
+   A:{scenario:"A colony of genetically identical ants moving as a unified swarm.",target:{configuration:"AGG",affiliation:"CSL"}},
+   B:{scenario:"An ant colony understood as a superorganism — a single unified entity whose parts (workers, queen, larvae) have fundamentally different functions.",target:{configuration:"COH",affiliation:"ASO"}},
    diffParam:"configuration",
-   expl:"MSC: many similar instances clustered together. MDF: many dissimilar instances fused into one unified whole. The swarm is MSC; the superorganism is MDF."},
+   expl:"AGG: multiple joined identical units. COH: unified whole from heterogeneous, functionally differentiated parts. The swarm is AGG; the superorganism is COH."},
   {id:"c2",title:"Proximal vs Inceptive Extension",difficulty:3,
    A:{scenario:"You are discussing only the near end of a very long bridge — the section closest to where you stand.",target:{extension:"PRX"}},
    B:{scenario:"You are discussing the first section of the bridge to have been constructed historically — its beginning in terms of sequence, not spatial proximity.",target:{extension:"ICP"}},
@@ -3155,8 +3095,8 @@ function RootFamilyTree({lm}){
 function CompressionSprint({synOn}){
   const targets=[
     {id:"cs1",text:"Multiple specialists with different skills who had previously been working independently but are now coordinating their efforts toward a shared goal.",
-     hint:"MDC or MDF config? COA affiliation? OBJ specification?",
-     model:{configuration:"MDC",affiliation:"COA",perspective:"M",specification:"OBJ"},charCount:45},
+     hint:"COH or CPN config? COA affiliation? OBJ specification?",
+     model:{configuration:"CPN",affiliation:"COA",perspective:"M",specification:"OBJ"},charCount:45},
     {id:"cs2",text:"The way in which a child gradually and unexpectedly comes to understand something that had previously been opaque to them.",
      hint:"Aspect: INC or HAB? Validation: OBS? Bias: EUP?",
      model:{aspect:"INC",root:"MŘ",stem:"S2",function:"DYN",bias:"EUP"},charCount:38},
@@ -3238,18 +3178,19 @@ function CompressionSprint({synOn}){
 function MorphSudoku(){
   // A 3×3 grid where each row must have all 3 Configuration values from a family,
   // each column must have all 3 Affiliation values, and each cell must be unique.
-  const configRows=[["UPX","DPX","MSS"],["MSC","MSF","MDS"],["MDC","MDF","MFF"]];
+  const configRows=[["UNI","DPX","DCT"],["AGG","SEG","CPN"],["COH","CST","MUL"]];
   const aflCols=[["CSL","ASO","VAR"],["ASO","VAR","COA"],["CSL","VAR","COA"]];
+  // Puzzle: 3x3 grid, some cells pre-filled, learner fills rest
   const puzzle=[
-    [{cfg:"UPX",afl:"CSL",fixed:true},{cfg:"DPX",afl:"ASO",fixed:false},{cfg:"MSS",afl:"VAR",fixed:true}],
-    [{cfg:"MSC",afl:"COA",fixed:true},{cfg:"MSF",afl:"CSL",fixed:false},{cfg:"MDS",afl:"ASO",fixed:false}],
-    [{cfg:"MDC",afl:"ASO",fixed:false},{cfg:"MDF",afl:"VAR",fixed:true},{cfg:"MFF",afl:"COA",fixed:true}],
+    [{cfg:"UNI",afl:"CSL",fixed:true},{cfg:"DPX",afl:"ASO",fixed:false},{cfg:"DCT",afl:"VAR",fixed:true}],
+    [{cfg:"AGG",afl:"COA",fixed:true},{cfg:"SEG",afl:"CSL",fixed:false},{cfg:"CPN",afl:"ASO",fixed:false}],
+    [{cfg:"COH",afl:"ASO",fixed:false},{cfg:"CST",afl:"VAR",fixed:true},{cfg:"MUL",afl:"COA",fixed:true}],
   ];
   const[grid,setGrid]=useState(puzzle.map(row=>row.map(cell=>({...cell,userCfg:cell.fixed?cell.cfg:"",userAfl:cell.fixed?cell.afl:""}))));
   const[checked,setChecked]=useState(false);
   const check=()=>setChecked(true);
   const isCorrect=(r,c)=>grid[r][c].userCfg===puzzle[r][c].cfg&&grid[r][c].userAfl===puzzle[r][c].afl;
-  const cfgOptions=["UPX","DPX","MSS","MSC","MSF","MDS","MDC","MDF","MFF","DSS","DSC","DSF","DDS","DDC","DDF","DFS","DFC","DFF","MFS","MFC"];
+  const cfgOptions=["UNI","DPX","DCT","AGG","SEG","CPN","COH","CST","MUL"];
   const aflOptions=["CSL","ASO","VAR","COA"];
   return(
     <div>
@@ -3463,10 +3404,10 @@ const DISSECT_FORMS=[
     slots:[
       {s:"Cr",v:"kŧ",label:"Root",detail:"KŢ · Cognition domain",color:"#991b1b"},
       {s:"Vr",v:"al",label:"Stem/Pattern",detail:"Stem 1, Pattern I — basic act of thinking",color:"#9a3412"},
-      {s:"Ca",v:"k",label:"Ca complex",detail:"MSC·CSL·M·DEL·NRM — Multi·Sim·Con, Consolidative, Monadic, Delimitive, Normal",color:"#14532d"},
+      {s:"Ca",v:"m",label:"Ca complex",detail:"SEG·CSL·P·DEL·NRM — Segmentative, Consolidative, Polyadic, Delimitive, Normal",color:"#14532d"},
       {s:"Vc",v:"ö",label:"Case",detail:"Purposive — this set exists for the purpose of…",color:"#4c1d95"},
     ],
-    key:"Ca is the heart: Multi·Sim·Con (MSC) = many similar instances clustered together. Monadic (M) = this is a specific bounded set, not an abstract type."
+    key:"Ca is the heart: Segmentative (SEG) = arrangement was unified, now separated. Polyadic (P) = set of instances not a single one. These are different dimensions encoding different aspects simultaneously."
   },
   {
     form:"žblvra",label:"Speech: Coherent Associative Monadic Thematic",
@@ -3474,10 +3415,10 @@ const DISSECT_FORMS=[
     slots:[
       {s:"Cr",v:"žb",label:"Root",detail:"ŽB · Speech / Communication",color:"#991b1b"},
       {s:"Vr",v:"a",label:"Stem/Pattern",detail:"Stem 1, Pattern I — act of speaking",color:"#9a3412"},
-      {s:"Ca",v:"çl",label:"Ca complex",detail:"MDF·ASO·M·DEL·NRM — Multi·Dis·Fus, Associative, Monadic, Delimitive, Normal",color:"#14532d"},
+      {s:"Ca",v:"lvr",label:"Ca complex",detail:"COH·ASO·M·DEL·NRM — Coherent, Associative, Monadic, Delimitive, Normal",color:"#14532d"},
       {s:"Vc",v:"a",label:"Case",detail:"Thematic — primary participant",color:"#4c1d95"},
     ],
-    key:"MDF (Multi·Dis·Fus) = many dissimilar instances fused into one unified whole — this is a communication system, not a sum of speeches. ASO (Associative) = parts are similar in kind but functionally differentiated."
+    key:"COH (Coherent) = unified whole from heterogeneous parts — this is a communication system not a sum of speeches. ASO (Associative) = parts are similar in kind but functionally differentiated."
   },
   {
     form:"rmulça",label:"Value: Uniplex Coalescent Monadic Thematic",
@@ -3569,29 +3510,17 @@ const SLOT_MAP={configuration:'Ca',affiliation:'Ca',perspective:'Ca',extension:'
   specification:'Vr',function:'Vr',mood:'Vn',validation:'Vn',aspect:'Vn',case:'Vc',bias:'Cb'};
 const EXT_ORDER=['PRX','ICP','DEL','ATV','GRA','DPL'];
 const ASP_ORDER=['INC','PRG','ICS','HAB','IMM','CSS','TRM2','PAU','RSM','RGR','PCL','RTR','PRS','SMM','EXP'];
-const CFG_ORDER=['UPX','DPX','DSS','DSC','DSF','DDS','DDC','DDF','DFS','DFC','DFF','MSS','MSC','MSF','MDS','MDC','MDF','MFS','MFC','MFF'];
+const CFG_ORDER=['UNI','DPX','DCT','AGG','SEG','CPN','COH','CST','MUL'];
 
-const CFG_SCENARIOS={
-  UPX:["a single apple","one specific instance","this particular chair","one bounded referent"],
-  DPX:["exactly two (details unspecified)","two of something","a pair (similarity unclear)"],
-  DSS:["two matching socks in separate drawers","two similar things apart","two alike but not touching"],
-  DSC:["a pair of socks laid together","two similar things touching","two alike in contact"],
-  DSF:["two walnut halves fused","two similar things merged","twin forms inseparable"],
-  DDS:["a spoon and fork on opposite ends","two unlike things apart","dissimilar items separated"],
-  DDC:["a spoon and fork side by side","two unlike things touching","dissimilar items in contact"],
-  DDF:["a spork","fork and spoon fused","two unlike things merged into one"],
-  DFS:["two unknown objects kept apart","two things whose similarity is unclear, separate","ambiguous pair separated"],
-  DFC:["two unknown objects touching","two things of unclear similarity in contact","ambiguous pair in contact"],
-  DFF:["two unknown things blended","things merged whose similarity was never resolved","ambiguous pair fused"],
-  MSS:["coins scattered on a table","many similar things spread apart","several same-kind items separate"],
-  MSC:["a bunch of grapes","many similar things touching","a cluster of the same kind"],
-  MSF:["a snowball","many similar things merged into mass","same-kind items pressed into one"],
-  MDS:["hardware store shelf (screws nails bolts)","many unlike things spread apart","dissimilar items scattered"],
-  MDC:["trail mix","many unlike things mixed together","dissimilar items in contact"],
-  MDF:["a mosaic","many unlike things fused into one unified whole","dissimilar elements permanently merged"],
-  MFS:["a thrift store","many items of unclear similarity scattered","fuzzy-similarity items spread apart"],
-  MFC:["a junk drawer","many items of unclear similarity touching","fuzzy-similarity items in contact"],
-  MFF:["noise","everything blended into undifferentiated blur","complete fusion of unclear-similar things"]};
+const CFG_SCENARIOS={UNI:["a single apple","one specific instance","this particular chair","one bounded referent"],
+  DPX:["exactly two matching items","a pair of identical objects","two of the same thing"],
+  DCT:["coins scattered on the floor","separate unconnected instances","several spread-apart items"],
+  AGG:["a bunch of grapes","a cluster of similar things","joined instances of the same type"],
+  SEG:["a broken cluster with gaps","joined but partially separated","a cluster that partly split"],
+  CPN:["a machine with distinct functional parts","components serving different roles","differentiated parts of one system"],
+  COH:["a mosaic from heterogeneous materials","unified whole from diverse parts","disparate elements forming one thing"],
+  CST:["a mixture of different types joined","heterogeneous elements combined","mixed composition"],
+  MUL:["a random assortment","an irregular jumble","miscellaneous collection with no unifying logic"]};
 const PER_SCENARIOS={M:["this specific dog","one particular bounded instance","that very chair"],
   G:["these dogs (a set)","multiple specific instances","a plurality of them"],
   N:["the category 'dog' itself","doghood as a type","the kind, not any instance"],
@@ -4268,7 +4197,7 @@ const PUZZLE_REGISTRY={
       {q:"\"doing it\" vs \"having done it\"",pk:"aspect",a:"PRG",b:"RTR"},
       {q:"\"I saw it\" vs \"I heard it was so\"",pk:"validation",a:"OBS",b:"PUP"},
       {q:"\"I assert\" vs \"I assume\"",pk:"mood",a:"FAC",b:"ASM"},
-      {q:"\"a cluster\" vs \"a single one\"",pk:"configuration",a:"MSC",b:"UPX"},
+      {q:"\"a cluster\" vs \"a single one\"",pk:"configuration",a:"AGG",b:"UNI"},
       {q:"\"the actual thing\" vs \"the representative type\"",pk:"essence",a:"NRM",b:"RPV"},
       {q:"\"the full extent\" vs \"just the near part\"",pk:"extension",a:"DEL",b:"PRX"},
       {q:"\"the material of\" vs \"the structure of\"",pk:"specification",a:"CTE",b:"CSV"},
@@ -4360,7 +4289,7 @@ const PUZZLE_REGISTRY={
 
   // ── COMPRESSION ───────────────────────────────────────────────────────────
   compress_single:{label:"Best Single Encoding",cat:"Compression",module:10,phase:3,engine:'MCQ',
-    generate:()=>{const examples=[{en:"the specific dog I'm looking at",pk:"perspective",a:"M"},{en:"dogs as a category/type",pk:"perspective",a:"N"},{en:"a cluster of joined similar items",pk:"configuration",a:"MSC"},{en:"I directly witnessed this",pk:"validation",a:"OBS"},{en:"many dissimilar parts fused into one whole",pk:"configuration",a:"MDF"},{en:"the very beginning of the action",pk:"aspect",a:"INC"},{en:"I'm speculating — may or may not be true",pk:"mood",a:"SPC"},{en:"the material/substance of the thing",pk:"specification",a:"CTE"}];const ex=_s(examples);const p=PARAMS[ex.pk];const correct=p.values.find(v=>v.id===ex.a);if(!correct)return PUZZLE_REGISTRY.compress_single.generate();return _q(`Best Ithkuil encoding for: "${ex.en}"?`,correct,_dist(correct,p.values),o=>`${o.label}: ${o.desc}`);}},
+    generate:()=>{const examples=[{en:"the specific dog I'm looking at",pk:"perspective",a:"M"},{en:"dogs as a category/type",pk:"perspective",a:"N"},{en:"a cluster of joined similar items",pk:"configuration",a:"AGG"},{en:"I directly witnessed this",pk:"validation",a:"OBS"},{en:"a machine with differentiated parts",pk:"configuration",a:"CPN"},{en:"the very beginning of the action",pk:"aspect",a:"INC"},{en:"I'm speculating — may or may not be true",pk:"mood",a:"SPC"},{en:"the material/substance of the thing",pk:"specification",a:"CTE"}];const ex=_s(examples);const p=PARAMS[ex.pk];const correct=p.values.find(v=>v.id===ex.a);if(!correct)return PUZZLE_REGISTRY.compress_single.generate();return _q(`Best Ithkuil encoding for: "${ex.en}"?`,correct,_dist(correct,p.values),o=>`${o.label}: ${o.desc}`);}},
   compress_combo:{label:"Maximum Compression",cat:"Compression",module:10,phase:3,engine:'MCQ',
     generate:()=>{const examples=[{en:"Multiple scattered dogs I'm directly watching",best:"DCT + OBS",opts:["DCT + OBS","AGG + PUP","UNI + REC","MUL + ASM"]},{en:"The habitual action I'm imagining hypothetically",best:"HAB + SPC",opts:["HAB + SPC","PRG + FAC","RTR + OBS","IMM + COU"]},{en:"The normative ideal imagined type",best:"RPV + IMA",opts:["RPV + IMA","NRM + OBS","RPV + OBS","NRM + IMA"]},{en:"A unified whole whose existence is simply asserted",best:"COH + ABS",opts:["COH + ABS","COH + ERG","AGG + THM","MUL + ABS"]}];const ex=_s(examples);const opts=_shuf(ex.opts).map((o,i)=>({id:String(i),label:o,correct:o===ex.best}));return {question:`Most compressed encoding for: "${ex.en}"`,options:opts,answer:opts.find(o=>o.correct)?.id};}},
   affix_degree:{label:"Affix Degree",cat:"Compression",module:10,phase:3,engine:'MCQ',
@@ -4436,7 +4365,7 @@ const PUZZLE_REGISTRY={
   discourse:{label:"Discourse Reference",cat:"Generative",module:12,phase:4,engine:'MCQ',
     generate:()=>{const cases=[{text:"The philosopher argued with the student. She then left.",q:"Who does 'she' most likely refer to in precise Ithkuil?",a:"philosopher",opts:["philosopher","student","both","unclear"]},{text:"The dog chased the cat until it hid under the bed.",q:"The obviative marker distinguishes the hider as:",a:"cat",opts:["cat","dog","either","neither"]},{text:"The teacher praised the student, who then smiled.",q:"The proximate referent for 'who' in Ithkuil would be:",a:"student",opts:["student","teacher","both","neither"]}];const c=_s(cases);const opts=_shuf(c.opts).map(o=>({id:o,label:o,correct:o===c.a}));return {question:`${c.text}\n${c.q}`,options:opts,answer:c.a};}},
   philosophy_judge:{label:"Philosophical Encoding",cat:"Generative",module:12,phase:4,engine:'MCQ',
-    generate:()=>{const cases=[{q:"\"The act of knowing that one does not know\" — which perspective most precisely encodes this?",a:"N",pk:"perspective",note:"Noumenal — encoding the category/type of knowledge-state"},{q:"\"A specific instance of recursive self-reference\" — which configuration?",a:"UPX",pk:"configuration",note:"Uniplex — one bounded event, even if its content is recursive"},{q:"\"The normative ideal of justice vs. an actual just act\" — which essence distinction?",a:"RPV",pk:"essence",note:"Representative (RPV) vs Normal (NRM)"}];const c=_s(cases);const p=PARAMS[c.pk];const correct=p.values.find(v=>v.id===c.a);if(!correct)return PUZZLE_REGISTRY.philosophy_judge.generate();return {..._q(c.q,correct,_dist(correct,p.values)),note:c.note};}},
+    generate:()=>{const cases=[{q:"\"The act of knowing that one does not know\" — which perspective most precisely encodes this?",a:"N",pk:"perspective",note:"Noumenal — encoding the category/type of knowledge-state"},{q:"\"A specific instance of recursive self-reference\" — which configuration?",a:"UNI",pk:"configuration",note:"Uniplex — one bounded event, even if its content is recursive"},{q:"\"The normative ideal of justice vs. an actual just act\" — which essence distinction?",a:"RPV",pk:"essence",note:"Representative (RPV) vs Normal (NRM)"}];const c=_s(cases);const p=PARAMS[c.pk];const correct=p.values.find(v=>v.id===c.a);if(!correct)return PUZZLE_REGISTRY.philosophy_judge.generate();return {..._q(c.q,correct,_dist(correct,p.values)),note:c.note};}},
 };
 
 // Group registry by category
@@ -5025,7 +4954,7 @@ Object.assign(PUZZLE_REGISTRY,{
   build_case_pair:{label:"Build: Assign Two Cases",cat:"Build",module:6,phase:2,engine:'BUILD',
     generate:()=>{const pairs=[{s:"The hammer broke the window",erg:"INS",thm:"THM"},{s:"The teacher praised the student",erg:"ERG",thm:"THM"},{s:"Rain fell from the sky",erg:"ABL",thm:"THM"},{s:"She gave the book to him",erg:"ERG",thm:"DAT"}];const p=_s(pairs);return {prompt:`"${p.s}"\n\nAssign: what Case takes the first NP, and what Case for the second NP?`,targets:[{pk:'case',val:p.erg}],note:`First NP: ${p.erg}, Second NP: ${p.thm}`};}},
   build_compress:{label:"Build: Compress a Sentence",cat:"Build",module:10,phase:3,engine:'BUILD',
-    generate:()=>{const cases=[{en:"I am directly witnessing a cluster of scattered identical objects.",pks:{configuration:'MSS',validation:'OBS'}},{en:"She habitually imagines the pure abstract concept.",pks:{aspect:'HAB',validation:'IMG',perspective:'A'}},{en:"The speaker assumes this is about to begin.",pks:{mood:'ASM',aspect:'IMM'}}];const c=_s(cases);const targets=Object.entries(c.pks).map(([pk,val])=>({pk,val}));return {prompt:`Compress into minimal Ithkuil parameters:\n"${c.en}"`,targets,note:Object.entries(c.pks).map(([k,v])=>`${PARAMS[k]?.label}: ${v}`).join(' · ')};}},
+    generate:()=>{const cases=[{en:"I am directly witnessing a cluster of scattered identical objects.",pks:{configuration:'DCT',validation:'OBS'}},{en:"She habitually imagines the pure abstract concept.",pks:{aspect:'HAB',validation:'IMG',perspective:'A'}},{en:"The speaker assumes this is about to begin.",pks:{mood:'ASM',aspect:'IMM'}}];const c=_s(cases);const targets=Object.entries(c.pks).map(([pk,val])=>({pk,val}));return {prompt:`Compress into minimal Ithkuil parameters:\n"${c.en}"`,targets,note:Object.entries(c.pks).map(([k,v])=>`${PARAMS[k]?.label}: ${v}`).join(' · ')};}},
 
   // ── MULTI: decode all Ca components at once ────────────────────────────
   ca_all:{label:"Decode Full Ca",cat:"Multi",module:4,phase:2,engine:'MULTI',
@@ -5053,7 +4982,7 @@ Object.assign(PUZZLE_REGISTRY,{
   timeline_val:{label:"Validation Certainty Scale",cat:"Visual",module:7,phase:2,engine:'VISUAL',
     generate:()=>{const seq=['OBS','REC','RPR','PUP','INF','IMA'];const sub=seq.slice(0,4);const items=sub.map(id=>({id,label:PARAMS.validation.values.find(v=>v.id===id)?.label||id}));const slots=[{id:'direct',label:'Most direct / certain',answer:'OBS'},{id:'memory',label:'From memory',answer:'REC'},{id:'report',label:'From a named source',answer:'RPR'},{id:'hearsay',label:'From hearsay',answer:'PUP'}];return {prompt:'Order these Validation values from most to least epistemically direct:',axis:['Direct witness','← certainty →','Pure hearsay'],items,slots,note:'OBS > REC > RPR > PUP in epistemic directness'};}},
   cfg_shape:{label:"Config → Shape Match",cat:"Visual",module:2,phase:1,engine:'VISUAL',
-    generate:()=>{const pairs=[{id:'UPX',shape:'A single dot (●)'},{id:'DPX',shape:'Two dots, relation unspecified (●●)'},{id:'MSS',shape:'Scattered separate same-kind dots (∷)'},{id:'MSC',shape:'Tight cluster of same-kind dots (⬡)'},{id:'MDF',shape:'Dissimilar elements fused into one whole (⁂)'},{id:'MDC',shape:'Mixed elements in contact (⊞)'}];const sub=_pick(pairs,4);const items=sub.map(p=>({id:p.id,label:PARAMS.configuration.values.find(v=>v.id===p.id)?.label||p.id}));const slots=sub.map(p=>({id:p.id+'_slot',label:p.shape,answer:p.id}));return {prompt:'Match each Configuration value to its visual representation:',items,slots};}},
+    generate:()=>{const pairs=[{id:'UNI',shape:'A single dot (●)'},{id:'DPX',shape:'Two identical dots (●●)'},{id:'DCT',shape:'Scattered separate dots (∷)'},{id:'AGG',shape:'A tight cluster (⬡)'},{id:'CPN',shape:'Differently-shaped parts (⚙)'}];const sub=_pick(pairs,4);const items=sub.map(p=>({id:p.id,label:PARAMS.configuration.values.find(v=>v.id===p.id)?.label||p.id}));const slots=sub.map(p=>({id:p.id+'_slot',label:p.shape,answer:p.id}));return {prompt:'Match each Configuration value to its visual representation:',items,slots};}},
   per_depth:{label:"Perspective Depth Axis",cat:"Visual",module:2,phase:1,engine:'VISUAL',
     generate:()=>{const items=['M','G','N','A'].map(id=>({id,label:PARAMS.perspective.values.find(v=>v.id===id)?.label||id}));const slots=[{id:'s1',label:'Most concrete / particular',answer:'M'},{id:'s2',label:'Set of particulars',answer:'G'},{id:'s3',label:'The type / category itself',answer:'N'},{id:'s4',label:'Pure abstract property',answer:'A'}];return {prompt:'Place each Perspective on the concreteness → abstraction axis:',axis:['Concrete token','← abstraction →','Pure essence'],items,slots,note:'M(onadic) → G(agglomerative) → N(oumenal) → A(bstract)'};}},
   ext_reach:{label:"Extension Spatial Reach",cat:"Visual",module:2,phase:1,engine:'VISUAL',
@@ -5061,7 +4990,7 @@ Object.assign(PUZZLE_REGISTRY,{
 
   // ── INPUT: free-text open answers ──────────────────────────────────────
   describe_diff:{label:"Describe Parameter Difference",cat:"Input",module:5,phase:2,engine:'INPUT',
-    generate:()=>{const pairs=[{pk:'perspective',a:'M',b:'N',en:"\"this specific dog\" vs \"dogs as a category\"",accept:['perspective','monadic','noumenal','specific','category','type','instance'],expl:"Monadic (M) = specific bounded instance; Noumenal (N) = the category/type itself"},{pk:'configuration',a:'UPX',b:'MSC',en:"\"one apple\" vs \"a bunch of apples\"",accept:['configuration','uniplex','multi sim con','single','cluster','joined','MSC','UPX'],expl:"UPX (Uniplex) = one bounded instance; MSC (Multi·Sim·Con) = many similar instances clustered together"},{pk:'validation',a:'OBS',b:'PUP',en:"\"I saw it happen\" vs \"I heard it happened\"",accept:['validation','observational','purportive','witnessed','hearsay','heard'],expl:"OBS = direct witness; PUP (Purportive) = based on hearsay from an unspecified source"},{pk:'mood',a:'FAC',b:'COU',en:"\"it is raining\" vs \"if it were raining (but it isn't)\"",accept:['mood','factual','counterfactual','contrary','hypothetical','fact'],expl:"Factual asserts truth; Counterfactual (COU) asserts known falsity"}];const p=_s(pairs);return {question:`Describe in your own words the Ithkuil parameter distinction between:\n${p.en}`,hint:`Which parameter axis captures this? What does each value mean?`,accept:p.accept,explanation:p.expl};}},
+    generate:()=>{const pairs=[{pk:'perspective',a:'M',b:'N',en:"\"this specific dog\" vs \"dogs as a category\"",accept:['perspective','monadic','noumenal','specific','category','type','instance'],expl:"Monadic (M) = specific bounded instance; Noumenal (N) = the category/type itself"},{pk:'configuration',a:'UNI',b:'AGG',en:"\"one apple\" vs \"a bunch of apples\"",accept:['configuration','uniplex','aggregative','single','cluster','joined'],expl:"Uniplex = one; Aggregative = multiple joined instances of same type"},{pk:'validation',a:'OBS',b:'PUP',en:"\"I saw it happen\" vs \"I heard it happened\"",accept:['validation','observational','purportive','witnessed','hearsay','heard'],expl:"OBS = direct witness; PUP (Purportive) = based on hearsay from an unspecified source"},{pk:'mood',a:'FAC',b:'COU',en:"\"it is raining\" vs \"if it were raining (but it isn't)\"",accept:['mood','factual','counterfactual','contrary','hypothetical','fact'],expl:"Factual asserts truth; Counterfactual (COU) asserts known falsity"}];const p=_s(pairs);return {question:`Describe in your own words the Ithkuil parameter distinction between:\n${p.en}`,hint:`Which parameter axis captures this? What does each value mean?`,accept:p.accept,explanation:p.expl};}},
   affix_result:{label:"Describe Affix Combination",cat:"Input",module:10,phase:3,engine:'INPUT',
     generate:()=>{const combos=[{q:"Root: KŢ (Cognition) + Intensity Modifier at degree 7.\nDescribe the resulting meaning.",accept:['intense','high','strong','cognitive','thinking','degree'],expl:"'Very intensely thinking / cognizing' — the intensity affix scales the root's meaning upward to degree 7"},{q:"Root: ŽB (Speech) + Frequency Modifier at degree 2.\nDescribe the resulting meaning.",accept:['occasionally','rarely','infrequent','sometimes','frequency','seldom'],expl:"'Rarely speaking' — degree 2 of a frequency modifier indicates low frequency"},{q:"Root: XL (Motion) + Causative Affix + Reciprocal Affix.\nDescribe the resulting meaning.",accept:['cause','mutual','each other','reciprocal','caused motion','moving each other'],expl:"Each participant causes the other to move — reciprocal causative motion"}];const c=_s(combos);return {question:c.q,hint:'Focus on how the affix modifies the root meaning.',accept:c.accept,explanation:c.expl};}},
   case_reframe_desc:{label:"Describe Case Reframing",cat:"Input",module:6,phase:2,engine:'INPUT',
@@ -6612,13 +6541,13 @@ function FutureFeatures(){
         <div style={{display:'flex',flexWrap:'wrap',gap:6}}>
           {PARAMS.configuration.values.map(v=><button key={v.id} className="btn btn-sm" onClick={()=>{
             if(!gameState.answered){
-              const correct=v.id==="MSC";
+              const correct=v.id==="SEG";
               if(correct) setGameScore(s=>s+10);
               setGameState({...gameState,answered:true,selected:v.id,correct});
             }
-          }} style={{background:gameState.answered?(v.id==="MSC"?'rgba(34,197,94,0.2)':v.id===gameState.selected?'rgba(239,68,68,0.2)':'var(--surface)'):'var(--surface)',
-            border:`1px solid ${gameState.answered?(v.id==="MSC"?'#22c55e44':v.id===gameState.selected?'#ef444444':'var(--border)'):'var(--border)'}`,
-            color:gameState.answered?(v.id==="MSC"?'#22c55e':v.id===gameState.selected?'#ef4444':'var(--muted)'):'var(--muted)'}}>
+          }} style={{background:gameState.answered?(v.id==="SEG"?'rgba(34,197,94,0.2)':v.id===gameState.selected?'rgba(239,68,68,0.2)':'var(--surface)'):'var(--surface)',
+            border:`1px solid ${gameState.answered?(v.id==="SEG"?'#22c55e44':v.id===gameState.selected?'#ef444444':'var(--border)'):'var(--border)'}`,
+            color:gameState.answered?(v.id==="SEG"?'#22c55e':v.id===gameState.selected?'#ef4444':'var(--muted)'):'var(--muted)'}}>
             {v.icon} {v.label}
           </button>)}
         </div>
@@ -7433,13 +7362,13 @@ Object.assign(PUZZLE_REGISTRY,{
     generate:()=>{
       const scenarios=[
         {prompt:"Encode: 'The group of scattered stars that I'm directly observing right now'",
-         targets:[{pk:'configuration',val:'MSS'},{pk:'perspective',val:'G'},{pk:'validation',val:'OBS'},{pk:'aspect',val:'PRG'}],
+         targets:[{pk:'configuration',val:'DCT'},{pk:'perspective',val:'G'},{pk:'validation',val:'OBS'},{pk:'aspect',val:'PRG'}],
          note:"DCT=scattered separate instances · G=agglomerative set · OBS=direct witness · PRG=ongoing now"},
         {prompt:"Encode: 'The abstract category of consciousness itself, imagined rather than witnessed'",
          targets:[{pk:'perspective',val:'N'},{pk:'validation',val:'IMA'},{pk:'mood',val:'SPC'}],
          note:"N=Noumenal type itself · IMA=imaginary · SPC=speculative"},
         {prompt:"Encode: 'A cluster of functionally differentiated parts forming a unified machine, completely'",
-         targets:[{pk:'configuration',val:'MDC'},{pk:'extension',val:'DEL'},{pk:'affiliation',val:'CSL'}],
+         targets:[{pk:'configuration',val:'CPN'},{pk:'extension',val:'DEL'},{pk:'affiliation',val:'CSL'}],
          note:"CPN=componential · DEL=full extent · CSL=consolidative (same function)"},
         {prompt:"Encode: 'The habitual act of recalling a past event with corrective intent'",
          targets:[{pk:'aspect',val:'HAB'},{pk:'validation',val:'REC'},{pk:'bias',val:'CRR'}],
@@ -7499,7 +7428,7 @@ Object.assign(PUZZLE_REGISTRY,{
       const pks=['configuration','affiliation','perspective','extension','essence'];
       const target=_s(pks); const p=PARAMS[target];
       const correct=_s(p.values);
-      const params={configuration:'UPX',affiliation:'CSL',perspective:'M',extension:'DEL',essence:'NRM'};
+      const params={configuration:'UNI',affiliation:'CSL',perspective:'M',extension:'DEL',essence:'NRM'};
       params[target]=correct.id;
       try{
         const form=window._iz.formativeToIthkuil({type:'UNF/C',root:'kţ',ca:params});
@@ -7764,7 +7693,7 @@ Object.assign(PUZZLE_REGISTRY,{
          accept:['OBS','observational','M','monadic','RTR','retrospective','DEL','delimitive','cognition'],
          expl:'OBS (direct witness) · M (monadic: one specific instance) · RTR (retrospective: just completed) · DEL (full extent). Root KŢ or similar.'},
         {en:'An imagined, speculative state: multiple scattered entities of the same type, seen as a set, with the speaker openly doubting the information source.',
-         accept:['IMA','imaginary','SPC','speculative','MSS','multi sim sep','G','agglomerative','SKP','skeptical','PUP'],
+         accept:['IMA','imaginary','SPC','speculative','DCT','discrete','G','agglomerative','SKP','skeptical','PUP'],
          expl:'IMA (imaginary validation) · SPC (speculative mood) · DCT (discrete configuration) · G (agglomerative perspective: the set) · SKP (skeptical bias) or PUP (purportive: from hearsay)'},
         {en:'A habitual, recurring pattern of speech witnessed by the speaker — ongoing at the time of narration.',
          accept:['HAB','habitual','OBS','observational','PRG','progressive','speech'],
@@ -7773,7 +7702,7 @@ Object.assign(PUZZLE_REGISTRY,{
          accept:['N','noumenal','ASM','assumptive','BSC','basic','containment','abstract'],
          expl:'N (Noumenal perspective: the type itself, not instances) · ASM (assumptive mood: speaker assumes without certainty) · BSC (basic specification: the root in its default sense)'},
         {en:'A component system with functionally differentiated parts, seen in its complete spatial extent, by a speaker reporting from a named source.',
-         accept:['MDC','multi dis con','DEL','delimitive','RPR','reportive','full extent'],
+         accept:['CPN','componential','DEL','delimitive','RPR','reportive','full extent'],
          expl:'CPN (Componential configuration: distinct functional parts) · DEL (Delimitive extension: full extent, nothing excluded) · RPR (Reportive validation: named informant)'},
       ];
       const c=_s(cases);
@@ -7804,13 +7733,13 @@ Object.assign(PUZZLE_REGISTRY,{
          targets:[{pk:'perspective',val:'N'},{pk:'affiliation',val:'CSL'}],
          note:"N=Noumenal (the abstract type) · CSL=Consolidative (same function, unified)"},
         {ctx:"Merge two words: first is Aggregative+DEL extension, second adds Representative essence. Select all three merged Ca values:",
-         targets:[{pk:'configuration',val:'MSC'},{pk:'extension',val:'DEL'},{pk:'essence',val:'RPV'}],
+         targets:[{pk:'configuration',val:'AGG'},{pk:'extension',val:'DEL'},{pk:'essence',val:'RPV'}],
          note:"AGG=tight cluster · DEL=full spatial extent · RPV=representative sample"},
         {ctx:"Reframe a Dispersed+Agglomerative source by adding Attenuative extension. Select all Ca parameters for the result:",
-         targets:[{pk:'configuration',val:'MSS'},{pk:'perspective',val:'G'},{pk:'extension',val:'ATV'}],
+         targets:[{pk:'configuration',val:'DCT'},{pk:'perspective',val:'G'},{pk:'extension',val:'ATV'}],
          note:"DCT=scattered instances · G=agglomerative set · ATV=attenuated/lessened portion"},
         {ctx:"Compound targets: Configuration=CPN (componential) with CSL affiliation and NRM essence — select them all:",
-         targets:[{pk:'configuration',val:'MDC'},{pk:'affiliation',val:'CSL'},{pk:'essence',val:'NRM'}],
+         targets:[{pk:'configuration',val:'CPN'},{pk:'affiliation',val:'CSL'},{pk:'essence',val:'NRM'}],
          note:"CPN=componential distinct parts · CSL=unified function · NRM=normal/concrete essence"},
       ];
       const s=_s(scenarios);
@@ -7851,7 +7780,7 @@ Object.assign(PUZZLE_REGISTRY,{
          targets:[{pk:'validation',val:'RPR'},{pk:'aspect',val:'HAB'},{pk:'bias',val:'SKP'}],
          note:"RPR=reportive (named source) · HAB=habitual recurrence · SKP=skeptical bias"},
         {en:"Assume for argument's sake that several scattered distinct instances exist.",
-         targets:[{pk:'mood',val:'ASM'},{pk:'configuration',val:'MSS'}],
+         targets:[{pk:'mood',val:'ASM'},{pk:'configuration',val:'DCT'}],
          note:"ASM=assumptive mood · DCT=discrete scattered instances"},
         {en:"The pure abstract category of motion itself — not any particular moving thing — vividly imagined.",
          targets:[{pk:'perspective',val:'N'},{pk:'validation',val:'IMA'},{pk:'mood',val:'SPC'}],
@@ -7903,11 +7832,11 @@ Object.assign(PUZZLE_REGISTRY,{
       const mappings=[
         {id:'UNI',feel:'One self-contained point of pure light (●)'},
         {id:'DPX',feel:'Two perfectly mirrored shapes (●●)'},
-        {id:'MSS',feel:'Scattered same-kind specks, none touching (∷)'},
-        {id:'MSC',feel:'Tightly packed same-kind cluster (⬡)'},
-        {id:'MSF',feel:'Same-kind elements merged into one mass (◼)'},
-        {id:'MDC',feel:'Mixed different things in contact (⊞)'},
-        {id:'MDF',feel:'Dissimilar elements fused into one whole (⁂)'},
+        {id:'DCT',feel:'Scattered independent specks — no connections (∷)'},
+        {id:'AGG',feel:'Tightly packed cluster, parts indistinguishable (⬡)'},
+        {id:'SEG',feel:'A chain of distinct segments — separate but linked (◉—◉—◉)'},
+        {id:'CPN',feel:'Interlocking different shapes forming one machine (⚙)'},
+        {id:'COH',feel:'A flowing mass — parts merge into each other (~)'},
         {id:'MSS',feel:'Ordered rows of identical units — a formation (|||)'},
       ];
       const sub=_pick(mappings,4);
@@ -7968,7 +7897,7 @@ Object.assign(PUZZLE_REGISTRY,{
         {pk:'validation',a:'OBS',b:'RPR',q:'How does Observational validation (OBS) differ from Reportive validation (RPR)?',
          accept:['witness','direct','saw','observed','report','named','source','told','reported','secondhand'],
          expl:'OBS = speaker directly witnessed it; RPR = speaker received information from a named/identified external source'},
-        {pk:'configuration',a:'MSC',b:'MSS',q:'What is the structural difference between Multi·Sim·Con (MSC) and Multi·Sim·Sep (MSS) configuration?',
+        {pk:'configuration',a:'AGG',b:'DCT',q:'What is the structural difference between Aggregative (AGG) and Discrete (DCT) configuration?',
          accept:['aggregate','joined','cluster','bound','discrete','scattered','separate','apart','unconnected','dispersed'],
          expl:'AGG = multiple identical instances bound into one cluster; DCT = multiple identical instances that are separate/dispersed'},
         {pk:'aspect',a:'PRG',b:'RTR',q:'Distinguish Progressive aspect (PRG) from Retrospective aspect (RTR).',
@@ -8019,7 +7948,7 @@ Object.assign(PUZZLE_REGISTRY,{
     generate:()=>{
       const cases=[
         {q:'English: "I seem to recall, based on something I once heard, that there may have been multiple identical events of this type occurring at irregular intervals in the past."\n\nName at least three Ithkuil parameters compressing this and explain each.',
-         accept:['validation','purportive','PUP','aspect','retrospective','RTR','habitual','HAB','configuration','MSS','hearsay'],
+         accept:['validation','purportive','PUP','aspect','retrospective','RTR','habitual','HAB','configuration','DCT','hearsay'],
          expl:'PUP (purportive hearsay validation) + RTR (past/retrospective aspect) + HAB (irregular habitual recurrence) + DCT (multiple discrete events) — four morphological markers replace ~35 English words'},
         {q:'English: "The philosopher is directly witnessing, right now, the pure abstract concept of motion itself — not any particular moving thing."\n\nWhich Ithkuil parameters encode this, and what does each do?',
          accept:['validation','OBS','observational','perspective','noumenal','N','aspect','progressive','PRG','witnessed'],
@@ -8028,7 +7957,7 @@ Object.assign(PUZZLE_REGISTRY,{
          accept:['bias','skeptical','SKP','validation','reportive','RPR','aspect','habitual','HAB','stance'],
          expl:'SKP (skeptical bias) + RPR (reportive: based on a named report) + HAB (habitual aspect) — three morphological markers handle the full English subordinate clause'},
         {q:'English: "She assumes that the vague, scattered forms she can barely make out are all instances of the same general type."\n\nIdentify the Ithkuil parameters involved.',
-         accept:['mood','assumptive','ASM','configuration','MSS','perspective','N','noumenal','validation'],
+         accept:['mood','assumptive','ASM','configuration','DCT','perspective','N','noumenal','validation'],
          expl:'ASM (assumptive mood) + DCT (discrete scattered instances) + N (Noumenal perspective: the general type) — three parameters compress the hedged assumption about scattered tokens of a type'},
       ];
       const c=_s(cases);
@@ -8242,7 +8171,7 @@ Object.assign(PUZZLE_REGISTRY,{
       const pk=_s(pks);const p=PARAMS[pk];
       const va=_s(p.values),vb=_s(p.values.filter(v=>v.id!==va.id));
       try{
-        const base={configuration:'UPX',affiliation:'CSL',perspective:'M',extension:'DEL',essence:'NRM'};
+        const base={configuration:'UNI',affiliation:'CSL',perspective:'M',extension:'DEL',essence:'NRM'};
         const fa=window._iz.formativeToIthkuil({type:'UNF/C',root:'kţ',ca:{...base,[pk]:va.id}});
         const fb=window._iz.formativeToIthkuil({type:'UNF/C',root:'kţ',ca:{...base,[pk]:vb.id}});
         const correct={id:pk,label:p.label};
